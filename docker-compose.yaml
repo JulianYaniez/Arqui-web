@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tp_1
+    restart: always
+    environment:
+      POSTGRES_DB: tp_1
+      POSTGRES_USER: tp_1
+      POSTGRES_PASSWORD: tp_1
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
