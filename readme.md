@@ -2,7 +2,7 @@
 
 ## Integrantes:
     - Kessy Leonardo
-    - Julian Fildel Yañez
+    - Julian Fidel Yañez
     - Marcos David Tami
     - Agustina Magali Fennema
     - Nicolás Valentín Gómez
