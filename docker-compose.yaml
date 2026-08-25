@@ -1,7 +1,7 @@
 services:
   postgres:
-    image: postgres:16-alpine
-    container_name: tp_1
+    image: postgres:18-alpine
+    container_name: tpe_group_7
     restart: always
     environment:
       POSTGRES_DB: tpe_group_7
@@ -10,6 +10,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 volumes:
   postgres_data:
