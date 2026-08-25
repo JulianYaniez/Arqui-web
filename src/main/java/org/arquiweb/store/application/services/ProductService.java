@@ -1,14 +1,14 @@
 package org.arquiweb.store.application.services;
 
-import org.arquiweb.store.application.ports.repositories.ClientRepository;
+import org.arquiweb.store.application.ports.repositories.ProductRepository;
 import org.arquiweb.store.domain.models.Client;
 
 import java.util.UUID;
 
-public class ClientService {
-    private ClientRepository clientRepository;
+public class ProductService {
+    private ProductRepository productRepository;
 
-    public ClientService() {
+    public ProductService() {
         // TODO - Get repository depending on wanted DB
     }
 
