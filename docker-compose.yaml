@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: tpe_group_7
       POSTGRES_USER: group_7
-      POSTGRES_PASSWORD: 0112358
+      POSTGRES_PASSWORD: "0112358"
     ports:
       - "5432:5432"
     volumes:

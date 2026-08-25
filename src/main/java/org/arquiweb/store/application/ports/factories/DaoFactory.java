@@ -1,4 +1,4 @@
-package org.arquiweb.store.infrastructure.db.daos.factories;
+package org.arquiweb.store.application.ports.factories;
 
 import org.arquiweb.store.application.ports.repositories.ClientRepository;
 import org.arquiweb.store.application.ports.repositories.InvoiceProductRepository;

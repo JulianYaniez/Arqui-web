@@ -1,5 +1,6 @@
 package org.arquiweb.store.infrastructure.db.daos.factories;
 
+import org.arquiweb.store.application.ports.factories.DaoFactory;
 import org.arquiweb.store.application.ports.repositories.ClientRepository;
 import org.arquiweb.store.application.ports.repositories.InvoiceProductRepository;
 import org.arquiweb.store.application.ports.repositories.InvoiceRepository;
@@ -11,7 +12,15 @@ import org.arquiweb.store.infrastructure.db.daos.adapters.relational.RelationalP
 import org.arquiweb.store.infrastructure.db.engines.RelationalDatabase;
 
 public class RelationalDaoFactory extends DaoFactory {
-    private RelationalDatabase database;
+    private static final RelationalDatabase database = new RelationalDatabase();
+    private static DaoFactory instance;
+
+    public static DaoFactory getInstance() {
+        if (instance == null) {
+            instance = new RelationalDaoFactory();
+        }
+        return instance;
+    }
 
     @Override
     public ClientRepository getClientRepository() {
