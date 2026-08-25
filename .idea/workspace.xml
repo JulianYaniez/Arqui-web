@@ -5,11 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a0c7f08-8a33-4cd0-b4b7-d8d72b788a4b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/services/InvoiceService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/services/ProductService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/adapters/DaoAdapter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/adapters/relational/RelationalClientDao.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/adapters/relational/RelationalInvoiceDao.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/adapters/relational/RelationalInvoiceProductDao.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/adapters/relational/RelationalProductDao.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/factories/DaoFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/factories/RelationalDaoFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/engines/Database.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/engines/RelationalDatabase.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/services/ClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/services/ClientService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/ClientRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/ClientRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/InvoiceProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/InvoiceProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/InvoiceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/InvoiceRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/repositories/ProductRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,61 +46,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0005021899935962" />
-      <entry key="MS500" value="1.2815305657150096" />
-      <entry key="S2" value="2.6734171230507444" />
-      <entry key="S5" value="4.914252877304699" />
-      <entry key="S10" value="7.724688467656303" />
-      <entry key="S30" value="13.423937640858506" />
-      <entry key="S60" value="17.249402902678842" />
-      <entry key="M2" value="21.263892633505936" />
-      <entry key="M5" value="31.507080757436658" />
-      <entry key="M10" value="46.70201389023696" />
-      <entry key="M15" value="57.87124334807009" />
-      <entry key="M30" value="76.9630683758892" />
-      <entry key="H1" value="91.92721240968969" />
-      <entry key="H2" value="101.52972867407193" />
-      <entry key="H4" value="107.00539833925897" />
-      <entry key="D1" value="111.9623913995612" />
-      <entry key="W1" value="112.85079294621796" />
+      <entry key="MS100" value="1.3073394678504924E-19" />
+      <entry key="MS500" value="1.7017799239685258E-4" />
+      <entry key="S2" value="0.206110325406161" />
+      <entry key="S5" value="1.3888898636593852" />
+      <entry key="S10" value="2.835212220718314" />
+      <entry key="S30" value="4.81439684387915" />
+      <entry key="S60" value="5.894126724005074" />
+      <entry key="M2" value="7.396450887113334" />
+      <entry key="M5" value="16.981410784991766" />
+      <entry key="M10" value="41.64742508908233" />
+      <entry key="M15" value="63.93028714894864" />
+      <entry key="M30" value="114.32675538960193" />
+      <entry key="H1" value="176.9782281888719" />
+      <entry key="H2" value="235.54227072674988" />
+      <entry key="H4" value="277.52364614937505" />
+      <entry key="D1" value="321.88118720733456" />
+      <entry key="W1" value="330.5263850274482" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="1.808132461099519E-299" />
-      <entry key="S2" value="2.062089736988124E-75" />
-      <entry key="S5" value="1.3357433610191513E-30" />
-      <entry key="S10" value="1.1557436398350445E-15" />
-      <entry key="S30" value="1.0494527010196498E-5" />
-      <entry key="S60" value="0.003269315106804358" />
-      <entry key="M2" value="0.07207337211968773" />
-      <entry key="M5" value="1.182861526432278" />
-      <entry key="M10" value="4.19472452772508" />
-      <entry key="M15" value="6.603241546180152" />
-      <entry key="M30" value="10.533212107222758" />
-      <entry key="H1" value="13.363153395056745" />
-      <entry key="H2" value="15.067274736935342" />
-      <entry key="H4" value="16.00318172300682" />
-      <entry key="D1" value="16.82946376989649" />
-      <entry key="W1" value="16.975527641345646" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000003874732366" />
+      <entry key="S10" value="1.0006224787682274" />
+      <entry key="S30" value="1.089588539712266" />
+      <entry key="S60" value="1.4629489329206455" />
+      <entry key="M2" value="3.0466687387873077" />
+      <entry key="M5" value="9.351013875979278" />
+      <entry key="M10" value="17.396517902316454" />
+      <entry key="M15" value="22.789212718030843" />
+      <entry key="M30" value="32.384785799956205" />
+      <entry key="H1" value="42.1688858594003" />
+      <entry key="H2" value="50.61176707235837" />
+      <entry key="H4" value="56.489886980607984" />
+      <entry key="D1" value="62.612510509465174" />
+      <entry key="W1" value="63.798119531226355" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9731434061956401" />
-      <entry key="MS500" value="1.2744809385224123" />
-      <entry key="S2" value="2.6696819023265697" />
-      <entry key="S5" value="4.911342574201284" />
-      <entry key="S10" value="7.722347220998534" />
-      <entry key="S30" value="13.422539411163628" />
-      <entry key="S60" value="17.25089803368796" />
-      <entry key="M2" value="21.328250447165782" />
-      <entry key="M5" value="32.66536510906541" />
-      <entry key="M10" value="50.86630046147553" />
-      <entry key="M15" value="64.44602608359834" />
-      <entry key="M30" value="87.47591005865466" />
-      <entry key="H1" value="105.2780785451182" />
-      <entry key="H2" value="116.59024088347239" />
-      <entry key="H4" value="123.00503059507321" />
-      <entry key="D1" value="128.79123898980274" />
-      <entry key="W1" value="129.82623194253986" />
+      <entry key="MS100" value="8.736124035473932E-14" />
+      <entry key="MS500" value="0.0025054607248318063" />
+      <entry key="S2" value="0.3879403595336814" />
+      <entry key="S5" value="1.8314320061976317" />
+      <entry key="S10" value="3.470728474623014" />
+      <entry key="S30" value="5.747146316673446" />
+      <entry key="S60" value="7.26452522733257" />
+      <entry key="M2" value="10.379093652430516" />
+      <entry key="M5" value="26.27349080569267" />
+      <entry key="M10" value="58.9826418395967" />
+      <entry key="M15" value="86.66157589331351" />
+      <entry key="M30" value="146.66596016055846" />
+      <entry key="H1" value="219.1155669466893" />
+      <entry key="H2" value="286.1345122818929" />
+      <entry key="H4" value="334.00247746753774" />
+      <entry key="D1" value="384.49163248796725" />
+      <entry key="W1" value="394.32420339605466" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -130,6 +140,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.arquiweb.store.infrastructure.db.daos.adapters.relational" />
       <recent name="org.arquiweb.store.application.services" />
     </key>
   </component>

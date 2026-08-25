@@ -4,9 +4,9 @@ services:
     container_name: tp_1
     restart: always
     environment:
-      POSTGRES_DB: tp_1
-      POSTGRES_USER: tp_1
-      POSTGRES_PASSWORD: tp_1
+      POSTGRES_DB: tpe_group_7
+      POSTGRES_USER: group_7
+      POSTGRES_PASSWORD: 0112358
     ports:
       - "5432:5432"
     volumes:

@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface InvoiceProductRepository {
-    Optional<InvoiceProduct> findById(String id);
+    Optional<InvoiceProduct> findById(UUID id);
     List<InvoiceProduct> findAll();
     UUID save(InvoiceProduct product);
 }
