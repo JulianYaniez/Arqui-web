@@ -3,6 +3,7 @@ package org.arquiweb;
 import org.arquiweb.store.application.ports.factories.DaoFactory;
 import org.arquiweb.store.application.ports.repositories.ClientRepository;
 import org.arquiweb.store.infrastructure.db.daos.factories.RelationalDaoFactory;
+import org.arquiweb.store.infrastructure.db.init.builders.RelationalBuilder;
 import org.arquiweb.store.infrastructure.db.init.readers.CsvReader;
 import org.arquiweb.store.infrastructure.db.init.seeders.ClientsSeeder;
 
@@ -22,6 +23,10 @@ public class Main {
                 reader
         );
 
-        seeder.seed();
+        RelationalBuilder builder = new RelationalBuilder();
+
+        builder.build();
+
+        // seeder.seed();
     }
 }
