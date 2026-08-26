@@ -17,7 +17,6 @@ public class ClientService {
     // Should be changed to receive DTO instead
     public void insert(Client client) {
         // Should parse DTO into a Business Entity here
-
         clientDao.save(client);
     }
 
