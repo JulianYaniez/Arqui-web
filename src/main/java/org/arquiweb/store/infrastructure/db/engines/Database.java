@@ -3,8 +3,8 @@ package org.arquiweb.store.infrastructure.db.engines;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public interface Database {
+public abstract class Database {
 
-    public Connection getConnection() throws SQLException;
+    public abstract Connection getConnection() throws SQLException;
 
 }

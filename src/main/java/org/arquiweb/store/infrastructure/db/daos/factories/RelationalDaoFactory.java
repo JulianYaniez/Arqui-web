@@ -9,11 +9,15 @@ import org.arquiweb.store.infrastructure.db.daos.adapters.relational.RelationalC
 import org.arquiweb.store.infrastructure.db.daos.adapters.relational.RelationalInvoiceDao;
 import org.arquiweb.store.infrastructure.db.daos.adapters.relational.RelationalInvoiceProductDao;
 import org.arquiweb.store.infrastructure.db.daos.adapters.relational.RelationalProductDao;
+import org.arquiweb.store.infrastructure.db.engines.Database;
+import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
 import org.arquiweb.store.infrastructure.db.engines.RelationalDatabase;
 
 public class RelationalDaoFactory extends DaoFactory {
-    private static final RelationalDatabase database = new RelationalDatabase();
+    private static final Database database = DatabaseFactory.getRelationalDatabase();
     private static DaoFactory instance;
+
+    private RelationalDaoFactory() {}
 
     public static DaoFactory getInstance() {
         if (instance == null) {

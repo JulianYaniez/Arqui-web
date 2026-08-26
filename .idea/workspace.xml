@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a0c7f08-8a33-4cd0-b4b7-d8d72b788a4b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/engines/DatabaseFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/services/ClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/services/ClientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/adapters/relational/RelationalClientDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/adapters/relational/RelationalClientDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/factories/DaoFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/application/ports/factories/DaoFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/factories/RelationalDaoFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/daos/factories/RelationalDaoFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/engines/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/engines/Database.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/engines/RelationalDatabase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/arquiweb/store/infrastructure/db/engines/RelationalDatabase.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -26,7 +23,7 @@
     </colors>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="35" />
+    <option name="cachedIndexableFilesCount" value="43" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -50,61 +47,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="4.862126980779551E-6" />
-      <entry key="MS500" value="0.10248192524651452" />
-      <entry key="S2" value="1.1415264877103064" />
-      <entry key="S5" value="2.199164841903519" />
-      <entry key="S10" value="3.5298206466121775" />
-      <entry key="S30" value="7.752250939906691" />
-      <entry key="S60" value="11.272850677337141" />
-      <entry key="M2" value="15.482573799086438" />
-      <entry key="M5" value="27.903035743478192" />
-      <entry key="M10" value="49.99808161963588" />
-      <entry key="M15" value="71.63813948255905" />
-      <entry key="M30" value="132.00918567259913" />
-      <entry key="H1" value="225.9166326577369" />
-      <entry key="H2" value="332.30181280166704" />
-      <entry key="H4" value="419.7587411641489" />
-      <entry key="D1" value="522.205135060734" />
-      <entry key="W1" value="543.3564546997843" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000054102010218" />
+      <entry key="S2" value="1.0904853393060754" />
+      <entry key="S5" value="1.9340345911329226" />
+      <entry key="S10" value="3.1406786465494623" />
+      <entry key="S30" value="5.785072066017622" />
+      <entry key="S60" value="10.236310956026301" />
+      <entry key="M2" value="17.550542205083936" />
+      <entry key="M5" value="32.635462688015586" />
+      <entry key="M10" value="55.040580039720936" />
+      <entry key="M15" value="76.92222443861057" />
+      <entry key="M30" value="138.64289949134601" />
+      <entry key="H1" value="236.7471028118953" />
+      <entry key="H2" value="350.7647966912927" />
+      <entry key="H4" value="446.3957047114175" />
+      <entry key="D1" value="560.2022702618732" />
+      <entry key="W1" value="583.9094293395962" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0016885492798981" />
-      <entry key="MS500" value="1.2789348305812411" />
-      <entry key="S2" value="1.7267343483603659" />
-      <entry key="S5" value="1.8803640267540673" />
-      <entry key="S10" value="1.9594230946353681" />
-      <entry key="S30" value="2.4187860642072296" />
-      <entry key="S60" value="2.9594110666748943" />
-      <entry key="M2" value="3.8154866778814047" />
-      <entry key="M5" value="6.815682649844962" />
-      <entry key="M10" value="12.128028999639788" />
-      <entry key="M15" value="17.728469285521232" />
-      <entry key="M30" value="34.18453790620194" />
-      <entry key="H1" value="57.798532690608795" />
-      <entry key="H2" value="81.48735619933414" />
-      <entry key="H4" value="99.43270703637234" />
-      <entry key="D1" value="119.3245148390959" />
-      <entry key="W1" value="123.31588395385884" />
+      <entry key="MS100" value="2.5944428542140835E-8" />
+      <entry key="MS500" value="0.03039546710663392" />
+      <entry key="S2" value="0.41754733754859114" />
+      <entry key="S5" value="0.712325619799912" />
+      <entry key="S10" value="0.9576374266226887" />
+      <entry key="S30" value="1.9797491069270499" />
+      <entry key="S60" value="3.1855849137193166" />
+      <entry key="M2" value="4.7347084629041625" />
+      <entry key="M5" value="7.659817900450118" />
+      <entry key="M10" value="12.46942224219728" />
+      <entry key="M15" value="17.69098624024531" />
+      <entry key="M30" value="33.758571761449765" />
+      <entry key="H1" value="58.32262009203356" />
+      <entry key="H2" value="84.07637326829432" />
+      <entry key="H4" value="104.0854484225385" />
+      <entry key="D1" value="126.64705309191136" />
+      <entry key="W1" value="131.21565999035758" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.0066237386687634904" />
-      <entry key="MS500" value="0.5288314223913451" />
-      <entry key="S2" value="2.3979693774224757" />
-      <entry key="S5" value="3.8231914568077197" />
-      <entry key="S10" value="5.294796942155719" />
-      <entry key="S30" value="10.005866288637009" />
-      <entry key="S60" value="14.100935896788368" />
-      <entry key="M2" value="19.205547774384677" />
-      <entry key="M5" value="34.65564489998081" />
-      <entry key="M10" value="62.06726359141164" />
-      <entry key="M15" value="89.30592979797127" />
-      <entry key="M30" value="166.13244228032875" />
-      <entry key="H1" value="283.6632859955603" />
-      <entry key="H2" value="413.75282027985736" />
-      <entry key="H4" value="519.1693725217908" />
-      <entry key="D1" value="641.5252544283037" />
-      <entry key="W1" value="666.6716902659966" />
+      <entry key="MS100" value="4.8490844503761504E-4" />
+      <entry key="MS500" value="0.21734698598361504" />
+      <entry key="S2" value="0.8092587326114785" />
+      <entry key="S5" value="2.039395172908799" />
+      <entry key="S10" value="3.659105740066893" />
+      <entry key="S30" value="7.547591647319559" />
+      <entry key="S60" value="13.270626306459885" />
+      <entry key="M2" value="22.173413445893576" />
+      <entry key="M5" value="40.218542513107366" />
+      <entry key="M10" value="67.44587697347909" />
+      <entry key="M15" value="94.55094984381776" />
+      <entry key="M30" value="172.34034001664753" />
+      <entry key="H1" value="295.01697181797545" />
+      <entry key="H2" value="434.8034159581859" />
+      <entry key="H4" value="550.4579038065056" />
+      <entry key="D1" value="686.8446323190492" />
+      <entry key="W1" value="715.1243956546715" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -119,34 +116,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "tpe__1",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/kessy/Me/Coding/ArquiWeb/Arqui-web",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/julia/OneDrive/Documentos/TUDAI/segundo año/Segundo cuatrimestre/Arqui/Tpe_grupal/Arqui-web/a/src/main/java/org/example/Main.java"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;tpe__1&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/kessy/Me/Coding/ArquiWeb/Arqui-web&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/julia/OneDrive/Documentos/TUDAI/segundo año/Segundo cuatrimestre/Arqui/Tpe_grupal/Arqui-web/a/src/main/java/org/example/Main.java&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="org.arquiweb.store.infrastructure.db.daos.adapters.relational" />
