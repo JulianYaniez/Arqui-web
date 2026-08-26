@@ -10,4 +10,5 @@ public interface ClientRepository {
     Optional<Client> findById(UUID id);
     List<Client> findAll();
     UUID save(Client client);
+    void saveAll(List<Client> clients);
 }

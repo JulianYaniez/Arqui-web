@@ -47,4 +47,28 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
        }
        return client.getId();
    }
+
+   public void saveAll(List<Client> clients) {
+        String sql = "INSERT INTO " + this.table + " (id, name, email) VALUES (?, ?, ?)";
+
+        try (
+                Connection conn = db.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            conn.setAutoCommit(false);
+
+            for (Client client : clients) {
+                stmt.setObject(1, client.getId());
+                stmt.setString(2, client.getName());
+                stmt.setString(3, client.getEmail());
+                stmt.addBatch();
+            }
+
+            stmt.executeBatch();
+            conn.commit();
+
+        } catch (SQLException e) {
+            System.err.println("Couldn't save users: " + e.getMessage());
+        }
+   }
 }
