@@ -14,8 +14,8 @@ public class Client {
 
     public Client(String name, String email) {
         this.id = UUID.ofEpochMillis(System.currentTimeMillis()); // Generate UUID v7
-        this.name = name;
-        this.email = email;
+        setName(name);
+        setEmail(email);
     }
 
     public void setName(String name) {
@@ -24,10 +24,12 @@ public class Client {
         }
         this.name = name;
     }
+
     public void setEmail(String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email cannot be null or blank");
         }
         this.email = email;
     }
+    
 }
