@@ -10,4 +10,5 @@ public interface ProductRepository {
     Optional<Product> findById(UUID id);
     List<Product> findAll();
     UUID save(Product product);
+    List<Product> saveAll(List<Product> products);
 }

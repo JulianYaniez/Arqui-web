@@ -10,4 +10,5 @@ public interface InvoiceProductRepository {
     Optional<InvoiceProduct> findById(UUID id);
     List<InvoiceProduct> findAll();
     UUID save(InvoiceProduct product);
+    List<InvoiceProduct> saveAll(List<InvoiceProduct> invoicesProducts);
 }

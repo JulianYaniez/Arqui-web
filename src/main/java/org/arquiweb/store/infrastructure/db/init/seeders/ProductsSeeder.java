@@ -25,10 +25,14 @@ public class ProductsSeeder implements Seeder{
         List<Product> products = new ArrayList<>();
 
         rows.forEach(row -> {
+            Integer value = Integer.valueOf(
+                    row.get("value")
+            );
+
             products.add(
                     new Product(
                             row.get("name"),
-                            row.get("value")
+                            value
                     )
             );
         });

@@ -1,7 +1,6 @@
 package org.arquiweb.store.infrastructure.db.init.seeders;
 
 import org.arquiweb.store.application.ports.repositories.InvoiceProductRepository;
-import org.arquiweb.store.domain.models.Invoice;
 import org.arquiweb.store.domain.models.InvoiceProduct;
 import org.arquiweb.store.infrastructure.db.init.readers.Reader;
 
@@ -26,15 +25,17 @@ public class InvoiceProductSeeder implements Seeder {
         List<InvoiceProduct> invoiceProducts = new ArrayList<>();
 
         rows.forEach(row -> {
+            Integer quantity = Integer.valueOf(
+                    row.get("cantidad")
+            );
+
             invoiceProducts.add(
-                    new invoiceProduct(
-                            row.get("quantity")
-                    )
+                    new InvoiceProduct(quantity)
             );
         });
 
          // Guarda todos los invoice de la lista en la base de datos
-        repository.save(invoiceProducts);
+        repository.saveAll(invoiceProducts);
     }
 }
 
