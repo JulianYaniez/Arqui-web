@@ -4,11 +4,13 @@ import org.arquiweb.store.application.ports.repositories.ClientRepository;
 import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
 import org.arquiweb.store.infrastructure.db.engines.Database;
+import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,19 +18,61 @@ import java.util.UUID;
 public class RelationalClientDao extends DaoAdapter implements ClientRepository {
 
     private final String table = "clients";
+    private static RelationalClientDao instance;
 
-    public RelationalClientDao(Database db) {
+    private RelationalClientDao(Database db) {
         super(db);
     }
 
+    public static RelationalClientDao getInstance() {
+        if (instance == null) {
+            instance = new RelationalClientDao(DatabaseFactory.getRelationalDatabase());
+        }
+        return instance;
+    }
+
    public Optional<Client> findById(UUID id) {
-       // TODO
-       return null;
+       String sql = "SELECT * FROM " + this.table + " WHERE id = ?";
+       try (
+           Connection conn = db.getConnection();
+           PreparedStatement stmt = conn.prepareStatement(sql);
+       ) {
+           stmt.setObject(1, id);
+           ResultSet rs = stmt.executeQuery();
+
+            if(rs.next()) {
+                Client client = new Client(
+                        rs.getString("name"),
+                        rs.getString("email")
+                );
+
+                return Optional.of(client);
+            }
+       } catch (SQLException e) {
+           System.err.println("Customer not found : " + e.getMessage());
+       }
+       return Optional.empty();
    }
 
    public List<Client>  findAll() {
-       // TODO
-       return null;
+       List<Client> res = new ArrayList<>();
+       String sql = "SELECT * FROM " + this.table;
+       try(
+               Connection conn = db.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+               ResultSet rs = stmt.executeQuery();
+       ) {
+           while(rs.next()) {
+               Client client = new Client(
+                       rs.getString("name"),
+                       rs.getString("email")
+               );
+               res.add(client);
+           }
+       } catch (SQLException e) {
+           System.err.println("Customer not found : " + e.getMessage());
+       }
+       return res;
    }
 
    public UUID save(Client client) {
