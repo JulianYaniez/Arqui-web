@@ -9,7 +9,10 @@ import java.util.List;
 
 public class ClientsSeeder implements Seeder {
 
+    
+    // Repositorio que se utiliza para guardar en la base de datos
     private final ClientRepository repository;
+    // Reader encargado de leer los datos del archivo CSV
     private final Reader reader;
 
     public ClientsSeeder(ClientRepository repository, Reader reader) {
@@ -30,6 +33,7 @@ public class ClientsSeeder implements Seeder {
             );
         });
 
+        // Guarda todos los clients de la lista en la base de datos
         repository.saveAll(clients);
     }
 }
