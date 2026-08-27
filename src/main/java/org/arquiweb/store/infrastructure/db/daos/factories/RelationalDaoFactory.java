@@ -14,7 +14,6 @@ import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
 import org.arquiweb.store.infrastructure.db.engines.RelationalDatabase;
 
 public class RelationalDaoFactory extends DaoFactory {
-    private static final Database database = DatabaseFactory.getRelationalDatabase();
     private static DaoFactory instance;
 
     private RelationalDaoFactory() {}
@@ -27,22 +26,18 @@ public class RelationalDaoFactory extends DaoFactory {
     }
 
     @Override
-    public ClientRepository getClientRepository() {
-        return new RelationalClientDao(database);
-    }
+    public ClientRepository getClientRepository() { return RelationalClientDao.getInstance(); }
 
     @Override
     public ProductRepository getProductRepository() {
-        return new RelationalProductDao(database);
+        return RelationalProductDao.getInstance();
     }
 
     @Override
     public InvoiceRepository  getInvoiceRepository() {
-        return new RelationalInvoiceDao(database);
+        return RelationalInvoiceDao.getInstance();
     }
 
     @Override
-    public InvoiceProductRepository getInvoiceProductRepository() {
-        return new RelationalInvoiceProductDao(database);
-    }
+    public InvoiceProductRepository getInvoiceProductRepository() { return RelationalInvoiceProductDao.getInstance(); }
 }
