@@ -106,7 +106,6 @@ import java.util.UUID;
            conn.setAutoCommit(false);
 
            for (Product product : products) {
-               System.out.println("aaa");
                stmt.setObject(1, product.getProductId());
                stmt.setString(2, product.getName());
                stmt.setInt(3, product.getValue());
