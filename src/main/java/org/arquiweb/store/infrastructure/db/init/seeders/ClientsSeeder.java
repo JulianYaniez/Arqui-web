@@ -6,6 +6,7 @@ import org.arquiweb.store.infrastructure.db.init.readers.Reader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ClientsSeeder implements Seeder {
 
@@ -27,6 +28,7 @@ public class ClientsSeeder implements Seeder {
         rows.forEach(row -> {
             clients.add(
                     new Client(
+                            UUID.fromString(row.get("id")),
                             row.get("name"),
                             row.get("email")
                     )
