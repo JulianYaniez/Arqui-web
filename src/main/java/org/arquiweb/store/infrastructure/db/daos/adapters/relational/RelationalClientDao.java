@@ -42,6 +42,7 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
 
             if(rs.next()) {
                 Client client = new Client(
+                        (UUID) rs.getObject("id"),
                         rs.getString("name"),
                         rs.getString("email")
                 );
@@ -56,7 +57,11 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
 
    public List<Client>  findAll() {
        List<Client> res = new ArrayList<>();
-       String sql = "SELECT * FROM " + this.table;
+       String sql = "SELECT * FROM " + this.table  + """
+                    JOIN invoices i USING(clientId)
+                    ORDER BY count(i.clientId) DESC
+                   """; // REVISAR (Se necesita el valor de la tabla producto).
+
        try(
                Connection conn = db.getConnection();
                PreparedStatement stmt = conn.prepareStatement(sql);
@@ -64,6 +69,7 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
        ) {
            while(rs.next()) {
                Client client = new Client(
+                       (UUID) rs.getObject("id"),
                        rs.getString("name"),
                        rs.getString("email")
                );
