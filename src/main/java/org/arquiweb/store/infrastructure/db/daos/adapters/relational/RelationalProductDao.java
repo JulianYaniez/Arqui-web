@@ -1,16 +1,23 @@
 package org.arquiweb.store.infrastructure.db.daos.adapters.relational;
 
 import org.arquiweb.store.application.ports.repositories.ProductRepository;
+import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.domain.models.Product;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
 import org.arquiweb.store.infrastructure.db.engines.Database;
 import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
     public class RelationalProductDao extends DaoAdapter implements ProductRepository {
+        private final String table = "product";
         private static RelationalProductDao instance;
         public RelationalProductDao(Database db) {
             super(db);
@@ -25,17 +32,92 @@ import java.util.UUID;
 
 
    public Optional<Product> findById(UUID id) {
-       // TODO
-       return null;
+       String sql = "SELECT * FROM " + this.table + " WHERE id = ?";
+       try (
+               Connection conn = db.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+       ) {
+           stmt.setObject(1, id);
+           ResultSet rs = stmt.executeQuery();
+
+           if(rs.next()) {
+               Product product = new Product(
+                    (UUID) rs.getObject("id"),
+                    rs.getString("name"),
+                    rs.getInt("value")
+               );
+
+               return Optional.of(product);
+           }
+       } catch (SQLException e) {
+           System.err.println("Product not found : " + e.getMessage());
+       }
+       return Optional.empty();
    }
 
    public List<Product>  findAll() {
-       // TODO
-       return null;
+       List<Product> res = new ArrayList<>();
+       String sql = "SELECT * FROM " + this.table;
+       try(
+               Connection conn = db.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+               ResultSet rs = stmt.executeQuery();
+       ) {
+           while(rs.next()) {
+               Product product = new Product(
+                       (UUID) rs.getObject("id"),
+                       rs.getString("name"),
+                       rs.getInt("value")
+               );
+               res.add(product);
+           }
+       } catch (SQLException e) {
+           System.err.println("Customer not found : " + e.getMessage());
+       }
+       return res;
    }
 
-   public UUID save(Product client) {
-       // TODO
-       return null;
+   public UUID save(Product product) {
+       String sql = "INSERT INTO " + this.table + " (id, name, value) VALUES (?, ?, ?)";
+
+       try (
+               Connection conn = db.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+       ) {
+           stmt.setObject(1, product.getProductId());
+           stmt.setString(2, product.getName());
+           stmt.setInt(3, product.getValue());
+           stmt.executeUpdate();
+       } catch (SQLException e) {
+           System.err.println("Couldn't save user: " + e.getMessage());
+       }
+       return product.getProductId();
    }
-}
+
+   @Override
+   public List<Product> saveAll(List<Product> products) {
+       String sql = "INSERT INTO " + this.table + " (id, name, value) VALUES (?, ?, ?)";
+
+       try (
+               Connection conn = db.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql)
+       ) {
+           conn.setAutoCommit(false);
+
+           for (Product product : products) {
+               stmt.setObject(1, product.getProductId());
+               stmt.setString(2, product.getName());
+               stmt.setInt(3, product.getValue());
+               stmt.addBatch();
+           }
+
+           stmt.executeBatch();
+           conn.commit();
+
+       } catch (SQLException e) {
+           System.err.println("Couldn't save users: " + e.getMessage());
+       }
+        return null;
+
+        }
+    }
