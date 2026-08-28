@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,12 +52,39 @@ public class RelationalInvoiceDao extends DaoAdapter implements InvoiceRepositor
     }
 
     public List<Invoice>  findAll() {
-        // TODO
-        return null;
+        String sql = "SELECT * FROM " + this.table;
+        List<Invoice> res = new ArrayList<>();
+        try (
+                Connection conn = db.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery();
+        ) {
+            while(rs.next()) {
+                Invoice invoice = new Invoice (
+                        (UUID) rs.getObject("id")
+                );
+                res.add(invoice);
+            }
+        } catch (SQLException e) {
+            System.err.println("Customer not found : " + e.getMessage());
+        }
+        return res;
     }
 
     public UUID save(Invoice client) {
-        // TODO
-        return null;
+        String sql = "INSERT INTO " + this.table + " VALUES (?, ?)";
+        try(
+                Connection conn = db.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+        ){
+            stmt.setObject(1, client.getInvoiceId());
+            stmt.setObject(2, client.getClientId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Customer not found : " + e.getMessage());
+        }
+        return client.getInvoiceId();
     }
+
+    public
 }
