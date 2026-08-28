@@ -50,7 +50,7 @@ public class RelationalInvoiceProductDao extends DaoAdapter implements InvoicePr
 
 
         }catch (SQLException e){
-            System.err.println(" not found : " + e.getMessage());
+            System.err.println("invoice_product not found : " + e.getMessage());
         }
        return Optional.empty();
    }
@@ -73,7 +73,7 @@ public class RelationalInvoiceProductDao extends DaoAdapter implements InvoicePr
             }
 
         }catch (SQLException e){
-            System.out.println(e);
+            System.out.println("invoice_product not found :"+e);
         }
         return  res;
    }
@@ -89,13 +89,13 @@ public class RelationalInvoiceProductDao extends DaoAdapter implements InvoicePr
             stmt.setObject(3,invoicesProduct.getQuantity());
             stmt.executeQuery();
         } catch (SQLException e) {
-            throw new RuntimeException("couldn´t save invoice producto" + e);
+            throw new RuntimeException("Couldn't save invoice_product " + e);
         }
         return invoicesProduct.getInvoiceId();
    }
 
     @Override
-    public List<InvoiceProduct> saveAll(List<InvoiceProduct> invoicesProducts) {
+    public void saveAll(List<InvoiceProduct> invoicesProducts) {
         String sql = "INSERT INTO " + this.table + " (invoiceId, productId, quantity) VALUES (?, ?, ?)";
 
         try (
@@ -115,8 +115,7 @@ public class RelationalInvoiceProductDao extends DaoAdapter implements InvoicePr
             conn.commit();
 
         } catch (SQLException e) {
-            System.err.println("Couldn't save users: " + e.getMessage());
+            System.err.println("Couldn't save invoice_product : " + e.getMessage());
         }
-        return null;
     }
 }

@@ -72,7 +72,7 @@ import java.util.UUID;
                res.add(product);
            }
        } catch (SQLException e) {
-           System.err.println("Customer not found : " + e.getMessage());
+           System.err.println("Product not found : " + e.getMessage());
        }
        return res;
    }
@@ -89,13 +89,13 @@ import java.util.UUID;
            stmt.setInt(3, product.getValue());
            stmt.executeUpdate();
        } catch (SQLException e) {
-           System.err.println("Couldn't save user: " + e.getMessage());
+           System.err.println("Couldn't save product: " + e.getMessage());
        }
        return product.getProductId();
    }
 
    @Override
-   public List<Product> saveAll(List<Product> products) {
+   public void saveAll(List<Product> products) {
        String sql = "INSERT INTO " + this.table + " (id, name, value) VALUES (?, ?, ?)";
 
        try (
@@ -115,9 +115,7 @@ import java.util.UUID;
            conn.commit();
 
        } catch (SQLException e) {
-           System.err.println("Couldn't save users: " + e.getMessage());
+           System.err.println("Couldn't save product: " + e.getMessage());
        }
-        return null;
-
-        }
-    }
+   }
+}
