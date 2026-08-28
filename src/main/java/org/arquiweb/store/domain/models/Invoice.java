@@ -8,18 +8,18 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class Invoice {
-    private UUID InvoiceId;
-    private UUID ProductId;
+    private UUID invoiceId;
+    private UUID clientId;
 
-    public Invoice(UUID ProductId){
-        this.ProductId = ProductId;
+    public Invoice(UUID clientId){
+        this.clientId = clientId;
     }
 
-    public void setProductId(UUID productId) {
-        if (productId == null) {
+    public void setClientId(UUID clientId) {
+        if (clientId == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
-        ProductId = productId;
+        this.clientId = clientId;
     }
 
 }
