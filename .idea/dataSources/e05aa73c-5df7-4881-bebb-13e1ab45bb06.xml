@@ -3,9 +3,9 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.55">
     <root id="1">
       <DateStyle>mdy</DateStyle>
-      <IntrospectionStateNumber>791</IntrospectionStateNumber>
+      <IntrospectionStateNumber>3910</IntrospectionStateNumber>
       <ServerVersion>18.6</ServerVersion>
-      <StartupTime>1787777388</StartupTime>
+      <StartupTime>1787946542</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -807,7 +807,7 @@ true posixrules
 13327||10|C|G
 13327||-9223372036854775808|U|G
 13327||10|U|G</Grants>
-      <IntrospectionStateNumber>791</IntrospectionStateNumber>
+      <IntrospectionStateNumber>3910</IntrospectionStateNumber>
       <ObjectId>16384</ObjectId>
       <OwnerName>group_7</OwnerName>
     </database>
@@ -4323,11 +4323,11 @@ true posixrules
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <LastIntrospectionL1Xid>791</LastIntrospectionL1Xid>
-      <LastIntrospectionL2Xid>791</LastIntrospectionL2Xid>
-      <LastIntrospectionL3Xid>791</LastIntrospectionL3Xid>
+      <LastIntrospectionL1Xid>3910</LastIntrospectionL1Xid>
+      <LastIntrospectionL2Xid>3910</LastIntrospectionL2Xid>
+      <LastIntrospectionL3Xid>3910</LastIntrospectionL3Xid>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2026-08-26.22:46:51</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-08-28.20:13:01</LastIntrospectionLocalTimestamp>
       <LastIntrospectionVersion>260210</LastIntrospectionVersion>
       <ObjectId>2200</ObjectId>
       <StateNumber>546</StateNumber>
@@ -4335,67 +4335,67 @@ true posixrules
     </schema>
     <table id="273" parent="272" name="clients">
       <DetailsLevel>2</DetailsLevel>
-      <ObjectId>24815</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16690</ObjectId>
+      <StateNumber>3397</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>group_7</OwnerName>
     </table>
     <table id="274" parent="272" name="invoice_products">
       <DetailsLevel>2</DetailsLevel>
-      <ObjectId>24845</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16720</ObjectId>
+      <StateNumber>3397</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>group_7</OwnerName>
     </table>
     <table id="275" parent="272" name="invoices">
       <DetailsLevel>2</DetailsLevel>
-      <ObjectId>24833</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16708</ObjectId>
+      <StateNumber>3397</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>group_7</OwnerName>
     </table>
     <table id="276" parent="272" name="products">
       <DetailsLevel>2</DetailsLevel>
-      <ObjectId>24825</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16700</ObjectId>
+      <StateNumber>3397</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>group_7</OwnerName>
     </table>
     <column id="277" parent="273" name="id">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>uuid|0s</StoredType>
       <TypeId>2950</TypeId>
     </column>
     <column id="278" parent="273" name="name">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>varchar(100)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
     <column id="279" parent="273" name="email">
       <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>varchar(100)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
     <index id="280" parent="273" name="clients_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24821</ObjectId>
+      <ObjectId>16696</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
     <index id="281" parent="273" name="clients_email_key">
       <ColNames>email</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24823</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16698</ObjectId>
+      <StateNumber>3397</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
       <CollationNames>default</CollationNames>
@@ -4404,145 +4404,145 @@ true posixrules
     </index>
     <key id="282" parent="273" name="clients_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24822</ObjectId>
+      <ObjectId>16697</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
-      <UnderlyingIndexId>24821</UnderlyingIndexId>
+      <StateNumber>3397</StateNumber>
+      <UnderlyingIndexId>16696</UnderlyingIndexId>
     </key>
     <key id="283" parent="273" name="clients_email_key">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24824</ObjectId>
-      <StateNumber>790</StateNumber>
-      <UnderlyingIndexId>24823</UnderlyingIndexId>
+      <ObjectId>16699</ObjectId>
+      <StateNumber>3397</StateNumber>
+      <UnderlyingIndexId>16698</UnderlyingIndexId>
     </key>
     <column id="284" parent="274" name="invoiceid">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>uuid|0s</StoredType>
       <TypeId>2950</TypeId>
     </column>
     <column id="285" parent="274" name="productid">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>uuid|0s</StoredType>
       <TypeId>2950</TypeId>
     </column>
     <column id="286" parent="274" name="quantity">
       <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>integer|0s</StoredType>
       <TypeId>23</TypeId>
     </column>
     <foreign-key id="287" parent="274" name="invoice_products_invoiceid_fkey">
       <ColNames>invoiceid</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24853</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16728</ObjectId>
+      <StateNumber>3397</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>24833</RefTableId>
+      <RefTableId>16708</RefTableId>
     </foreign-key>
     <foreign-key id="288" parent="274" name="invoice_products_productid_fkey">
       <ColNames>productid</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24858</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16733</ObjectId>
+      <StateNumber>3397</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>24825</RefTableId>
+      <RefTableId>16700</RefTableId>
     </foreign-key>
     <index id="289" parent="274" name="invoice_products_pkey">
       <ColNames>invoiceid
 productid</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24851</ObjectId>
+      <ObjectId>16726</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
     <key id="290" parent="274" name="invoice_products_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24852</ObjectId>
+      <ObjectId>16727</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
-      <UnderlyingIndexId>24851</UnderlyingIndexId>
+      <StateNumber>3397</StateNumber>
+      <UnderlyingIndexId>16726</UnderlyingIndexId>
     </key>
     <column id="291" parent="275" name="id">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>uuid|0s</StoredType>
       <TypeId>2950</TypeId>
     </column>
     <column id="292" parent="275" name="clientid">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>uuid|0s</StoredType>
       <TypeId>2950</TypeId>
     </column>
     <foreign-key id="293" parent="275" name="invoices_clientid_fkey">
       <ColNames>clientid</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24840</ObjectId>
-      <StateNumber>790</StateNumber>
+      <ObjectId>16715</ObjectId>
+      <StateNumber>3397</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>24815</RefTableId>
+      <RefTableId>16690</RefTableId>
     </foreign-key>
     <index id="294" parent="275" name="invoices_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24838</ObjectId>
+      <ObjectId>16713</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
     <key id="295" parent="275" name="invoices_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24839</ObjectId>
+      <ObjectId>16714</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
-      <UnderlyingIndexId>24838</UnderlyingIndexId>
+      <StateNumber>3397</StateNumber>
+      <UnderlyingIndexId>16713</UnderlyingIndexId>
     </key>
     <column id="296" parent="276" name="id">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>uuid|0s</StoredType>
       <TypeId>2950</TypeId>
     </column>
     <column id="297" parent="276" name="name">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <StoredType>varchar(100)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
     <column id="298" parent="276" name="value">
       <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>790</StateNumber>
-      <StoredType>numeric(10,2 digit)|0s</StoredType>
-      <TypeId>1700</TypeId>
+      <StateNumber>3397</StateNumber>
+      <StoredType>integer|0s</StoredType>
+      <TypeId>23</TypeId>
     </column>
     <index id="299" parent="276" name="products_pkey">
       <ColNames>id</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24831</ObjectId>
+      <ObjectId>16706</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
+      <StateNumber>3397</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
     <key id="300" parent="276" name="products_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>24832</ObjectId>
+      <ObjectId>16707</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>790</StateNumber>
-      <UnderlyingIndexId>24831</UnderlyingIndexId>
+      <StateNumber>3397</StateNumber>
+      <UnderlyingIndexId>16706</UnderlyingIndexId>
     </key>
   </database-model>
 </dataSource>

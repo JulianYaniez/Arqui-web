@@ -28,7 +28,7 @@ public class InvoiceProductSeeder implements Seeder {
 
         rows.forEach(row -> {
             Integer quantity = Integer.valueOf(
-                    row.get("cantidad")
+                    row.get("quantity")
             );
             UUID invoiceId = UUID.nameUUIDFromBytes(row.get("invoiceId").getBytes(StandardCharsets.UTF_8));
             UUID productId = UUID.nameUUIDFromBytes(row.get("productId").getBytes(StandardCharsets.UTF_8));

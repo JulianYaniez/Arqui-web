@@ -42,7 +42,6 @@ public class ProductsSeeder implements Seeder{
             );
         });
 
-
         // Guarda todos los products de la lista en la base de datos
         repository.saveAll(products);
     }
