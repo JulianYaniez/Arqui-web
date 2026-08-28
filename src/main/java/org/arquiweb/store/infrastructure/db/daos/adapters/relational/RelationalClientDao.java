@@ -57,10 +57,12 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
 
    public List<Client>  findAll() {
        List<Client> res = new ArrayList<>();
-       String sql = "SELECT * FROM " + this.table  + """
-                    JOIN invoices i USING(clientId)
-                    ORDER BY count(i.clientId) DESC
-                   """; // REVISAR (Se necesita el valor de la tabla producto).
+       String sql = "SELECT * FROM " + this.table  + " c " + """ 
+                    JOIN invoices i ON c.id = i.clientid
+                    JOIN invoice_products ip  ON i.id = ip.invoiceid
+                    JOIN products p ON ip.productid = p.id
+                    ORDER BY count(p.value) DESC;
+                   """;
 
        try(
                Connection conn = db.getConnection();
