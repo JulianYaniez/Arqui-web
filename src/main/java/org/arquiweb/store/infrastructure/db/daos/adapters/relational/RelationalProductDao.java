@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
     public class RelationalProductDao extends DaoAdapter implements ProductRepository {
-        private final String table = "product";
+        private final String table = "products";
         private static RelationalProductDao instance;
         public RelationalProductDao(Database db) {
             super(db);
@@ -105,6 +105,7 @@ import java.util.UUID;
            conn.setAutoCommit(false);
 
            for (Product product : products) {
+               System.out.println("aaa");
                stmt.setObject(1, product.getProductId());
                stmt.setString(2, product.getName());
                stmt.setInt(3, product.getValue());
