@@ -86,5 +86,23 @@ public class RelationalInvoiceDao extends DaoAdapter implements InvoiceRepositor
         return client.getInvoiceId();
     }
 
-    public
+    public void saveAll(List<Invoice> invoices) {
+        String sql = "INSERT INTO " + this.table + " VALUES (?, ?)";
+        try(
+                Connection conn = db.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+        ) {
+            for(Invoice i : invoices) {
+                stmt.setObject(1, i.getInvoiceId());
+                stmt.setObject(2, i.getClientId());
+                stmt.addBatch();
+            }
+
+            stmt.executeBatch();
+            conn.commit();
+
+        } catch (SQLException e) {
+            System.err.println("Customer not found : " + e.getMessage());
+        }
+    }
 }
