@@ -6,6 +6,7 @@ import org.arquiweb.store.domain.models.Product;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
 import org.arquiweb.store.infrastructure.db.engines.Database;
 import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
+import org.postgresql.gss.GSSOutputStream;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,7 +51,7 @@ import java.util.UUID;
                return Optional.of(product);
            }
        } catch (SQLException e) {
-           System.err.println("Product not found : " + e.getMessage());
+           System.err.println("Product not found: " + e.getMessage());
        }
        return Optional.empty();
    }
@@ -72,7 +73,7 @@ import java.util.UUID;
                res.add(product);
            }
        } catch (SQLException e) {
-           System.err.println("Product not found : " + e.getMessage());
+           System.err.println("Product not found: " + e.getMessage());
        }
        return res;
    }
@@ -119,4 +120,30 @@ import java.util.UUID;
            System.err.println("Couldn't save product: " + e.getMessage());
        }
    }
-}
+
+
+   public Optional<Product> topRevenueProduct(){
+    String sql = "SELECT p.id, p.name, p.value, sum(ip.quantity * p.value) as total_revenue FROM " + this.table +
+                  " p JOIN invoice_products ip on p.id = productId GROUP BY p.id, p.name ORDER BY total_revenue LIMIT 1 ";
+
+       try (
+               Connection conn = db.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+       ) {
+           ResultSet rs = stmt.executeQuery();
+           if(rs.next()) {
+               Product product = new Product(
+                       (UUID) rs.getObject("id"),
+                       rs.getString("name"),
+                       rs.getInt("value")
+               );
+
+               return Optional.of(product);
+           }
+       } catch (SQLException e) {
+           System.err.println("Product not found: " + e.getMessage());
+       }
+       return Optional.empty();
+    }
+
+    }
