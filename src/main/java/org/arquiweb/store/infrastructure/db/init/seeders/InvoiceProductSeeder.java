@@ -4,8 +4,10 @@ import org.arquiweb.store.application.ports.repositories.InvoiceProductRepositor
 import org.arquiweb.store.domain.models.InvoiceProduct;
 import org.arquiweb.store.infrastructure.db.init.readers.Reader;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class InvoiceProductSeeder implements Seeder {
     
@@ -28,9 +30,15 @@ public class InvoiceProductSeeder implements Seeder {
             Integer quantity = Integer.valueOf(
                     row.get("cantidad")
             );
+            UUID invoiceId = UUID.nameUUIDFromBytes(row.get("invoiceId").getBytes(StandardCharsets.UTF_8));
+            UUID productId = UUID.nameUUIDFromBytes(row.get("productId").getBytes(StandardCharsets.UTF_8));
 
             invoiceProducts.add(
-                    new InvoiceProduct(quantity)
+                    new InvoiceProduct(
+                            invoiceId,
+                            productId,
+                            quantity
+                    )
             );
         });
 

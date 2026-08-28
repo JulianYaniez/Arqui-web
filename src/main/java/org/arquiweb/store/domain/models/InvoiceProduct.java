@@ -10,7 +10,7 @@ public class InvoiceProduct {
     private UUID productId;
     private Integer quantity;
 
-    public InvoiceProduct(Integer quantity){
+    public InvoiceProduct(UUID invoiceId, UUID productId, Integer quantity){
         setQuantity(quantity);
         setInvoiceId(invoiceId);
         setProductId(productId);
