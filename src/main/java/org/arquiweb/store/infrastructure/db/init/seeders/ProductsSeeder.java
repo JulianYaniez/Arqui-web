@@ -4,8 +4,10 @@ import org.arquiweb.store.application.ports.repositories.ProductRepository;
 import org.arquiweb.store.domain.models.Product;
 import org.arquiweb.store.infrastructure.db.init.readers.Reader;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ProductsSeeder implements Seeder{
 
@@ -29,17 +31,19 @@ public class ProductsSeeder implements Seeder{
                     row.get("value")
             );
 
+            UUID id = UUID.nameUUIDFromBytes(row.get("id").getBytes(StandardCharsets.UTF_8));
+
             products.add(
                     new Product(
+                            id,
                             row.get("name"),
                             value
                     )
             );
         });
 
-        repository.saveAll(products);
         // Guarda todos los products de la lista en la base de datos
-
+        repository.saveAll(products);
     }
 
 }

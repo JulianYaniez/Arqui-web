@@ -1,4 +1,4 @@
-idFactura,idProducto,cantidad
+invoiceId,productId,quantity
 1,52,5
 2,41,2
 2,39,3

@@ -26,7 +26,7 @@ public class RelationalBuilder implements Builder {
                 CREATE TABLE IF NOT EXISTS products (
                     id UUID PRIMARY KEY,
                     name VARCHAR(100) NOT NULL,
-                    value DECIMAL(10,2) NOT NULL
+                    value INT NOT NULL
                 );
                 """;
 

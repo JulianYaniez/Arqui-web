@@ -10,4 +10,5 @@ public interface InvoiceRepository {
     Optional<Invoice> findById(UUID id);
     List<Invoice> findAll();
     UUID save(Invoice invoice);
+    void saveAll(List<Invoice> invoices);
 }

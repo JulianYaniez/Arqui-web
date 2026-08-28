@@ -25,12 +25,12 @@ public class InvoicesSeeder implements Seeder {
             //List<Invoice> invoices = new ArrayList<>();
             
             rows.forEach(row-> {
-                UUID id = UUID.nameUUIDFromBytes(row.get("idFactura").getBytes(StandardCharsets.UTF_8));
-                UUID idClient = UUID.nameUUIDFromBytes(row.get("idClient").getBytes(StandardCharsets.UTF_8));
+                UUID id = UUID.nameUUIDFromBytes(row.get("id").getBytes(StandardCharsets.UTF_8));
+                UUID idClient = UUID.nameUUIDFromBytes(row.get("clientId").getBytes(StandardCharsets.UTF_8));
 
-                repository.save(new Invoice(id, idClient));
+
                 // Guarda todos los invoice de la lista en la base de datos
-
+                repository.save(new Invoice(id, idClient));
             });
     }
 

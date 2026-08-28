@@ -6,28 +6,28 @@ import lombok.Getter;
 
 @Getter
 public class InvoiceProduct {
-    private UUID InvoiceId;
-    private UUID ProductId;
+    private UUID invoiceId;
+    private UUID productId;
     private Integer quantity;
 
-    public InvoiceProduct(Integer quantity){
+    public InvoiceProduct(UUID invoiceId, UUID productId, Integer quantity){
         setQuantity(quantity);
-        setInvoiceId(InvoiceId);
-        setProductId(ProductId);
+        setInvoiceId(invoiceId);
+        setProductId(productId);
     }
 
     public void setInvoiceId(UUID invoiceId) {
         if (invoiceId == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
-        InvoiceId = invoiceId;
+        this.invoiceId = invoiceId;
     }
 
     public void setProductId(UUID productId) {
         if (productId == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
-        ProductId = productId;
+        this.productId = productId;
     }
 
     public void setQuantity(Integer quantity) {
