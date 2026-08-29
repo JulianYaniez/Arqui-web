@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class InvoiceProductSeeder implements Seeder {
+public class InvoiceProductsSeeder implements Seeder {
     
     // Repositorio que se utiliza para guardar los clientes en la base de datos
     private final InvoiceProductRepository repository; 
     // Reader encargado de leer los datos del archivo CSV
     private final Reader reader;
 
-    public InvoiceProductSeeder(InvoiceProductRepository repository, Reader reader){
+    public InvoiceProductsSeeder(InvoiceProductRepository repository, Reader reader){
         this.repository = repository;
         this.reader = reader;
     }

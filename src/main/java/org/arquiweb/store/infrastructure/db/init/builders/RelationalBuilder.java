@@ -11,7 +11,21 @@ import java.util.List;
 
 public class RelationalBuilder implements Builder {
 
-    private Database database = DatabaseFactory.getRelationalDatabase();
+    private final Database database;
+
+    private static Builder instance;
+
+
+    public static Builder getInstance() {
+        if (instance == null) {
+            instance = new RelationalBuilder();
+        }
+        return instance;
+    }
+
+    private RelationalBuilder() {
+        this.database = DatabaseFactory.getRelationalDatabase();
+    }
 
     public void build() {
         String client = """

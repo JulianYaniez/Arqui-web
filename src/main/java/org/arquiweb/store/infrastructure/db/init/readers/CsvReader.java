@@ -8,6 +8,15 @@ import java.util.stream.Stream;
 
 public class CsvReader implements Reader {
 
+    private static Reader instance;
+
+    public static Reader getInstance() {
+        if (instance == null) {
+            instance = new CsvReader();
+        }
+        return instance;
+    }
+
     public List<Map<String, String>> read(String file) {
 
         Path path = Path.of(basePath + "csv/" + file);
