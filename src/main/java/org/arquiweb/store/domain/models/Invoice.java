@@ -8,7 +8,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class Invoice {
-    private UUID invoiceId;
+    private UUID id;
     private UUID clientId;
 
     public Invoice(UUID clientId){

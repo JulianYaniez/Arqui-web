@@ -2,7 +2,10 @@ package org.arquiweb.store.infrastructure.db.init.seeders;
 
 import org.arquiweb.store.application.ports.repositories.ClientRepository;
 import org.arquiweb.store.domain.models.Client;
+import org.arquiweb.store.infrastructure.db.engines.Database;
+import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
 import org.arquiweb.store.infrastructure.db.init.readers.Reader;
+import org.arquiweb.store.infrastructure.db.utils.RelationalDatabaseUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -23,6 +26,10 @@ public class ClientsSeeder implements Seeder {
     }
 
     public void seed() {
+        Database db = DatabaseFactory.getRelationalDatabase();
+        if (RelationalDatabaseUtils.isTablePopulated(db, "clients"))
+            return;
+
         var rows = reader.read("clients.csv");
         List<Client> clients = new ArrayList<>();
 

@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class Product {
-    private UUID productId;
+    private UUID id;
     private String name;
     private Integer value;
 

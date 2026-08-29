@@ -46,7 +46,7 @@ public class RelationalInvoiceDao extends DaoAdapter implements InvoiceRepositor
                 return Optional.of(invoice);
             }
         } catch (SQLException e) {
-            System.err.println("Customer not found : " + e.getMessage());
+            System.err.println("Couldn't find invoice: " + e.getMessage());
         }
         return Optional.empty();
     }
@@ -66,24 +66,24 @@ public class RelationalInvoiceDao extends DaoAdapter implements InvoiceRepositor
                 res.add(invoice);
             }
         } catch (SQLException e) {
-            System.err.println("Customer not found : " + e.getMessage());
+            System.err.println("Couldn't find invoices: " + e.getMessage());
         }
         return res;
     }
 
-    public UUID save(Invoice client) {
+    public UUID save(Invoice invoice) {
         String sql = "INSERT INTO " + this.table + " VALUES (?, ?)";
         try(
                 Connection conn = db.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql);
         ){
-            stmt.setObject(1, client.getInvoiceId());
-            stmt.setObject(2, client.getClientId());
+            stmt.setObject(1, invoice.getId());
+            stmt.setObject(2, invoice.getClientId());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Customer not found : " + e.getMessage());
+            System.err.println("Couldn't save invoice: " + e.getMessage());
         }
-        return client.getInvoiceId();
+        return invoice.getId();
     }
 
     public void saveAll(List<Invoice> invoices) {
@@ -92,8 +92,10 @@ public class RelationalInvoiceDao extends DaoAdapter implements InvoiceRepositor
                 Connection conn = db.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql);
         ) {
+            conn.setAutoCommit(false);
+
             for(Invoice i : invoices) {
-                stmt.setObject(1, i.getInvoiceId());
+                stmt.setObject(1, i.getId());
                 stmt.setObject(2, i.getClientId());
                 stmt.addBatch();
             }
@@ -102,7 +104,7 @@ public class RelationalInvoiceDao extends DaoAdapter implements InvoiceRepositor
             conn.commit();
 
         } catch (SQLException e) {
-            System.err.println("Customer not found : " + e.getMessage());
+            System.err.println("Couldn't save invoices: " + e.getMessage());
         }
     }
 }

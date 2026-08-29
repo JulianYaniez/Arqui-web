@@ -1,12 +1,10 @@
 package org.arquiweb.store.infrastructure.db.daos.adapters.relational;
 
 import org.arquiweb.store.application.ports.repositories.ProductRepository;
-import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.domain.models.Product;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
 import org.arquiweb.store.infrastructure.db.engines.Database;
 import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
-import org.postgresql.gss.GSSOutputStream;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -85,14 +83,14 @@ import java.util.UUID;
                Connection conn = db.getConnection();
                PreparedStatement stmt = conn.prepareStatement(sql);
        ) {
-           stmt.setObject(1, product.getProductId());
+           stmt.setObject(1, product.getId());
            stmt.setString(2, product.getName());
            stmt.setInt(3, product.getValue());
            stmt.executeUpdate();
        } catch (SQLException e) {
            System.err.println("Couldn't save product: " + e.getMessage());
        }
-       return product.getProductId();
+       return product.getId();
    }
 
    @Override
@@ -106,7 +104,7 @@ import java.util.UUID;
            conn.setAutoCommit(false);
 
            for (Product product : products) {
-               stmt.setObject(1, product.getProductId());
+               stmt.setObject(1, product.getId());
                stmt.setString(2, product.getName());
                stmt.setInt(3, product.getValue());
                stmt.addBatch();

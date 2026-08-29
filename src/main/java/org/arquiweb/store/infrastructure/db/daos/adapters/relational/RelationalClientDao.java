@@ -50,12 +50,12 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
                 return Optional.of(client);
             }
        } catch (SQLException e) {
-           System.err.println("Customer not found : " + e.getMessage());
+           System.err.println("Client not found: " + e.getMessage());
        }
        return Optional.empty();
    }
 
-   public List<Client>  findAll() {
+   public List<Client> findAll() {
        List<Client> res = new ArrayList<>();
        String sql = "SELECT * FROM " + this.table  + " c " + """ 
                     JOIN invoices i ON c.id = i.clientid
@@ -78,7 +78,7 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
                res.add(client);
            }
        } catch (SQLException e) {
-           System.err.println("Customer not found : " + e.getMessage());
+           System.err.println("No clients found: " + e.getMessage());
        }
        return res;
    }
@@ -95,7 +95,7 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
            stmt.setString(3, client.getEmail());
            stmt.executeUpdate();
        } catch (SQLException e) {
-           System.err.println("Couldn't save user: " + e.getMessage());
+           System.err.println("Couldn't save client: " + e.getMessage());
        }
        return client.getId();
    }
@@ -120,7 +120,7 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
             conn.commit();
 
         } catch (SQLException e) {
-            System.err.println("Couldn't save users: " + e.getMessage());
+            System.err.println("Couldn't save clients: " + e.getMessage());
         }
    }
 }

@@ -2,7 +2,10 @@ package org.arquiweb.store.infrastructure.db.init.seeders;
 
 import org.arquiweb.store.application.ports.repositories.ProductRepository;
 import org.arquiweb.store.domain.models.Product;
+import org.arquiweb.store.infrastructure.db.engines.Database;
+import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
 import org.arquiweb.store.infrastructure.db.init.readers.Reader;
+import org.arquiweb.store.infrastructure.db.utils.RelationalDatabaseUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -23,8 +26,14 @@ public class ProductsSeeder implements Seeder{
     }
 
     public void seed() {
+        Database db = DatabaseFactory.getRelationalDatabase();
+        if (RelationalDatabaseUtils.isTablePopulated(db, "products"))
+            return;
+
+
         var rows = reader.read("products.csv");
         List<Product> products = new ArrayList<>();
+
 
         rows.forEach(row -> {
             Integer value = Integer.valueOf(
@@ -40,6 +49,7 @@ public class ProductsSeeder implements Seeder{
                             value
                     )
             );
+
         });
 
         // Guarda todos los products de la lista en la base de datos

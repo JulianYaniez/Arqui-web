@@ -2,7 +2,10 @@ package org.arquiweb.store.infrastructure.db.init.seeders;
 
 import org.arquiweb.store.application.ports.repositories.InvoiceProductRepository;
 import org.arquiweb.store.domain.models.InvoiceProduct;
+import org.arquiweb.store.infrastructure.db.engines.Database;
+import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
 import org.arquiweb.store.infrastructure.db.init.readers.Reader;
+import org.arquiweb.store.infrastructure.db.utils.RelationalDatabaseUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -22,7 +25,10 @@ public class InvoiceProductsSeeder implements Seeder {
     }
 
     public void seed() {
-        
+        Database db = DatabaseFactory.getRelationalDatabase();
+        if (RelationalDatabaseUtils.isTablePopulated(db, "invoice_products"))
+            return;
+
         var rows = reader.read("invoice-products.csv");
         List<InvoiceProduct> invoiceProducts = new ArrayList<>();
 
