@@ -11,4 +11,6 @@ public interface ProductRepository {
     List<Product> findAll();
     UUID save(Product product);
     void saveAll(List<Product> products);
+
+    Optional<Product> findTopRevenueProduct();
 }
