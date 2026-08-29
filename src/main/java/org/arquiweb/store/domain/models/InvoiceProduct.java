@@ -3,8 +3,10 @@ package org.arquiweb.store.domain.models;
 import java.util.UUID;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class InvoiceProduct {
     private UUID invoiceId;
     private UUID productId;

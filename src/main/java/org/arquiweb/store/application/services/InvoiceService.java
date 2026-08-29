@@ -1,27 +1,28 @@
 package org.arquiweb.store.application.services;
 
+import org.arquiweb.store.application.ports.factories.DaoFactory;
 import org.arquiweb.store.application.ports.repositories.InvoiceRepository;
 import org.arquiweb.store.domain.models.Client;
 
 import java.util.UUID;
 
 public class InvoiceService {
-    private InvoiceRepository invoiceRepository;
+    private final InvoiceRepository invoiceRepository;
 
-    public InvoiceService() {
-        // TODO - Get repository depending on wanted DB
+    public InvoiceService(DaoFactory factory) {
+        this.invoiceRepository = factory.getInvoiceRepository();
     }
 
 
-    public static void insert(Client client) {
+    public void insert(Client client) {
         // TODO
     }
 
-    public static void get(UUID id) {
+    public void get(UUID id) {
         // TODO
     }
 
-    public static void getAll() {
+    public void getAll() {
         // TODO
     }
 }

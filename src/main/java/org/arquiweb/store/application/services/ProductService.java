@@ -1,27 +1,39 @@
 package org.arquiweb.store.application.services;
 
+import org.arquiweb.store.application.ports.factories.DaoFactory;
 import org.arquiweb.store.application.ports.repositories.ProductRepository;
 import org.arquiweb.store.domain.models.Client;
+import org.arquiweb.store.domain.models.Product;
 
 import java.util.UUID;
 
 public class ProductService {
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-    public ProductService() {
-        // TODO - Get repository depending on wanted DB
+    public ProductService(DaoFactory factory) {
+        this.productRepository = factory.getProductRepository();
     }
 
 
-    public static void insert(Client client) {
+    public void insert(Client client) {
         // TODO
     }
 
-    public static void get(UUID id) {
+    public void get(UUID id) {
         // TODO
     }
 
-    public static void getAll() {
+    public void getAll() {
         // TODO
     }
+
+    public Product getTopRevenue() {
+        var entity = productRepository.findTopRevenueProduct();
+
+        if (entity.isEmpty()) {
+            throw new RuntimeException("No product found");
+        }
+        return entity.get();
+    }
+
 }
