@@ -8,6 +8,14 @@
 * Agustina Magali Fennema
 * Nicolás Valentín Gómez
 
+## Requisitos: 
+    - Docker
+
+## Guia de ejecucion
+    - Correr:
+        - docker compose up -d
+        - ./mvnw compile exec:java
+
 ---
 
 ## Consignas
