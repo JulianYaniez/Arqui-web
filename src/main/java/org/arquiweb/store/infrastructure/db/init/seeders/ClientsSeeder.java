@@ -15,9 +15,9 @@ import java.util.UUID;
 public class ClientsSeeder implements Seeder {
 
     
-    // Repositorio que se utiliza para guardar en la base de datos
+    // Repository that saves data in bbdd
     private final ClientDao repository;
-    // Reader encargado de leer los datos del archivo CSV
+    // Reader who reads csv 
     private final Reader reader;
 
     public ClientsSeeder(ClientDao repository, Reader reader) {
@@ -44,7 +44,7 @@ public class ClientsSeeder implements Seeder {
             );
         });
 
-        // Guarda todos los clients de la lista en la base de datos
+        // Save clients to the list of bbdd
         repository.saveAll(clients);
     }
 }
