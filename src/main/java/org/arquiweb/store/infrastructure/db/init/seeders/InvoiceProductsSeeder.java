@@ -14,9 +14,9 @@ import java.util.UUID;
 
 public class InvoiceProductsSeeder implements Seeder {
     
-    // Repositorio que se utiliza para guardar los clientes en la base de datos
+    // Repository that saves data to the database
     private final InvoiceProductDao repository;
-    // Reader encargado de leer los datos del archivo CSV
+    // Reader who reads csv 
     private final Reader reader;
 
     public InvoiceProductsSeeder(InvoiceProductDao repository, Reader reader){
@@ -48,7 +48,7 @@ public class InvoiceProductsSeeder implements Seeder {
             );
         });
 
-         // Guarda todos los invoice de la lista en la base de datos
+        //  Save clients from the list to the database
         repository.saveAll(invoiceProducts);
     }
 }

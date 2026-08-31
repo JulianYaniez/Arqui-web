@@ -14,9 +14,9 @@ import java.util.UUID;
 
 public class InvoicesSeeder implements Seeder {
 
-    // Repositorio que se utiliza para guardar en la base de datos
+    // Repository that saves data to the database
     private final InvoiceDao repository;
-    // Reader encargado de leer los datos del archivo CSV
+    // Reader who reads csv 
     private final Reader reader;
 
     public InvoicesSeeder(InvoiceDao repository, Reader reader) {
