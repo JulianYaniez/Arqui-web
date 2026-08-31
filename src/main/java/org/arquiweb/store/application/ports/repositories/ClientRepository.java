@@ -1,5 +1,6 @@
 package org.arquiweb.store.application.ports.repositories;
 
+import org.arquiweb.store.application.ports.dtos.ClientBillingDTO;
 import org.arquiweb.store.domain.models.Client;
 
 import java.util.List;
@@ -11,4 +12,6 @@ public interface ClientRepository {
     List<Client> findAll();
     UUID save(Client client);
     void saveAll(List<Client> clients);
+
+    List<ClientBillingDTO> findAllByBilling();
 }

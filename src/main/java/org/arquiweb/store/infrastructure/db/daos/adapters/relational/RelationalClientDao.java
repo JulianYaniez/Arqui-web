@@ -1,5 +1,6 @@
 package org.arquiweb.store.infrastructure.db.daos.adapters.relational;
 
+import org.arquiweb.store.application.ports.dtos.ClientBillingDTO;
 import org.arquiweb.store.application.ports.repositories.ClientRepository;
 import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
@@ -57,13 +58,7 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
 
    public List<Client> findAll() {
        List<Client> res = new ArrayList<>();
-       String sql = "SELECT * FROM " + this.table  + " c " + """ 
-                   JOIN invoices i ON c.id = i.clientid
-                   JOIN invoice_products ip  ON i.id = ip.invoiceid
-                   JOIN products p ON ip.productid = p.id
-                   GROUP BY c.id, i.id, ip.invoiceid, ip.productid, p.id
-                   ORDER BY count(p.value) DESC;
-                   """;
+       String sql = "SELECT * FROM " + this.table;
 
        try(
                Connection conn = db.getConnection();
@@ -123,5 +118,37 @@ public class RelationalClientDao extends DaoAdapter implements ClientRepository 
         } catch (SQLException e) {
             System.err.println("Couldn't save clients: " + e.getMessage());
         }
+   }
+
+    public List<ClientBillingDTO> findAllByBilling() {
+       List<ClientBillingDTO> res = new ArrayList<>();
+       String sql = """
+                   SELECT c.id, c.name, c.email, COALESCE(SUM(ip.quantity * p.value), 0) AS billed
+                    FROM clients c
+                    LEFT JOIN invoices i ON c.id = i.clientid
+                    LEFT JOIN invoice_products ip ON i.id= ip.invoiceid
+                    LEFT JOIN products p ON ip.productid = p.id
+                    GROUP BY c.id, c.name, c.email
+                    ORDER BY billed DESC
+                   """;
+
+       try(
+               Connection conn = db.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+               ResultSet rs = stmt.executeQuery();
+       ) {
+           while(rs.next()) {
+               ClientBillingDTO client = new ClientBillingDTO(
+                       (UUID) rs.getObject("id"),
+                       rs.getString("name"),
+                       rs.getString("email"),
+                       rs.getInt("billed")
+               );
+               res.add(client);
+           }
+       } catch (SQLException e) {
+           System.err.println("No clients found: " + e.getMessage());
+       }
+       return res;
    }
 }

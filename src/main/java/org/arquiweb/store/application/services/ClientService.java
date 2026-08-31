@@ -1,5 +1,6 @@
 package org.arquiweb.store.application.services;
 
+import org.arquiweb.store.application.ports.dtos.ClientBillingDTO;
 import org.arquiweb.store.application.ports.repositories.ClientRepository;
 import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.application.ports.factories.DaoFactory;
@@ -32,5 +33,9 @@ public class ClientService {
 
     public List<Client> getAll() {
         return clientDao.findAll();
+    }
+
+    public List<ClientBillingDTO> getAllByBilling() {
+        return clientDao.findAllByBilling();
     }
 }

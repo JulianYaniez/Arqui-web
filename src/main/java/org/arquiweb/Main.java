@@ -28,16 +28,22 @@ public class Main {
         System.out.println(topProduct.toString());
         System.out.println();
 
-        System.out.println("List of clients billed the most:");
+        int show = 10;
+        System.out.println("Top "+ show + " clients billed the most:");
         var clientService = new ClientService(factory);
-        var clientList = clientService.getAll();
-        printAll(clientList);
+        var clientList = clientService.getAllByBilling();
+        print(clientList, show);
 
     }
 
-    private static void printAll(List<Client> list) {
-        for (Client client : list) {
-            System.out.println(client.toString());
+    private static void print(List list, int limit) {
+        int i = 0;
+        for (Object o : list) {
+            i++;
+            if (i > limit) {
+                return;
+            }
+            System.out.println(o.toString());
         }
 
     }
