@@ -1,5 +1,6 @@
 package org.arquiweb.store.infrastructure.db.daos.adapters.relational;
 
+import org.arquiweb.store.application.ports.dtos.ProductRevenueDTO;
 import org.arquiweb.store.application.ports.repositories.ProductRepository;
 import org.arquiweb.store.domain.models.Product;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
@@ -120,7 +121,7 @@ import java.util.UUID;
 
 
    @Override
-   public Optional<Product> findTopRevenueProduct(){
+   public Optional<ProductRevenueDTO> findTopRevenueProduct(){
     String sql = "SELECT p.id, p.name, p.value, sum(ip.quantity * p.value) as total_revenue FROM " + this.table +
                   " p JOIN invoice_products ip on p.id = productId GROUP BY p.id, p.name ORDER BY total_revenue LIMIT 1 ";
 
@@ -130,10 +131,11 @@ import java.util.UUID;
        ) {
            ResultSet rs = stmt.executeQuery();
            if(rs.next()) {
-               Product product = new Product(
+               ProductRevenueDTO product = new ProductRevenueDTO(
                        (UUID) rs.getObject("id"),
                        rs.getString("name"),
-                       rs.getInt("value")
+                       rs.getInt("value"),
+                       rs.getInt("total_revenue")
                );
 
                return Optional.of(product);

@@ -1,5 +1,6 @@
 package org.arquiweb.store.application.ports.repositories;
 
+import org.arquiweb.store.application.ports.dtos.ProductRevenueDTO;
 import org.arquiweb.store.domain.models.Product;
 
 import java.util.List;
@@ -12,5 +13,5 @@ public interface ProductRepository {
     UUID save(Product product);
     void saveAll(List<Product> products);
 
-    Optional<Product> findTopRevenueProduct();
+    Optional<ProductRevenueDTO> findTopRevenueProduct();
 }

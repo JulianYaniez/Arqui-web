@@ -1,5 +1,6 @@
 package org.arquiweb.store.application.services;
 
+import org.arquiweb.store.application.ports.dtos.ProductRevenueDTO;
 import org.arquiweb.store.application.ports.factories.DaoFactory;
 import org.arquiweb.store.application.ports.repositories.ProductRepository;
 import org.arquiweb.store.domain.models.Client;
@@ -27,7 +28,7 @@ public class ProductService {
         // TODO
     }
 
-    public Product getTopRevenue() {
+    public ProductRevenueDTO getTopRevenue() {
         var entity = productRepository.findTopRevenueProduct();
 
         if (entity.isEmpty()) {
