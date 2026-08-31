@@ -3,8 +3,9 @@ package org.arquiweb.store.application.services;
 import org.arquiweb.store.application.ports.dtos.ProductRevenueDTO;
 import org.arquiweb.store.application.ports.factories.DaoFactory;
 import org.arquiweb.store.application.ports.daos.ProductDao;
-import org.arquiweb.store.domain.models.Client;
+import org.arquiweb.store.domain.models.Product;
 
+import java.util.List;
 import java.util.UUID;
 
 public class ProductService {
@@ -15,16 +16,22 @@ public class ProductService {
     }
 
 
-    public void insert(Client client) {
-        // TODO
+    public void insert(Product product) {
+        productDao.save(product);
     }
 
-    public void get(UUID id) {
-        // TODO
+    public Product get(UUID id) {
+        var entity = productDao.findById(id);
+
+        if(entity.isEmpty()) {
+            throw new RuntimeException("Invoice with id " + id + " not found");
+        }
+
+        return entity.get();
     }
 
-    public void getAll() {
-        // TODO
+    public List<Product> getAll() {
+        return productDao.findAll();
     }
 
     public ProductRevenueDTO getTopRevenue() {
