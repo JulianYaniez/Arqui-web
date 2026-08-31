@@ -1,7 +1,6 @@
 package org.arquiweb.store.infrastructure.db.daos.adapters.relational;
 
-import org.arquiweb.store.application.ports.repositories.InvoiceProductRepository;
-import org.arquiweb.store.domain.models.Client;
+import org.arquiweb.store.application.ports.daos.InvoiceProductDao;
 import org.arquiweb.store.domain.models.InvoiceProduct;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
 import org.arquiweb.store.infrastructure.db.engines.Database;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RelationalInvoiceProductDao extends DaoAdapter implements InvoiceProductRepository {
+public class RelationalInvoiceProductDao extends DaoAdapter implements InvoiceProductDao {
     private final String table = "invoice_products";
     private static RelationalInvoiceProductDao instance;
     public RelationalInvoiceProductDao(Database db) {

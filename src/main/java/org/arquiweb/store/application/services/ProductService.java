@@ -2,17 +2,16 @@ package org.arquiweb.store.application.services;
 
 import org.arquiweb.store.application.ports.dtos.ProductRevenueDTO;
 import org.arquiweb.store.application.ports.factories.DaoFactory;
-import org.arquiweb.store.application.ports.repositories.ProductRepository;
+import org.arquiweb.store.application.ports.daos.ProductDao;
 import org.arquiweb.store.domain.models.Client;
-import org.arquiweb.store.domain.models.Product;
 
 import java.util.UUID;
 
 public class ProductService {
-    private final ProductRepository productRepository;
+    private final ProductDao productDao;
 
     public ProductService(DaoFactory factory) {
-        this.productRepository = factory.getProductRepository();
+        this.productDao = factory.getProductRepository();
     }
 
 
@@ -29,7 +28,7 @@ public class ProductService {
     }
 
     public ProductRevenueDTO getTopRevenue() {
-        var entity = productRepository.findTopRevenueProduct();
+        var entity = productDao.findTopRevenueProduct();
 
         if (entity.isEmpty()) {
             throw new RuntimeException("No product found");

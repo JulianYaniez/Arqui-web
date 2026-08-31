@@ -1,6 +1,6 @@
 package org.arquiweb.store.infrastructure.db.init.seeders;
 
-import org.arquiweb.store.application.ports.repositories.ProductRepository;
+import org.arquiweb.store.application.ports.daos.ProductDao;
 import org.arquiweb.store.domain.models.Product;
 import org.arquiweb.store.infrastructure.db.engines.Database;
 import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
@@ -15,12 +15,12 @@ import java.util.UUID;
 public class ProductsSeeder implements Seeder{
 
         // Repositorio que se utiliza para guardar los clientes en la base de datos
-        private final ProductRepository repository;
+        private final ProductDao repository;
         // Reader encargado de leer los datos del archivo CSV
         private final Reader reader;
 
 
-    public ProductsSeeder(ProductRepository repository, Reader reader) {
+    public ProductsSeeder(ProductDao repository, Reader reader) {
         this.repository = repository;
         this.reader = reader;
     }

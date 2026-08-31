@@ -1,7 +1,7 @@
 package org.arquiweb.store.infrastructure.db.daos.adapters.relational;
 
 import org.arquiweb.store.application.ports.dtos.ClientBillingDTO;
-import org.arquiweb.store.application.ports.repositories.ClientRepository;
+import org.arquiweb.store.application.ports.daos.ClientDao;
 import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
 import org.arquiweb.store.infrastructure.db.engines.Database;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RelationalClientDao extends DaoAdapter implements ClientRepository {
+public class RelationalClientDao extends DaoAdapter implements ClientDao {
 
     private final String table = "clients";
     private static RelationalClientDao instance;

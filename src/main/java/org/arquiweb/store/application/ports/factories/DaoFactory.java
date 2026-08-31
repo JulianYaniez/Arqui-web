@@ -1,21 +1,21 @@
 package org.arquiweb.store.application.ports.factories;
 
-import org.arquiweb.store.application.ports.repositories.ClientRepository;
-import org.arquiweb.store.application.ports.repositories.InvoiceProductRepository;
-import org.arquiweb.store.application.ports.repositories.InvoiceRepository;
-import org.arquiweb.store.application.ports.repositories.ProductRepository;
+import org.arquiweb.store.application.ports.daos.ClientDao;
+import org.arquiweb.store.application.ports.daos.InvoiceProductDao;
+import org.arquiweb.store.application.ports.daos.InvoiceDao;
+import org.arquiweb.store.application.ports.daos.ProductDao;
 
 public abstract class DaoFactory {
    public enum Engines {
        POSTGRES,
    }
 
-   public abstract ClientRepository getClientRepository();
+   public abstract ClientDao getClientRepository();
 
-   public abstract ProductRepository getProductRepository();
+   public abstract ProductDao getProductRepository();
 
-   public abstract InvoiceRepository getInvoiceRepository();
+   public abstract InvoiceDao getInvoiceRepository();
 
-   public abstract InvoiceProductRepository getInvoiceProductRepository();
+   public abstract InvoiceProductDao getInvoiceProductRepository();
 
 }

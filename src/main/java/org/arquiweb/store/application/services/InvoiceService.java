@@ -1,16 +1,16 @@
 package org.arquiweb.store.application.services;
 
 import org.arquiweb.store.application.ports.factories.DaoFactory;
-import org.arquiweb.store.application.ports.repositories.InvoiceRepository;
+import org.arquiweb.store.application.ports.daos.InvoiceDao;
 import org.arquiweb.store.domain.models.Client;
 
 import java.util.UUID;
 
 public class InvoiceService {
-    private final InvoiceRepository invoiceRepository;
+    private final InvoiceDao invoiceDao;
 
     public InvoiceService(DaoFactory factory) {
-        this.invoiceRepository = factory.getInvoiceRepository();
+        this.invoiceDao = factory.getInvoiceRepository();
     }
 
 

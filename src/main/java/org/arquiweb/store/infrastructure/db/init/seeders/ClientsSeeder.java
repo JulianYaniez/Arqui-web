@@ -1,6 +1,6 @@
 package org.arquiweb.store.infrastructure.db.init.seeders;
 
-import org.arquiweb.store.application.ports.repositories.ClientRepository;
+import org.arquiweb.store.application.ports.daos.ClientDao;
 import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.infrastructure.db.engines.Database;
 import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
@@ -16,11 +16,11 @@ public class ClientsSeeder implements Seeder {
 
     
     // Repositorio que se utiliza para guardar en la base de datos
-    private final ClientRepository repository;
+    private final ClientDao repository;
     // Reader encargado de leer los datos del archivo CSV
     private final Reader reader;
 
-    public ClientsSeeder(ClientRepository repository, Reader reader) {
+    public ClientsSeeder(ClientDao repository, Reader reader) {
         this.repository = repository;
         this.reader = reader;
     }

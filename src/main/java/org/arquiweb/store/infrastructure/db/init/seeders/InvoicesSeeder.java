@@ -1,6 +1,6 @@
 package org.arquiweb.store.infrastructure.db.init.seeders;
 
-import org.arquiweb.store.application.ports.repositories.InvoiceRepository;
+import org.arquiweb.store.application.ports.daos.InvoiceDao;
 import org.arquiweb.store.domain.models.Invoice;
 import org.arquiweb.store.infrastructure.db.engines.Database;
 import org.arquiweb.store.infrastructure.db.engines.DatabaseFactory;
@@ -15,11 +15,11 @@ import java.util.UUID;
 public class InvoicesSeeder implements Seeder {
 
     // Repositorio que se utiliza para guardar en la base de datos
-    private final InvoiceRepository repository;
+    private final InvoiceDao repository;
     // Reader encargado de leer los datos del archivo CSV
     private final Reader reader;
 
-    public InvoicesSeeder(InvoiceRepository repository, Reader reader) {
+    public InvoicesSeeder(InvoiceDao repository, Reader reader) {
             this.repository = repository;
             this.reader = reader;
     }

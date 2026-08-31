@@ -1,7 +1,7 @@
 package org.arquiweb.store.application.services;
 
 import org.arquiweb.store.application.ports.dtos.ClientBillingDTO;
-import org.arquiweb.store.application.ports.repositories.ClientRepository;
+import org.arquiweb.store.application.ports.daos.ClientDao;
 import org.arquiweb.store.domain.models.Client;
 import org.arquiweb.store.application.ports.factories.DaoFactory;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class ClientService {
-    private final ClientRepository clientDao;
+    private final ClientDao clientDao;
 
     public ClientService(DaoFactory factory) {
         this.clientDao = factory.getClientRepository();

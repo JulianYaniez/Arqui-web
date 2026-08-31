@@ -1,7 +1,7 @@
 package org.arquiweb.store.infrastructure.db.daos.adapters.relational;
 
 import org.arquiweb.store.application.ports.dtos.ProductRevenueDTO;
-import org.arquiweb.store.application.ports.repositories.ProductRepository;
+import org.arquiweb.store.application.ports.daos.ProductDao;
 import org.arquiweb.store.domain.models.Product;
 import org.arquiweb.store.infrastructure.db.daos.adapters.DaoAdapter;
 import org.arquiweb.store.infrastructure.db.engines.Database;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-    public class RelationalProductDao extends DaoAdapter implements ProductRepository {
+    public class RelationalProductDao extends DaoAdapter implements ProductDao {
         private final String table = "products";
         private static RelationalProductDao instance;
         public RelationalProductDao(Database db) {
