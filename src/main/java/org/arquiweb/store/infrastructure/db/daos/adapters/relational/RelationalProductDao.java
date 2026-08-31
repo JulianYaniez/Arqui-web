@@ -123,7 +123,7 @@ import java.util.UUID;
    @Override
    public Optional<ProductRevenueDTO> findTopRevenueProduct(){
     String sql = "SELECT p.id, p.name, p.value, sum(ip.quantity * p.value) as total_revenue FROM " + this.table +
-                  " p JOIN invoice_products ip on p.id = productId GROUP BY p.id, p.name ORDER BY total_revenue LIMIT 1 ";
+                  " p JOIN invoice_products ip on p.id = productId GROUP BY p.id, p.name ORDER BY total_revenue DESC LIMIT 1 ";
 
        try (
                Connection conn = db.getConnection();
