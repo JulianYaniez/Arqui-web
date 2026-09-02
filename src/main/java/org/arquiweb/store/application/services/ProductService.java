@@ -24,7 +24,7 @@ public class ProductService {
         var entity = productDao.findById(id);
 
         if(entity.isEmpty()) {
-            throw new RuntimeException("Invoice with id " + id + " not found");
+            throw new RuntimeException("Invoice with id  " + id + " not found");
         }
 
         return entity.get();
@@ -38,7 +38,7 @@ public class ProductService {
         var entity = productDao.findTopRevenueProduct();
 
         if (entity.isEmpty()) {
-            throw new RuntimeException("No product found");
+            throw new RuntimeException("No product found ");
         }
         return entity.get();
     }

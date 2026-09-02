@@ -25,7 +25,7 @@ public class ClientService {
         var entity = clientDao.findById(id);
 
         if (entity.isEmpty()) {
-            throw new RuntimeException("Client with id " + id + " not found");
+            throw new RuntimeException("Client with id  " + id + " not found ");
         }
 
         return entity.get();

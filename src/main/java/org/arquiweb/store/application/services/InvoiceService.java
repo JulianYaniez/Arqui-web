@@ -23,7 +23,7 @@ public class InvoiceService {
         var entity = invoiceDao.findById(id);
         
         if(entity.isEmpty()) {
-            throw new RuntimeException("Invoice with id " + id + " not found");
+            throw new RuntimeException("Invoice with id  " + id + " not found ");
         }
 
         return entity.get();
