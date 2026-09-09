@@ -1,14 +1,20 @@
 <persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
-    <persistence-unit name="db">
+    <persistence-unit name="group-7">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>org.arquiweb.entities.Student</class>
+        <class>org.arquiweb.entities.Degree</class>
+        <class>org.arquiweb.entities.Enrollment</class>
+
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/tpe_group_7"/>
-            <property name="jakarta.persistence.jdbc.user" value="postgres"/>
-            <property name="jakarta.persistence.jdbc.password" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.user" value="group_7"/>
+            <property name="jakarta.persistence.jdbc.password" value="0112358"/>
 
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
         </properties>
     </persistence-unit>
 </persistence>
