@@ -30,7 +30,7 @@ public class Student {
     @Column(name = "dob")
     private LocalDate dob;
 
-    @Column(name = "genre", nullable = false)
+    @Column(name = "genre", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
     private Genre genre;
 

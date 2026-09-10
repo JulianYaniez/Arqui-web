@@ -2,7 +2,9 @@ package org.arquiweb.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.arquiweb.entities.composites.EnrollmentId;
 import org.arquiweb.enums.EnrollmentStatus;
 
@@ -13,6 +15,8 @@ import java.util.UUID;
 @Table(name = "enrollments")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Enrollment {
 
     @EmbeddedId
@@ -34,7 +38,7 @@ public class Enrollment {
     @Column(name = "finished_at")
     private LocalDate finishedAt;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
     private EnrollmentStatus status;
 
