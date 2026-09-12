@@ -7,6 +7,8 @@ public abstract class JpaRepository {
 
     protected EntityManager em;
 
+    protected final int batchSize = 50;
+
     public JpaRepository() {
         this.em = JpaUtil.getEntityManager();
     }

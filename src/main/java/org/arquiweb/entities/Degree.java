@@ -19,6 +19,7 @@ public class Degree {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name ="id", unique = true, nullable = false)
     private UUID id;
 
     @Column(name = "name", nullable = false, unique = true, length = 128)
