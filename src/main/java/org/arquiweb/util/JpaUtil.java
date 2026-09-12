@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-public class JPAUtil {
+public class JpaUtil {
     public static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("group-7");
 
     public static EntityManager getEntityManager() {
