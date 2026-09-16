@@ -9,6 +9,7 @@ import java.util.UUID;
 public interface StudentRepository {
     UUID save(Student student);
     void saveAll(List<Student> students);
+
     List<Student> getAll(String column, String order);
     Student getByRecordNumber(String recordNumber);
     List<Student> getByGenre(Genre genre);
