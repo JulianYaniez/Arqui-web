@@ -1,10 +1,7 @@
 package org.arquiweb.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.arquiweb.enums.Genre;
 
 import java.time.LocalDate;
@@ -15,6 +12,7 @@ import java.util.UUID;
 @Table(name = "students")
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class Student {
@@ -44,5 +42,7 @@ public class Student {
     private String recordNumber;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Enrollment> enrollments;
+
 }
