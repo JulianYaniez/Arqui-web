@@ -1,8 +1,11 @@
 package org.arquiweb.repositories.impl;
 
+import org.arquiweb.dto.DegreeEnrollmentsDTO;
 import org.arquiweb.entities.Degree;
 import org.arquiweb.repositories.interfaces.DegreeRepository;
 
+import javax.management.RuntimeErrorException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +48,22 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
             throw new RuntimeException("Could not save degrees " + degrees.toString());
         } finally {
             em.close();
+        }
+    }
+
+    @Override
+    public List<DegreeEnrollmentsDTO> getEnrollments() {
+        try {
+            String jpql = """
+                            SELECT new org.arquiweb.dto.DegreeEnrollmentsDTO(d.name, COUNT(e))
+                            FROM Degree d JOIN d.enrollments e
+                            WHERE e.finishedAt IS NULL
+                            GROUP BY d.name
+                          """;
+            return em.createQuery(jpql, DegreeEnrollmentsDTO.class).getResultList();
+
+        } catch(Exception e ) {
+            return List.of();
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.arquiweb.repositories.impl;
 
 import org.arquiweb.entities.Student;
+import org.arquiweb.enums.Genre;
 import org.arquiweb.repositories.interfaces.StudentRepository;
 
 import java.util.List;
@@ -47,5 +48,25 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
         } finally {
             em.close();
         }
+    }
+
+    @Override
+    public List<Student> getAll(String column, String order) {
+        return List.of();
+    }
+
+    @Override
+    public Student getByRecordNumber(String recordNumber) {
+        return null;
+    }
+
+    @Override
+    public List<Student> getByGenre(Genre genre) {
+        return List.of();
+    }
+
+    @Override
+    public List<Student> getByDegreeAndCity(UUID degreeId, String city) {
+        return List.of();
     }
 }
