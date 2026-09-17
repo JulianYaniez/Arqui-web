@@ -1,6 +1,7 @@
 package org.arquiweb.repositories.interfaces;
 
 import org.arquiweb.entities.Enrollment;
+import org.arquiweb.entities.Student;
 
 import java.util.List;
 
