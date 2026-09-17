@@ -89,7 +89,16 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
 
     @Override
     public List<Student> getByGenre(Genre genre) {
-        return List.of();
+        try {
+
+            String jpql = "SELECT s FROM Student s WHERE s.genre = :genre";
+
+            return em.createQuery(jpql, Student.class)
+                    .setParameter("genre", genre).getResultList();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get genre", e);
+        }
     }
 
     @Override
