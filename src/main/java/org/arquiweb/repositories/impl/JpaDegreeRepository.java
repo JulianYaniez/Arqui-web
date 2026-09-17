@@ -59,7 +59,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
                             FROM Degree d JOIN d.enrollments e
                             WHERE e.finishedAt IS NULL
                             GROUP BY d.name
-                          """;
+                        """;
             return em.createQuery(jpql, DegreeEnrollmentsDTO.class).getResultList();
 
         } catch(Exception e ) {
