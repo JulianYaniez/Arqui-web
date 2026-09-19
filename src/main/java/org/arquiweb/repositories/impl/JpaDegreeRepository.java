@@ -66,7 +66,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
 
 
     @Override
-    public ListDTO<DegreeReportDTO> getReports() {
+    public List<DegreeReportDTO> getReports() {
         try {
 
             record Year(String degree, Integer year, Long count) {}
@@ -120,14 +120,12 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
                 degrees.put(year.degree, degree);
             }
 
-            List<DegreeReportDTO> reports = degrees.entrySet().stream().map(degree -> {
+            return degrees.entrySet().stream().map(degree -> {
                         String degreeName = degree.getKey();
                         List<DegreeYearlyStatsDTO> stats = degree.getValue().values().stream().toList();
                         return new DegreeReportDTO(degreeName, stats);
                     })
                     .toList();
-
-            return new ListDTO<>(reports);
 
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong fetching the report data ", e);

@@ -13,5 +13,5 @@ public interface DegreeRepository {
     void saveAll(List<Degree> degrees);
     List<DegreeEnrollmentsDTO> getEnrollments();
 
-    ListDTO<DegreeReportDTO> getReports();
+    List<DegreeReportDTO> getReports();
 }
