@@ -7,6 +7,14 @@ import java.util.List;
 
 public class JpaEnrollmentRepository extends JpaRepository implements EnrollmentRepository {
 
+    private static JpaEnrollmentRepository instance;
+    public static JpaEnrollmentRepository getInstance() {
+        if (instance == null) {
+            instance = new JpaEnrollmentRepository();
+        }
+        return instance;
+    }
+
     public void save(Enrollment enrollment) {
         try {
             em.getTransaction().begin();

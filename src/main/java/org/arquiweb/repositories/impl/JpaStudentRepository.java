@@ -11,6 +11,14 @@ import javax.management.RuntimeErrorException;
 
 public class JpaStudentRepository extends JpaRepository implements StudentRepository {
 
+    private static JpaStudentRepository instance;
+    public static JpaStudentRepository getInstance() {
+        if (instance == null) {
+            instance = new JpaStudentRepository();
+        }
+        return instance;
+    }
+
     public UUID save(Student student) {
 
         try {

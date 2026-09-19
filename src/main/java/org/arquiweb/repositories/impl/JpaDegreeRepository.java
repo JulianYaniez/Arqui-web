@@ -8,6 +8,15 @@ import java.util.*;
 
 public class JpaDegreeRepository extends JpaRepository implements DegreeRepository {
 
+    private static JpaDegreeRepository instance;
+    public static JpaDegreeRepository getInstance() {
+        if (instance == null) {
+            instance = new JpaDegreeRepository();
+        }
+        return instance;
+    }
+
+
     public UUID save(Degree degree) {
         try {
             em.getTransaction().begin();
