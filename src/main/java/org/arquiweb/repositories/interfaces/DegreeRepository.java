@@ -2,7 +2,7 @@ package org.arquiweb.repositories.interfaces;
 
 import org.arquiweb.dto.DegreeReportDTO;
 import org.arquiweb.dto.DegreeEnrollmentsDTO;
-import org.arquiweb.dto.FullReportDTO;
+import org.arquiweb.dto.ListDTO;
 import org.arquiweb.entities.Degree;
 
 import java.util.List;
@@ -13,5 +13,5 @@ public interface DegreeRepository {
     void saveAll(List<Degree> degrees);
     List<DegreeEnrollmentsDTO> getEnrollments();
 
-    FullReportDTO getReports();
+    ListDTO<DegreeReportDTO> getReports();
 }

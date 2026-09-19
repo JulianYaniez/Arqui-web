@@ -1,9 +1,6 @@
 package org.arquiweb.repositories.impl;
 
-import org.arquiweb.dto.DegreeEnrollmentsDTO;
-import org.arquiweb.dto.DegreeYearlyStatsDTO;
-import org.arquiweb.dto.DegreeReportDTO;
-import org.arquiweb.dto.FullReportDTO;
+import org.arquiweb.dto.*;
 import org.arquiweb.entities.Degree;
 import org.arquiweb.repositories.interfaces.DegreeRepository;
 
@@ -69,7 +66,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
 
 
     @Override
-    public FullReportDTO getReports() {
+    public ListDTO<DegreeReportDTO> getReports() {
         try {
 
             record Year(String degree, Integer year, Long count) {}
@@ -130,7 +127,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
                     })
                     .toList();
 
-            return new FullReportDTO(reports);
+            return new ListDTO<>(reports);
 
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong fetching the report data ", e);
