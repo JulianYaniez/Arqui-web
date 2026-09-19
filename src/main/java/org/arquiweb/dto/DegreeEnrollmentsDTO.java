@@ -4,7 +4,15 @@ package org.arquiweb.dto;
 
 public record DegreeEnrollmentsDTO(
     String name,
-    long enrollmentsAmount
+    Long enrollmentsAmount
 ){
-
+    @Override
+    public String toString() {
+        return """
+               {
+                    "name": %s,
+                    "enrollments": %d,
+               }
+               """.formatted(name, enrollmentsAmount);
+    }
 }
