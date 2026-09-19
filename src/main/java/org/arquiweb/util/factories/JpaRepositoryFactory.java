@@ -18,6 +18,8 @@ public class JpaRepositoryFactory implements RepositoryFactory {
         return instance;
     }
 
+    private JpaRepositoryFactory() {}
+
     private DegreeRepository degreeRepository;
     private StudentRepository studentRepository;
     private EnrollmentRepository enrollmentRepository;
