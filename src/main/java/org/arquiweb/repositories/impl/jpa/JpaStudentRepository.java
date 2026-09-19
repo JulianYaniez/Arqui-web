@@ -1,4 +1,4 @@
-package org.arquiweb.repositories.impl;
+package org.arquiweb.repositories.impl.jpa;
 
 import org.arquiweb.entities.Student;
 import org.arquiweb.enums.Genre;
@@ -7,17 +7,7 @@ import org.arquiweb.repositories.interfaces.StudentRepository;
 import java.util.List;
 import java.util.UUID;
 
-import javax.management.RuntimeErrorException;
-
 public class JpaStudentRepository extends JpaRepository implements StudentRepository {
-
-    private static JpaStudentRepository instance;
-    public static JpaStudentRepository getInstance() {
-        if (instance == null) {
-            instance = new JpaStudentRepository();
-        }
-        return instance;
-    }
 
     public UUID save(Student student) {
 

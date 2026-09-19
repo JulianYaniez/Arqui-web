@@ -1,4 +1,4 @@
-package org.arquiweb.repositories.impl;
+package org.arquiweb.repositories.impl.jpa;
 
 import org.arquiweb.entities.Enrollment;
 import org.arquiweb.repositories.interfaces.EnrollmentRepository;
@@ -6,14 +6,6 @@ import org.arquiweb.repositories.interfaces.EnrollmentRepository;
 import java.util.List;
 
 public class JpaEnrollmentRepository extends JpaRepository implements EnrollmentRepository {
-
-    private static JpaEnrollmentRepository instance;
-    public static JpaEnrollmentRepository getInstance() {
-        if (instance == null) {
-            instance = new JpaEnrollmentRepository();
-        }
-        return instance;
-    }
 
     public void save(Enrollment enrollment) {
         try {

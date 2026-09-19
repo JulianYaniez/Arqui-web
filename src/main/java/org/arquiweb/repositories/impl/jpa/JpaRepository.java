@@ -1,4 +1,4 @@
-package org.arquiweb.repositories.impl;
+package org.arquiweb.repositories.impl.jpa;
 
 import jakarta.persistence.EntityManager;
 import org.arquiweb.util.JpaUtil;

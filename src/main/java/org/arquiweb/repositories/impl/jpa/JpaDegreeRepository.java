@@ -1,4 +1,4 @@
-package org.arquiweb.repositories.impl;
+package org.arquiweb.repositories.impl.jpa;
 
 import org.arquiweb.dto.*;
 import org.arquiweb.entities.Degree;
@@ -7,15 +7,6 @@ import org.arquiweb.repositories.interfaces.DegreeRepository;
 import java.util.*;
 
 public class JpaDegreeRepository extends JpaRepository implements DegreeRepository {
-
-    private static JpaDegreeRepository instance;
-    public static JpaDegreeRepository getInstance() {
-        if (instance == null) {
-            instance = new JpaDegreeRepository();
-        }
-        return instance;
-    }
-
 
     public UUID save(Degree degree) {
         try {
