@@ -1,5 +1,15 @@
 package org.arquiweb.dto.commands;
 
-public record SaveDegreeDTO() {
+import org.arquiweb.entities.Degree;
 
+public record SaveDegreeDTO(
+        String name
+) {
+    public SaveDegreeDTO {
+        if(name == null) throw new IllegalArgumentException("Name is required");
+    }
+
+    public Degree toEntity() {
+        return  new Degree(name);
+    }
 }

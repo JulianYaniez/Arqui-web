@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,5 +27,10 @@ public class Degree {
     private String name;
 
     @OneToMany(mappedBy = "degree", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Enrollment> enrollments;
+    private List<Enrollment> enrollments = new ArrayList<>();
+
+    public Degree(String name) {
+        this.id = UUID.ofEpochMillis(System.currentTimeMillis());
+        this.name = name;
+    }
 }

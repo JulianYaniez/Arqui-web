@@ -44,7 +44,7 @@ public class Student {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private List<Enrollment> enrollments;
+    private List<Enrollment> enrollments =  new ArrayList<>();
 
     public Student(
             String name,
@@ -61,6 +61,5 @@ public class Student {
         this.genre = genre;
         this.city = city;
         this.dob = dob;
-        this.enrollments = new ArrayList<>();
     }
 }
