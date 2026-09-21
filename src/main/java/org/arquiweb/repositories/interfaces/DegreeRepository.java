@@ -9,12 +9,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DegreeRepository {
+
+    Optional<Degree> getById(UUID degreeId);
     UUID save(Degree degree);
     void saveAll(List<Degree> degrees);
 
     boolean exists(UUID degreeId);
-
-    Optional<Degree> getById(UUID degreeId);
 
     List<DegreeEnrollmentsDTO> getEnrollments();
     List<DegreeReportDTO> getReports();

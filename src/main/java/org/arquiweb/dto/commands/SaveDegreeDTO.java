@@ -1,4 +1,5 @@
 package org.arquiweb.dto.commands;
 
-public record SaveDegree() {
+public record SaveDegreeDTO() {
+
 }
