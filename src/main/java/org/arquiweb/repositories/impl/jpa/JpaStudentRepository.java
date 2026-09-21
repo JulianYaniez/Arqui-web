@@ -153,5 +153,4 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
             throw new RuntimeException("Could not get students", e);
         }
     }
-
 }
