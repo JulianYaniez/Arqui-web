@@ -1,6 +1,7 @@
 package org.arquiweb.services;
 
 import org.arquiweb.dto.commands.SaveStudentDTO;
+import org.arquiweb.dto.queries.ListDTO;
 import org.arquiweb.dto.queries.StudentDTO;
 import org.arquiweb.entities.Degree;
 import org.arquiweb.entities.Enrollment;
@@ -77,21 +78,21 @@ public class StudentService {
         }
     }
 
-    public List<StudentDTO> getAll(String column, String order) {
-        return studentRepository.getAll(column, order)
+    public ListDTO<StudentDTO> getAll(String column, String order) {
+        return new ListDTO<>(studentRepository.getAll(column, order)
                 .stream().map(StudentDTO::from)
-                .toList();
+                .toList());
     }
 
-    public List<StudentDTO> getByGenre(Genre genre) {
-        return studentRepository.getByGenre(genre)
+    public ListDTO<StudentDTO> getByGenre(Genre genre) {
+        return new ListDTO<>(studentRepository.getByGenre(genre)
                 .stream().map(StudentDTO::from)
-                .toList();
+                .toList());
     }
 
-    public List<StudentDTO> getByDegreeAndCity(UUID degreeId, String city) {
-        return studentRepository.getByDegreeAndCity(degreeId, city)
+    public ListDTO<StudentDTO> getByDegreeAndCity(UUID degreeId, String city) {
+        return new ListDTO<>(studentRepository.getByDegreeAndCity(degreeId, city)
                 .stream().map(StudentDTO::from)
-                .toList();
+                .toList());
     }
 }
