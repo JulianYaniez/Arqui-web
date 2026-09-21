@@ -5,6 +5,7 @@ import org.arquiweb.enums.Genre;
 import org.arquiweb.repositories.interfaces.StudentRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class JpaStudentRepository extends JpaRepository implements StudentRepository {
@@ -50,6 +51,29 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
         }
     }
 
+    @Override
+    public boolean exists(UUID studentId) {
+       try {
+          Student student = em.find(Student.class, studentId);
+          return student != null;
+
+       } catch (Exception e) {
+           throw new RuntimeException("Could not find student with id: " + studentId);
+       }
+    }
+
+    @Override
+    public Optional<Student> getById(UUID studentId) {
+        try {
+            String jpql = "SELECT s FROM Student s WHERE s.id = :id";
+            return em.createQuery(jpql, Student.class).setParameter("id", studentId)
+                    .getResultList().stream()
+                    .findFirst();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not find student with id: " + studentId);
+        }
+    }
+
     public List<Student> getAll(String column, String order) {
 
         final List<String> allowedColumns = List.of("name", "dob", "genre", "city");
@@ -81,8 +105,17 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
     }
 
     @Override
-    public Student getByRecordNumber(String recordNumber) {
-        return null;
+    public Optional<Student> getByRecordNumber(String recordNumber) {
+        try {
+            String jpql = "SELECT s FROM Student s WHERE s.recordNumber = :recordNumber";
+            return em.createQuery(jpql, Student.class)
+                    .setParameter("recordNumber", recordNumber)
+                    .getResultList()
+                    .stream().findFirst();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get student by record number", e);
+        }
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.arquiweb.dto;
+package org.arquiweb.dto.queries;
 
 
 

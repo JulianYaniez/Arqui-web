@@ -1,6 +1,8 @@
 package org.arquiweb.repositories.impl.jpa;
 
-import org.arquiweb.dto.*;
+import org.arquiweb.dto.queries.DegreeEnrollmentsDTO;
+import org.arquiweb.dto.queries.DegreeReportDTO;
+import org.arquiweb.dto.queries.DegreeYearlyStatsDTO;
 import org.arquiweb.entities.Degree;
 import org.arquiweb.repositories.interfaces.DegreeRepository;
 
@@ -49,10 +51,32 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
     }
 
     @Override
+    public boolean exists(UUID degreeId) {
+        try  {
+            Degree degree = em.find(Degree.class, degreeId);
+            return degree != null;
+        } catch (Exception e) {
+            throw new RuntimeException("Could not find degree " + degreeId);
+        }
+    }
+
+    @Override
+    public Optional<Degree> getById(UUID degreeId) {
+        try {
+            String jpql = "SELECT d FROM Degree d WHERE d.id = :id";
+            return em.createQuery(jpql, Degree.class).setParameter("id", degreeId)
+                    .getResultList().stream()
+                    .findFirst();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not find degree " + degreeId);
+        }
+    }
+
+    @Override
     public List<DegreeEnrollmentsDTO> getEnrollments() {
         try {
             String jpql = """
-                            SELECT new org.arquiweb.dto.DegreeEnrollmentsDTO(d.name, COUNT(e))
+                            SELECT new org.arquiweb.dto.queries.DegreeEnrollmentsDTO(d.name, COUNT(e))
                             FROM Degree d JOIN d.enrollments e
                             WHERE e.finishedAt IS NULL
                             GROUP BY d.name

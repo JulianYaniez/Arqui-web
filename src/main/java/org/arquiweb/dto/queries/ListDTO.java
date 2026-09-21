@@ -1,4 +1,4 @@
-package org.arquiweb.dto;
+package org.arquiweb.dto.queries;
 
 import java.util.List;
 import java.util.stream.Collectors;

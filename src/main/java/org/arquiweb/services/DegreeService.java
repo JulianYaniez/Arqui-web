@@ -1,11 +1,9 @@
 package org.arquiweb.services;
 
-import org.arquiweb.dto.DegreeReportDTO;
-import org.arquiweb.dto.ListDTO;
+import org.arquiweb.dto.queries.DegreeReportDTO;
+import org.arquiweb.dto.queries.ListDTO;
 import org.arquiweb.repositories.interfaces.DegreeRepository;
 import org.arquiweb.util.RepositoryProvider;
-
-import java.util.List;
 
 public class DegreeService {
 
