@@ -56,7 +56,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
             Degree degree = em.find(Degree.class, degreeId);
             return degree != null;
         } catch (Exception e) {
-            throw new RuntimeException("Could not find degree " + degreeId);
+            throw new RuntimeException("Could not find degree " + degreeId, e);
         }
     }
 

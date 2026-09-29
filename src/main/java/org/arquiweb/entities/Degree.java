@@ -30,7 +30,6 @@ public class Degree {
     private List<Enrollment> enrollments = new ArrayList<>();
 
     public Degree(String name) {
-        this.id = UUID.ofEpochMillis(System.currentTimeMillis());
         this.name = name;
     }
 }

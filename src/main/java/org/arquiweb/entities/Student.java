@@ -54,7 +54,6 @@ public class Student {
             String city,
             LocalDate dob
     ) {
-        this.id = UUID.ofEpochMillis(System.currentTimeMillis());
         this.name = name;
         this.recordNumber = recordNumber;
         this.dni = dni;
