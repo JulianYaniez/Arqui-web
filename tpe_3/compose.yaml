@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: tpe_3_group_7
+    restart: always
+    environment:
+      POSTGRES_USER: group_7
+      POSTGRES_PASSWORD: "0112358"
+      POSTGRES_DB: tpe_group_7
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
