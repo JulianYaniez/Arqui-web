@@ -10,6 +10,11 @@
 
 ---
 
-## ERD Diagram
+## Entity-Relation Diagram
 
 ![Entity-Relation Diagram](/ERD_Diagram.png)
+
+
+## Object Diagram
+ 
+![Object Diagram](/OD_Diagram.png)

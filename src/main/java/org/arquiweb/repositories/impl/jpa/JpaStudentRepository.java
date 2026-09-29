@@ -1,6 +1,7 @@
 package org.arquiweb.repositories.impl.jpa;
 
 import org.arquiweb.entities.Student;
+import org.arquiweb.enums.EnrollmentStatus;
 import org.arquiweb.enums.Genre;
 import org.arquiweb.repositories.interfaces.StudentRepository;
 
@@ -13,6 +14,7 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
     public UUID save(Student student) {
 
         try {
+            this.refresh();
             em.getTransaction().begin();
             em.persist(student);
             em.getTransaction().commit();
@@ -30,6 +32,7 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
 
     public void saveAll(List<Student> students) {
         try  {
+            this.refresh();
             em.getTransaction().begin();
             int i  = 0;
             for (Student student : students) {
@@ -54,6 +57,7 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
     @Override
     public boolean exists(UUID studentId) {
        try {
+          this.refresh();
           Student student = em.find(Student.class, studentId);
           return student != null;
 
@@ -65,12 +69,17 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
     @Override
     public Optional<Student> getById(UUID studentId) {
         try {
+            this.refresh();
+            em.getTransaction().begin();
             String jpql = "SELECT s FROM Student s WHERE s.id = :id";
-            return em.createQuery(jpql, Student.class).setParameter("id", studentId)
+            return em.createQuery(jpql, Student.class)
+                    .setParameter("id", studentId)
                     .getResultList().stream()
                     .findFirst();
         } catch (Exception e) {
-            throw new RuntimeException("Could not find student with id: " + studentId);
+            throw new RuntimeException("Could not find student with id: " + studentId, e);
+        } finally {
+            em.close();
         }
     }
 
@@ -94,6 +103,7 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
         }
 
         try {
+            this.refresh();
 
             String jpql = "SELECT s FROM Student s ORDER BY " + orderColumn + " " + direction;
 
@@ -107,6 +117,7 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
     @Override
     public Optional<Student> getByRecordNumber(String recordNumber) {
         try {
+            this.refresh();
             String jpql = "SELECT s FROM Student s WHERE s.recordNumber = :recordNumber";
             return em.createQuery(jpql, Student.class)
                     .setParameter("recordNumber", recordNumber)
@@ -121,6 +132,7 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
     @Override
     public List<Student> getByGenre(Genre genre) {
         try {
+            this.refresh();
 
             String jpql = "SELECT s FROM Student s WHERE s.genre = :genre";
 
@@ -135,6 +147,7 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
     @Override
     public List<Student> getByDegreeAndCity(UUID degreeId, String city) {
         try {
+            this.refresh();
 
             String jpql = """
                 SELECT s
@@ -142,11 +155,13 @@ public class JpaStudentRepository extends JpaRepository implements StudentReposi
                 JOIN s.enrollments e
                 WHERE e.degree.id = :degreeId
                 AND s.city = :city
+                AND e.status = :status
                 """;
 
             return em.createQuery(jpql, Student.class)
                     .setParameter("degreeId", degreeId)
                     .setParameter("city", city)
+                    .setParameter("status", EnrollmentStatus.ONGOING)
                     .getResultList();
 
         } catch (Exception e) {

@@ -12,6 +12,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
 
     public UUID save(Degree degree) {
         try {
+            this.refresh();
             em.getTransaction().begin();
             em.persist(degree);
             em.getTransaction().commit();
@@ -29,6 +30,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
     public void saveAll(List<Degree> degrees) {
 
         try  {
+            this.refresh();
             em.getTransaction().begin();
             int i  = 0;
             for (Degree degree : degrees) {
@@ -53,6 +55,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
     @Override
     public boolean exists(UUID degreeId) {
         try  {
+            this.refresh();
             Degree degree = em.find(Degree.class, degreeId);
             return degree != null;
         } catch (Exception e) {
@@ -63,6 +66,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
     @Override
     public Optional<Degree> getById(UUID degreeId) {
         try {
+            this.refresh();
             String jpql = "SELECT d FROM Degree d WHERE d.id = :id";
             return em.createQuery(jpql, Degree.class).setParameter("id", degreeId)
                     .getResultList().stream()
@@ -75,6 +79,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
     @Override
     public List<DegreeEnrollmentsDTO> getEnrollments() {
         try {
+            this.refresh();
             String jpql = """
                             SELECT new org.arquiweb.dto.queries.DegreeEnrollmentsDTO(d.name, COUNT(e))
                             FROM Degree d JOIN d.enrollments e
@@ -92,6 +97,7 @@ public class JpaDegreeRepository extends JpaRepository implements DegreeReposito
     @Override
     public List<DegreeReportDTO> getReports() {
         try {
+            this.refresh();
 
             record Year(String degree, Integer year, Long count) {}
 

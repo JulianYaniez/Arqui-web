@@ -12,4 +12,8 @@ public abstract class JpaRepository {
     public JpaRepository() {
         this.em = JpaUtil.getEntityManager();
     }
+
+    public void refresh() {
+        this.em = JpaUtil.getEntityManager();
+    }
 }
