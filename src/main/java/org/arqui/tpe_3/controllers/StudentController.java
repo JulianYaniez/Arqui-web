@@ -15,25 +15,39 @@ public class StudentController {
     private StudentService studentService;
 
     // Register student (a)
-    @RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    @RequestMapping(
+        method = RequestMethod.POST, 
+        produces = "application/json", 
+        consumes = "application/json"
+    )
     public void registerStudent(){ 
         studentService.registerStudent();
     }
 
     // Search all students (c)
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(
+        method = RequestMethod.GET, 
+        produces = "application/json"
+    )
     public List<StudentDTO> searchStudents() {
         return studentService.searchStudents();
     }
 
     // Search student by ID (d)
-    @RequestMapping(method = RequestMethod.GET, params = "id", produces = "application/json")
+    @RequestMapping(
+        method = RequestMethod.GET, 
+        params = "id", produces = "application/json"
+    )
     public StudentDTO searchStudentById(@RequestParam int id) { 
         return studentService.searchStudentById(id);
     }
 
     // Search student by genre (e)
-    @RequestMapping(method = RequestMethod.GET, params = "genre", produces = "application/json")
+    @RequestMapping(
+        method = RequestMethod.GET, 
+        params = "genre", 
+        produces = "application/json"
+    )
     public StudentDTO searchStudentByGenre(@RequestParam String genre) { 
         return studentService.searchStudentByGenre(genre);
     }
