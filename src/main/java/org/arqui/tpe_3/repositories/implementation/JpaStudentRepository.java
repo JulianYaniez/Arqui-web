@@ -19,12 +19,56 @@ public class JpaStudentRepository implements StudentRepositoryCustom {
 
     @Override
     public List<Student> getAll(String column, String order) {
-        return List.of();
+
+        final List<String> allowedColumns = List.of("name", "dob", "genre", "city");
+
+        String direction = "ASC".equalsIgnoreCase(order) ? "ASC" : "DESC";
+
+        String orderColumn = switch (column) {
+            case "name" -> "s.name";
+            case "dob" -> "s.dob";
+            case "genre" -> "s.genre";
+            case "city" -> "s.city";
+            default -> "e.id";
+        };
+
+
+        if(!allowedColumns.contains(column)){
+            throw new IllegalArgumentException("Invalid column for entity Student");
+        }
+
+        try {
+
+            String jpql = "SELECT s FROM Student s ORDER BY " + orderColumn + " " + direction;
+
+            return em.createQuery(jpql, Student.class).getResultList();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get students", e);
+        }
     }
 
     @Override
     public List<Student> getByDegreeAndCity(UUID degreeId, String city) {
-        return List.of();
+
+        try {
+
+            String jpql = """
+                SELECT s
+                FROM Student s
+                JOIN s.enrollments e
+                WHERE e.degree.id = :degreeId
+                AND s.city = :city
+                """;
+
+            return em.createQuery(jpql, Student.class)
+                    .setParameter("degreeId", degreeId)
+                    .setParameter("city", city)
+                    .getResultList();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get students", e);
+        }
     }
 
 
