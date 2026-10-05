@@ -1,9 +1,10 @@
 package org.arqui.tpe_3.repositories.interfaces;
 
 import org.arqui.tpe_3.entities.Enrollment;
+import org.arqui.tpe_3.entities.composites.EnrollmentId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.UUID;
+public interface EnrollmentRepository extends JpaRepository<Enrollment, EnrollmentId> {
 
-public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
+    // This interface uses basic methods such as 'save' and 'saveAll', which are already provided by 'JpaRepository'.
 }
