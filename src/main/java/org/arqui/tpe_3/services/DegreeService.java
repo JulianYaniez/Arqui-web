@@ -12,7 +12,7 @@ public class DegreeService {
     private JpaDegreeRepository repository;
 
     // get all students by career (f)
-    public void getByCareer(){ }
+    public void getByCareer(String career){ }
 
     // get report careers (h)
     public void getReportCareers(){ }

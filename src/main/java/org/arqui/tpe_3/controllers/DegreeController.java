@@ -1,25 +1,36 @@
 package org.arqui.tpe_3.controllers;
 
+import java.util.List;
+
+import org.arqui.tpe_3.dtos.StudentDTO;
 import org.arqui.tpe_3.services.DegreeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RestController 
-@RequestMapping ("/degrees")
+@RestController
+@RequestMapping("/degrees")
 public class DegreeController {
-    
-    @Autowired 
+
+    @Autowired
     private DegreeService degreeService;
 
+
     // get all students by career (f)
-    public void getByCareer(){
-        degreeService.getByCareer();
+    @RequestMapping(
+        method = RequestMethod.GET,
+        params = "career",
+        produces = "application/json"
+    )
+    public List<StudentDTO> getStudents(@RequestParam String career) {
+        return degreeService.getByCareer(career);
     }
 
     // get report careers (h)
-    public void getReportCareers(){ 
+    @RequestMapping(
+        method = RequestMethod.GET,
+        produces = "application/json"
+    )
+    public void getReportCareers() {
         degreeService.getReportCareers();
     }
-
 }
