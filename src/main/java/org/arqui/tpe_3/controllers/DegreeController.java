@@ -21,7 +21,7 @@ public class DegreeController {
         params = "career",
         produces = "application/json"
     )
-    public List<StudentDTO> getStudents(@RequestParam String career) {
+    public List<StudentDTO> getStudentsByCareer(@RequestParam String career) {
         return degreeService.getByCareer(career);
     }
 
@@ -30,7 +30,7 @@ public class DegreeController {
         method = RequestMethod.GET,
         produces = "application/json"
     )
-    public void getReportCareers() {
-        degreeService.getReportCareers();
+    public List<StudentDTO> getReportCareers() {
+        return degreeService.getReportCareers();
     }
 }

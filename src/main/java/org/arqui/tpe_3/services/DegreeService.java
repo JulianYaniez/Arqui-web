@@ -1,6 +1,8 @@
 package org.arqui.tpe_3.services;
 
 
+import java.util.List;
+import org.arqui.tpe_3.dtos.StudentDTO;
 import org.arqui.tpe_3.repositories.implementation.JpaDegreeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,9 +14,13 @@ public class DegreeService {
     private JpaDegreeRepository repository;
 
     // get all students by career (f)
-    public void getByCareer(String career){ }
+    public List<StudentDTO> getByCareer(String career){
+        return null;
+    }
 
     // get report careers (h)
-    public void getReportCareers(){ }
+    public List<StudentDTO> getReportCareers(){ 
+        return null;
+    }
 
 }

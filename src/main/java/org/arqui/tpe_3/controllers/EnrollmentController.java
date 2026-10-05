@@ -1,5 +1,8 @@
 package org.arqui.tpe_3.controllers;
 
+import java.util.List;
+
+import org.arqui.tpe_3.dtos.StudentDTO;
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.services.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ public class EnrollmentController {
         consumes = "application/json"
     )
     public void entrollStudent(@RequestParam Student student){ 
-        enrollmentService.entrollStudent();
+        enrollmentService.entrollStudent(student);
     }
 
     // Search for students in a degree program (filter by city) (g)
@@ -32,8 +35,8 @@ public class EnrollmentController {
         params = "city",
         produces = "application/json"
     )
-    public void searchStudentsInProgram(@RequestParam String city) { 
-        enrollmentService.searchStudentsInProgram();
+    public List<StudentDTO> searchStudentsInProgram(@RequestParam String city) { 
+        return enrollmentService.searchStudentsInProgram(city);
     }
 
 }
