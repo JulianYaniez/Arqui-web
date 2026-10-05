@@ -1,5 +1,7 @@
 package org.arqui.tpe_3.controllers;
 
+import java.util.List;
+
 import org.arqui.tpe_3.services.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,23 +14,27 @@ public class StudentController {
     private StudentService studentService;
 
     // Register student (a)
+    @RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     public void registerStudent(){ 
         studentService.registerStudent();
     }
 
     // Search all students (c)
-    public void searchStudents() {
-        studentService.searchStudents();
+    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    public List<StudentDTO> searchStudents() {
+        return studentService.searchStudents();
     }
 
     // Search student by ID (d)
-    public void searchStudentById() { 
-        studentService.searchStudentById();
+    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    public List<StudentDTO> searchStudentById(@RequestParam int id) { 
+        return studentService.searchStudentById(id);
     }
 
     // Search student by genre (e)
-    public void searchStudentByGenre() { 
-        studentService.searchStudentByGenre();
+    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
+    public List<StudentDTO> searchStudentByGenre(@RequestParam String genre) { 
+        return studentService.searchStudentByGenre(genre);
     }
 
 }

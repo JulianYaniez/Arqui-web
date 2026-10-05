@@ -1,5 +1,7 @@
 package org.arqui.tpe_3.services;
 
+import java.util.List;
+
 import org.arqui.tpe_3.repositories.implementation.JpaStudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -12,12 +14,12 @@ public class StudentService {
     public void registerStudent(){ }
 
     // Search all students (c)
-    public void searchStudents() {}
+    public List<StudentDTO> searchStudents() {}
 
     // Search student by ID (d)
-    public void searchStudentById() { }
+    public List<StudentDTO> searchStudentById(int id) { }
 
     // Search student by genre (e)
-    public void searchStudentByGenre() { }
+    public List<StudentDTO> searchStudentByGenre(String genre) { }
 
 }
