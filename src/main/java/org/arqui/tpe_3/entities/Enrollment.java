@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.arqui.tpe_3.entities.composites.EnrollmentId;
+import org.arqui.tpe_3.enums.EnrollmentStatus;
 
 import java.time.LocalDate;
 
@@ -38,4 +39,10 @@ public class Enrollment {
     @Enumerated(EnumType.STRING)
     private EnrollmentStatus status;
 
+    public Enrollment(Student student, Degree degree) {
+        this.student = student;
+        this.degree = degree;
+        this.startedAt = LocalDate.now();
+        this.status = EnrollmentStatus.ONGOING;
+    }
 }

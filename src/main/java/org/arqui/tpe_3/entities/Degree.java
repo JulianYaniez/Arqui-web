@@ -24,6 +24,11 @@ public class Degree {
     @Column(name = "name")
     private String name;
 
-    @OneToMany()
+    @OneToMany(mappedBy = "degree")
     private List<Enrollment> enrollments = new ArrayList<>();
+
+    public Degree(String name) {
+        this.id = UUID.ofEpochMillis(System.currentTimeMillis());
+        this.name = name;
+    }
 }
