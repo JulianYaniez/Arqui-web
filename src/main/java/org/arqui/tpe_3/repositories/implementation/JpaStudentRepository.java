@@ -16,6 +16,7 @@ public class JpaStudentRepository implements StudentRepositoryCustom {
     private EntityManager em;
 
 
+
     @Override
     public List<Student> getAll(String column, String order) {
         return List.of();

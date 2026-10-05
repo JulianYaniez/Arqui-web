@@ -15,6 +15,7 @@ public class JpaDegreeRepository implements DegreeRepositoryCustom {
     private EntityManager em;
 
 
+
     @Override
     public List<DegreeReportDTO> getReports() {
         return List.of();
