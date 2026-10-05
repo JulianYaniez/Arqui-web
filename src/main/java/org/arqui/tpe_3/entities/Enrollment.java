@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.arqui.tpe_3.entities.composites.EnrollmentId;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "enrollments")
 @NoArgsConstructor
@@ -25,5 +27,15 @@ public class Enrollment {
     @MapsId("degreeId")
     @JoinColumn(name = "degree_id")
     private Degree degree;
+
+    @Column(name = "started_at", nullable = false)
+    private LocalDate startedAt;
+
+    @Column(name = "finished_at")
+    private LocalDate finishedAt;
+
+    @Column(name = "status", nullable = false, length = 16)
+    @Enumerated(EnumType.STRING)
+    private EnrollmentStatus status;
 
 }

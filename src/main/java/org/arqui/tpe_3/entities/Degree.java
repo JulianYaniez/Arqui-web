@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table (name = "degrees")
@@ -19,5 +21,9 @@ public class Degree {
     @Column(name = "id")
     private UUID id;
 
+    @Column(name = "name")
+    private String name;
 
+    @OneToMany()
+    private List<Enrollment> enrollments = new ArrayList<>();
 }
