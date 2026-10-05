@@ -24,7 +24,8 @@ public class JpaDegreeRepository implements DegreeRepositoryCustom {
 
         try {
 
-            record Year(String degree, Integer year, Long count) {}
+            record Year(String degree, Integer year, Long count) {
+            }
 
             String enrollmentsJpql = """
                         SELECT d.name, YEAR(e.startedAt), COUNT(e)
@@ -45,5 +46,45 @@ public class JpaDegreeRepository implements DegreeRepositoryCustom {
                     """;
             List<Year> graduates = em.createQuery(graduatesJpql, Year.class).getResultList();
 
-    //Check
+            Map<String, Map<Integer, DegreeYearlyStatsDTO>> degrees = new TreeMap<>();
+
+            for (Year year : enrollments) {
+                DegreeYearlyStatsDTO yearEnrollments = new DegreeYearlyStatsDTO(year.year, year.count, 0L);
+                Map<Integer, DegreeYearlyStatsDTO> degree = degrees.getOrDefault(year.degree, new TreeMap<>());
+
+                degree.put(year.year, yearEnrollments);
+                degrees.put(year.degree, degree);
+            }
+
+            for (Year year : graduates) {
+                DegreeYearlyStatsDTO yearGraduates = new DegreeYearlyStatsDTO(year.year, 0L, year.count);
+                Map<Integer, DegreeYearlyStatsDTO> degree = degrees.getOrDefault(year.degree, new TreeMap<>());
+
+                DegreeYearlyStatsDTO completeYear = degree.getOrDefault(year.year, null);
+
+                if (completeYear == null) {
+                    completeYear = yearGraduates;
+                } else {
+                    completeYear = new DegreeYearlyStatsDTO(
+                            completeYear.year(),
+                            completeYear.enrollments(),
+                            yearGraduates.graduates()
+                    );
+                }
+
+                degree.put(year.year, completeYear);
+                degrees.put(year.degree, degree);
+            }
+
+            return degrees.entrySet().stream().map(degree -> {
+                        String degreeName = degree.getKey();
+                        List<DegreeYearlyStatsDTO> stats = degree.getValue().values().stream().toList();
+                        return new DegreeReportDTO(degreeName, stats);
+                    })
+                    .toList();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Something went wrong fetching the report data ", e);
+        }
+    }
 }
