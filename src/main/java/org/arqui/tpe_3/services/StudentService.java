@@ -24,11 +24,11 @@ public class StudentService {
     // Search student by ID (d)
     public StudentDTO searchStudentById(int id) {
         return null;
-     }
+    }
 
     // Search student by genre (e)
     public StudentDTO searchStudentByGenre(String genre) {
         return null;
-     }
+    }
 
 }
