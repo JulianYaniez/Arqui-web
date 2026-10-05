@@ -1,0 +1,31 @@
+package org.arqui.tpe_3.dtos;
+
+import org.arqui.tpe_3.entities.Student;
+import org.arqui.tpe_3.enums.Genre;
+
+public record StudentDTO(
+        String universityRecordBook,
+        String name,
+        String dni,
+        Genre genre
+) {
+    @Override
+    public String toString() {
+        return """
+        {
+            "recordNumber":  %s,
+            "name":  %s,
+            "dni":  %s,
+            "genre": %s
+        }""".formatted(universityRecordBook, name, dni, genre);
+    }
+
+    public static StudentDTO from(Student s) {
+        return new StudentDTO(
+                s.getUniversityRecordBook(),
+                s.getName(),
+                s.getDni(),
+                s.getGenre()
+        );
+    }
+}

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.arqui.tpe_3.enums.Genre;
 
 import java.awt.print.Book;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -27,8 +28,8 @@ public class Student {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "surname")
-    private String surname;
+    @Column(name = "dob")
+    private LocalDate dob;
 
     @Column(name = "age")
     private int age;
@@ -52,7 +53,7 @@ public class Student {
     public Student(
             UUID id,
             String name,
-            String surname,
+            LocalDate dob,
             int age,
             Genre genre,
             String dni,
@@ -61,7 +62,7 @@ public class Student {
     ) {
         this.id = id;
         this.name = name;
-        this.surname = surname;
+        this.dob = dob;
         this.age = age;
         this.genre = genre;
         this.dni = dni;
