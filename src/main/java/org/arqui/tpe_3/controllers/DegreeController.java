@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.arqui.tpe_3.dtos.StudentDTO;
 import org.arqui.tpe_3.services.DegreeService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,8 +15,7 @@ public class DegreeController {
     @Autowired
     private DegreeService degreeService;
 
-
-    // get all students by career (f)
+    // Get all students by career (f)
     @RequestMapping(
         method = RequestMethod.GET,
         params = "career",
@@ -25,7 +25,7 @@ public class DegreeController {
         return degreeService.getByCareer(career);
     }
 
-    // get report careers (h)
+    // Get report careers (h)
     @RequestMapping(
         method = RequestMethod.GET,
         produces = "application/json"

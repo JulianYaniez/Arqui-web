@@ -5,19 +5,20 @@ import java.util.List;
 import org.arqui.tpe_3.dtos.StudentDTO;
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.services.EnrollmentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController 
-@RequestMapping ("/enrollments")
+@RestController
+@RequestMapping("/enrollments")
 public class EnrollmentController {
-    
-    @Autowired 
+
+    @Autowired
     private EnrollmentService enrollmentService;
-    
+
     // Enroll a student in a degree (b)
     @RequestMapping(
         method = RequestMethod.POST,
@@ -25,7 +26,7 @@ public class EnrollmentController {
         produces = "application/json",
         consumes = "application/json"
     )
-    public void entrollStudent(@RequestParam Student student){ 
+    public void entrollStudent(@RequestParam Student student) {
         enrollmentService.entrollStudent(student);
     }
 
@@ -35,8 +36,7 @@ public class EnrollmentController {
         params = "city",
         produces = "application/json"
     )
-    public List<StudentDTO> searchStudentsInProgram(@RequestParam String city) { 
+    public List<StudentDTO> searchStudentsInProgram(@RequestParam String city) {
         return enrollmentService.searchStudentsInProgram(city);
     }
-
 }
