@@ -18,4 +18,13 @@ public interface StudentJpaRepository extends JpaRepository<Student, UUID> {
 
     @Query("SELECT s FROM Student s WHERE s.genre = :genre")
     List<Student> getByGenre(Genre genre);
+
+    @Query("""
+            SELECT s
+            FROM Student s
+            JOIN s.enrollments e
+            WHERE e.degree.id = :degreeId
+            AND s.city = :city
+           """)
+    List<Student> getByDegreeAndCity(UUID degreeId, String city);
 }

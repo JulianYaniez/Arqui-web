@@ -40,18 +40,16 @@ public class StudentRepositoryImpl implements StudentRepository {
 
     @Override
     public List<Student> getByDegreeAndCity(UUID degreeId, String city) {
-        return null;
+        return studentRepository.getByDegreeAndCity(degreeId, city);
     }
 
     @Override
     public Optional<Student> getByRecordBook(String RecordBook) {
-        return Optional.empty();
+        return studentRepository.getByRecordBook(RecordBook);
     }
 
     @Override
     public List<Student> getByGenre(Genre genre) {
-        return List.of();
+        return studentRepository.getByGenre(genre);
     }
-
-
 }
