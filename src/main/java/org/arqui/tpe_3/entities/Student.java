@@ -25,48 +25,26 @@ public class Student {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "dob")
+    @Column(name = "dob", nullable = false)
     private LocalDate dob;
 
-    @Column(name = "age")
-    private int age;
-
-    @Column(name = "genre")
+    @Column(name = "genre", nullable = false)
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
-    @Column(name = "DNI")
+    @Column(name = "DNI", nullable = false)
     private String dni;
 
-    @Column(name = "city")
+    @Column(name = "city", nullable = false)
     private String city;
 
-    @Column(name = "universityRecordBook")
-    private String universityRecordBook;
+    @Column(name = "recordNumber", nullable = false)
+    private String recordNumber;
 
     @OneToMany(mappedBy = "student")
     private List<Enrollment> enrollments = new ArrayList<>();
 
-    public Student(
-            UUID id,
-            String name,
-            LocalDate dob,
-            int age,
-            Genre genre,
-            String dni,
-            String city,
-            String universityRecordBook
-    ) {
-        this.id = id;
-        this.name = name;
-        this.dob = dob;
-        this.age = age;
-        this.genre = genre;
-        this.dni = dni;
-        this.city = city;
-        this.universityRecordBook = universityRecordBook;
-    }
 }

@@ -2,6 +2,7 @@ package org.arqui.tpe_3.controllers;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.StudentDTO;
 import org.arqui.tpe_3.services.DegreeService;
 
@@ -10,26 +11,21 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/degrees")
+@RequiredArgsConstructor
 public class DegreeController {
 
-    @Autowired
-    private DegreeService degreeService;
+    private final DegreeService degreeService;
 
     // Get all students by career (f)
-    @RequestMapping(
-        method = RequestMethod.GET,
-        params = "career",
-        produces = "application/json"
-    )
-    public List<StudentDTO> getStudentsByCareer(@RequestParam String career) {
-        return degreeService.getByCareer(career);
+    @GetMapping()
+    public List<StudentDTO> getStudentsByCareer(
+            @RequestParam String careerName
+    ) {
+        return degreeService.getByCareer(careerName);
     }
 
     // Get report careers (h)
-    @RequestMapping(
-        method = RequestMethod.GET,
-        produces = "application/json"
-    )
+    @GetMapping("/reports")
     public List<StudentDTO> getReportCareers() {
         return degreeService.getReportCareers();
     }

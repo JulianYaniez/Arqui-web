@@ -3,15 +3,14 @@ package org.arqui.tpe_3.services;
 
 import java.util.List;
 import org.arqui.tpe_3.dtos.StudentDTO;
-import org.arqui.tpe_3.repositories.implementation.JpaDegreeRepository;
+import org.arqui.tpe_3.repositories.implementation.DegreeRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service 
 public class DegreeService {
     
-    @Autowired 
-    private JpaDegreeRepository repository;
+    private DegreeRepositoryImpl degreeRepository;
 
     // get all students by career (f)
     public List<StudentDTO> getByCareer(String career){

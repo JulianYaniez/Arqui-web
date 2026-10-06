@@ -21,14 +21,13 @@ public class Degree {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @OneToMany(mappedBy = "degree")
     private List<Enrollment> enrollments = new ArrayList<>();
 
     public Degree(String name) {
-        this.id = UUID.ofEpochMillis(System.currentTimeMillis());
         this.name = name;
     }
 }
