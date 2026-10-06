@@ -3,12 +3,14 @@ package org.arqui.tpe_3.services;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.StudentDTO;
 import org.arqui.tpe_3.repositories.implementation.StudentRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service 
+@Service
+@RequiredArgsConstructor
 public class StudentService {
     
     private StudentRepositoryImpl studentRepository;
