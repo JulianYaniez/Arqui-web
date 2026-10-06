@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
-import org.arqui.tpe_3.dtos.StudentDTO;
+import org.arqui.tpe_3.dtos.queries.StudentDTO;
 import org.arqui.tpe_3.services.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,7 +37,7 @@ public class StudentController {
     }
 
     // Search student by genre (e)
-    @GetMapping
+    @GetMapping(params = "genre")
     public StudentDTO searchStudentByGenre(@RequestParam String genre) { 
         return studentService.findStudentsByGenre(genre);
     }

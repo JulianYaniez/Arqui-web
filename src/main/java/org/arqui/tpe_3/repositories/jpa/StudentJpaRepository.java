@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface StudentJpaRepository extends JpaRepository<Student, UUID> {
 
 
-    @Query("SELECT s FROM Student s WHERE s.universityRecordBook = :universityRecordBook")
+    @Query("SELECT s FROM Student s WHERE s.recordNumber = :universityRecordBook")
     Optional<Student> getByUniversityRecordBook(String universityRecordBook);
 
 

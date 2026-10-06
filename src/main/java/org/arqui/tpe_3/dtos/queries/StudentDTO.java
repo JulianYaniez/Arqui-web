@@ -1,4 +1,4 @@
-package org.arqui.tpe_3.dtos;
+package org.arqui.tpe_3.dtos.queries;
 
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.enums.Genre;

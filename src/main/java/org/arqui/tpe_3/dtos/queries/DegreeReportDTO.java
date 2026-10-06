@@ -1,4 +1,4 @@
-package org.arqui.tpe_3.dtos;
+package org.arqui.tpe_3.dtos.queries;
 
 import java.util.List;
 import java.util.stream.Collectors;

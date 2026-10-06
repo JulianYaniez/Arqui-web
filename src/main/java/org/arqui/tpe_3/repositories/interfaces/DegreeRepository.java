@@ -1,6 +1,6 @@
 package org.arqui.tpe_3.repositories.interfaces;
 
-import org.arqui.tpe_3.dtos.DegreeReportDTO;
+import org.arqui.tpe_3.dtos.queries.DegreeReportDTO;
 
 import java.util.List;
 

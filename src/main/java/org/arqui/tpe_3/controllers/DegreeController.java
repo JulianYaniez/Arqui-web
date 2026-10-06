@@ -3,10 +3,9 @@ package org.arqui.tpe_3.controllers;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import org.arqui.tpe_3.dtos.StudentDTO;
+import org.arqui.tpe_3.dtos.queries.StudentDTO;
 import org.arqui.tpe_3.services.DegreeService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

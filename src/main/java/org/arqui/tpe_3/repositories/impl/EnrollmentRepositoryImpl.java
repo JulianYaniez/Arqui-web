@@ -1,8 +1,7 @@
-package org.arqui.tpe_3.repositories.implementation;
+package org.arqui.tpe_3.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
-import org.arqui.tpe_3.repositories.jpa.DegreeJpaRepository;
 import org.arqui.tpe_3.repositories.jpa.EnrollmenJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class EnrollmentRepositoryImpl implements EnrollmentRepository {
 
-    private final EnrollmenJpaRepository enrollmenRepository;
+    private final EnrollmenJpaRepository enrollmentRepository;
 
 }

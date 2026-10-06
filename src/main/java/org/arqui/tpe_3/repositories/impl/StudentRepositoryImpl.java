@@ -1,4 +1,4 @@
-package org.arqui.tpe_3.repositories.implementation;
+package org.arqui.tpe_3.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.entities.Student;

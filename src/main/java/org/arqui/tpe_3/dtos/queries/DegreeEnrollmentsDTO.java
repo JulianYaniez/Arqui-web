@@ -1,4 +1,4 @@
-package org.arqui.tpe_3.dtos;
+package org.arqui.tpe_3.dtos.queries;
 
 public record DegreeEnrollmentsDTO  (
     String name,
