@@ -21,7 +21,7 @@ import java.util.UUID;
 public class Student {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private UUID id;
 
@@ -47,4 +47,12 @@ public class Student {
     @OneToMany(mappedBy = "student")
     private List<Enrollment> enrollments = new ArrayList<>();
 
+    public Student(String name, LocalDate dob, Genre genre, String dni, String city, String recordNumber) {
+        this.name = name;
+        this.dob = dob;
+        this.genre = genre;
+        this.dni = dni;
+        this.city = city;
+        this.recordNumber = recordNumber;
+    }
 }
