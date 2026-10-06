@@ -13,7 +13,7 @@ public interface StudentJpaRepository extends JpaRepository<Student, UUID> {
 
 
     @Query("SELECT s FROM Student s WHERE s.recordNumber = :universityRecordBook")
-    Optional<Student> getByUniversityRecordBook(String universityRecordBook);
+    Optional<Student> getByRecordBook(String RecordBook);
 
 
     @Query("SELECT s FROM Student s WHERE s.genre = :genre")
