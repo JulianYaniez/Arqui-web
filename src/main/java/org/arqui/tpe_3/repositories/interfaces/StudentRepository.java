@@ -10,10 +10,12 @@ import java.util.UUID;
 public interface StudentRepository {
 
     void save(Student student);
+
     void saveAll(List<Student> students);
+
     Optional<Student>  findById(UUID id);
 
-    List<Student> getAll(String column, String order);
+    List<Student> getStudents(String column, String order);
 
     List<Student> getByDegreeAndCity(UUID degreeId, String city);
 

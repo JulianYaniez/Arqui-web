@@ -35,7 +35,7 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public List<Student> getAll(String column, String order) {
+    public List<Student> getStudents(String column, String order) {
 
         Sort.Direction direction = Sort.Direction.ASC;
 

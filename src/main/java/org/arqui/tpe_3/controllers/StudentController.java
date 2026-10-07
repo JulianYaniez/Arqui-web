@@ -6,6 +6,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
+import org.arqui.tpe_3.entities.Student;
+import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.services.StudentService;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +25,17 @@ public class StudentController {
         studentService.save(request);
     }
 
+    @PostMapping
+    public void saveAll(@RequestBody List<SaveStudentDTO> request) {
+        studentService.saveAll(request);
+    }
+
     // Search all students (c)
     @GetMapping
-    public List<StudentDTO> getStudents() {
-        return studentService.getStudents();
+    public List<StudentDTO> getStudents(
+            @RequestParam String column,
+            @RequestParam String order) {
+        return studentService.getStudents(column, order);
     }
 
     // Search student by ID (d)
@@ -39,8 +48,20 @@ public class StudentController {
 
     // Search student by genre (e)
     @GetMapping(params = "genre")
-    public StudentDTO findStudentByGenre(@RequestParam String genre) {
+    public List<StudentDTO> findStudentByGenre(@RequestParam Genre genre) {
         return studentService.findStudentsByGenre(genre);
+    }
+
+    @GetMapping
+    public List<StudentDTO> getByDegreeAndCity(
+            @RequestParam UUID degreeId,
+            @RequestParam String city) {
+        return studentService.getByDegreeAndCity(degreeId, city);
+    }
+
+    @GetMapping
+    public StudentDTO getByRecordBook(@RequestParam String recordBook) {
+        return studentService.getByRecordBook(recordBook);
     }
 
 }
