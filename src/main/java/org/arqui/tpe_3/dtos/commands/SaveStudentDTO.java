@@ -31,7 +31,6 @@ public record SaveStudentDTO(
 
     public Student toEntity() {
         return new Student(
-
                 name,
                 dob,
                 genre,

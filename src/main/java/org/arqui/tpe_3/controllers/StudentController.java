@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
 import org.arqui.tpe_3.services.StudentService;
 import org.springframework.web.bind.annotation.*;
@@ -18,27 +19,27 @@ public class StudentController {
     // Register student (a)
     // ** Must receive SaveStudentDTO
     @PostMapping
-    public void registerStudent(){ 
-        studentService.registerStudent();
-    }
-
-    // Search student by ID (d)
-    @GetMapping("/{id}")
-    public StudentDTO searchStudentById(
-            @PathVariable UUID id
-    ) {
-        return studentService.findStudentsById(id);
+    public void save(@RequestBody SaveStudentDTO request){
+        studentService.save(request);
     }
 
     // Search all students (c)
     @GetMapping
-    public List<StudentDTO> searchStudents() {
+    public List<StudentDTO> getStudents() {
         return studentService.getStudents();
+    }
+
+    // Search student by ID (d)
+    @GetMapping("/{id}")
+    public StudentDTO findStudentById(
+            @PathVariable UUID id
+    ) {
+        return studentService.findStudentById(id);
     }
 
     // Search student by genre (e)
     @GetMapping(params = "genre")
-    public StudentDTO searchStudentByGenre(@RequestParam String genre) { 
+    public StudentDTO findStudentByGenre(@RequestParam String genre) {
         return studentService.findStudentsByGenre(genre);
     }
 

@@ -20,6 +20,21 @@ public class StudentRepositoryImpl implements StudentRepository {
     private final StudentJpaRepository studentRepository;
 
     @Override
+    public void save(Student student) {
+        studentRepository.save(student);
+    }
+
+    @Override
+    public void saveAll(List<Student> students) {
+    studentRepository.saveAll(students);
+    }
+
+    @Override
+    public Optional<Student> findById(UUID id) {
+        return studentRepository.findById(id);
+    }
+
+    @Override
     public List<Student> getAll(String column, String order) {
 
         Sort.Direction direction = Sort.Direction.ASC;
