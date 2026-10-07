@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
+import org.arqui.tpe_3.entities.Degree;
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.services.StudentService;
@@ -21,13 +22,18 @@ public class StudentController {
     // Register student (a)
     // ** Must receive SaveStudentDTO
     @PostMapping
-    public void save(@RequestBody SaveStudentDTO request){
+    public void save(@RequestBody SaveStudentDTO request) {
         studentService.save(request);
     }
 
     @PostMapping
     public void saveAll(@RequestBody List<SaveStudentDTO> request) {
         studentService.saveAll(request);
+    }
+
+    @PostMapping
+    public void enrollStudent(@RequestBody Degree degree, Student student) {
+        studentService.enrollStudent(degree, student);
     }
 
     // Search all students (c)
@@ -40,9 +46,7 @@ public class StudentController {
 
     // Search student by ID (d)
     @GetMapping("/{id}")
-    public StudentDTO findStudentById(
-            @PathVariable UUID id
-    ) {
+    public StudentDTO findStudentById(@PathVariable UUID id) {
         return studentService.findStudentById(id);
     }
 

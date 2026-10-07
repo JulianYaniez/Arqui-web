@@ -1,9 +1,12 @@
 package org.arqui.tpe_3.services;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import org.arqui.tpe_3.entities.Degree;
+import org.arqui.tpe_3.entities.Enrollment;
+import org.arqui.tpe_3.entities.Student;
+import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
@@ -17,6 +20,12 @@ import org.springframework.stereotype.Service;
 public class StudentService {
 
     private StudentRepository studentRepository;
+    private EnrollmentRepository enrollmentRepository;
+
+    @Transactional
+    public void enrollStudent(Degree degree, Student student) {
+        enrollmentRepository.save(new Enrollment(student, degree));
+    }
 
     // save student (a)
     @Transactional(readOnly = true)
