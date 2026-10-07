@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Request;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
-import org.arqui.tpe_3.entities.Degree;
-import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.services.StudentService;
 import org.springframework.web.bind.annotation.*;
@@ -31,9 +30,9 @@ public class StudentController {
         studentService.saveAll(request);
     }
 
-    @PostMapping
-    public void enrollStudent(@RequestBody Degree degree, Student student) {
-        studentService.enrollStudent(degree, student);
+    @PostMapping("/{id}")
+    public void enrollStudent(@PathVariable UUID id, @RequestBody UUID degreeId) {
+        studentService.enrollStudent(id, degreeId);
     }
 
     // Search all students (c)

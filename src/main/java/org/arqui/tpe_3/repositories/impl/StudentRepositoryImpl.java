@@ -31,7 +31,7 @@ public class StudentRepositoryImpl implements StudentRepository {
 
     @Override
     public Optional<Student> findById(UUID id) {
-        return studentRepository.findById(id);
+        return studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
     }
 
     @Override

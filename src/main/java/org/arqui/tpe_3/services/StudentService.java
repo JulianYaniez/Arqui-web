@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.arqui.tpe_3.entities.Degree;
 import org.arqui.tpe_3.entities.Enrollment;
 import org.arqui.tpe_3.entities.Student;
+import org.arqui.tpe_3.repositories.interfaces.DegreeRepository;
 import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +22,13 @@ public class StudentService {
 
     private StudentRepository studentRepository;
     private EnrollmentRepository enrollmentRepository;
+    private DegreeRepository degreeRepository;
 
     @Transactional
-    public void enrollStudent(Degree degree, Student student) {
+    public void enrollStudent(UUID id, UUID degreeId) {
+        Student student = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
+        Degree degree = degreeRepository.findById(degreeId).orElseThrow(() -> new RuntimeException("Degree not found"));
+
         enrollmentRepository.save(new Enrollment(student, degree));
     }
 

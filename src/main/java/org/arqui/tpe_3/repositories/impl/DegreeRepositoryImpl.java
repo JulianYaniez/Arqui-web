@@ -11,9 +11,7 @@ import org.arqui.tpe_3.repositories.jpa.DegreeJpaRepository;
 import org.springframework.stereotype.Repository;
 
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,6 +27,11 @@ public class DegreeRepositoryImpl implements DegreeRepository {
     @Override
     public void saveAll(List<Degree> degrees) {
         degreeRepository.saveAll(degrees);
+    }
+
+    @Override
+    public Optional<Degree> findById(UUID id) {
+        return degreeRepository.findById(id);
     }
 
     @Override
