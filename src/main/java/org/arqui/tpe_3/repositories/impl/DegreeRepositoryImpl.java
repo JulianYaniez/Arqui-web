@@ -25,11 +25,6 @@ public class DegreeRepositoryImpl implements DegreeRepository {
     }
 
     @Override
-    public void saveAll(List<Degree> degrees) {
-        degreeRepository.saveAll(degrees);
-    }
-
-    @Override
     public Optional<Degree> findById(UUID id) {
         return degreeRepository.findById(id);
     }

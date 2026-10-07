@@ -25,11 +25,6 @@ public class StudentController {
         studentService.save(request);
     }
 
-    @PostMapping
-    public void saveAll(@RequestBody List<SaveStudentDTO> request) {
-        studentService.saveAll(request);
-    }
-
     @PostMapping("/{id}")
     public void enrollStudent(@PathVariable UUID id, @RequestBody UUID degreeId) {
         studentService.enrollStudent(id, degreeId);
@@ -38,8 +33,8 @@ public class StudentController {
     // Search all students (c)
     @GetMapping
     public List<StudentDTO> getStudents(
-            @RequestParam String column,
-            @RequestParam String order) {
+            @RequestParam(name = "column", required = false) String column,
+            @RequestParam(name = "order", required = false) String order) {
         return studentService.getStudents(column, order);
     }
 
@@ -51,20 +46,19 @@ public class StudentController {
 
     // Search student by genre (e)
     @GetMapping(params = "genre")
-    public List<StudentDTO> findStudentByGenre(@RequestParam Genre genre) {
+    public List<StudentDTO> findStudentByGenre(@RequestParam(name = "genre", required = false) Genre genre) {
         return studentService.findStudentsByGenre(genre);
     }
 
     @GetMapping
     public List<StudentDTO> getByDegreeAndCity(
-            @RequestParam UUID degreeId,
-            @RequestParam String city) {
+            @RequestParam(name = "degreeId", required = false) UUID degreeId,
+            @RequestParam(name = "city", required = false) String city) {
         return studentService.getByDegreeAndCity(degreeId, city);
     }
 
     @GetMapping
-    public StudentDTO getByRecordBook(@RequestParam String recordBook) {
+    public StudentDTO getByRecordBook(@RequestParam(name = "recordBook", required = false) String recordBook) {
         return studentService.getByRecordBook(recordBook);
     }
-
 }

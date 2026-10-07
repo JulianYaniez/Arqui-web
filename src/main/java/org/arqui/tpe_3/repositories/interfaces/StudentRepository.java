@@ -11,8 +11,6 @@ public interface StudentRepository {
 
     void save(Student student);
 
-    void saveAll(List<Student> students);
-
     Optional<Student>  findById(UUID id);
 
     List<Student> getStudents(String column, String order);

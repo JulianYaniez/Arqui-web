@@ -38,11 +38,6 @@ public class StudentService {
         studentRepository.save(student.toEntity());
     }
 
-    @Transactional(readOnly = true)
-    public void saveAll(List<SaveStudentDTO> students){
-        studentRepository.saveAll(students.stream().map(SaveStudentDTO::toEntity).toList());
-    }
-
     // Find all students (c)
     public List<StudentDTO> getStudents(String column, String order) {
         return studentRepository.getStudents(column, order).stream().map(StudentDTO::from).toList();

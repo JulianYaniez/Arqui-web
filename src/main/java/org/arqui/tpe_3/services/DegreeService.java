@@ -22,11 +22,6 @@ public class DegreeService {
         degreeRepository.save(degree.toEntity());
     }
 
-    @Transactional(readOnly = true)
-    public void saveAll(List<SaveDegreeDTO> degrees) {
-        degreeRepository.saveAll(degrees.stream().map(SaveDegreeDTO::toEntity).toList());
-    }
-
     // get all students by career (f)
     public List<DegreeEnrollmentsDTO> getEnrollments(){
         return  degreeRepository.getEnrollments();

@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface DegreeRepository {
 
     void save(Degree degree);
-    void saveAll(List<Degree> degrees);
+
     Optional<Degree> findById(UUID id);
 
     List<DegreeReportDTO> getReports();

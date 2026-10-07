@@ -22,11 +22,6 @@ public class DegreeController {
         degreeService.save(degree);
     }
 
-    @PostMapping
-    public void saveAll(@RequestBody List<SaveDegreeDTO> degrees) {
-        degreeService.saveAll(degrees);
-    }
-
     // Get all students by career (f)
     @GetMapping()
     public List<DegreeEnrollmentsDTO> getStudentsByCareer() {
