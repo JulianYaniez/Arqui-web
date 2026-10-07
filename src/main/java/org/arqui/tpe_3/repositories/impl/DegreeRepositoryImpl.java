@@ -1,9 +1,11 @@
 package org.arqui.tpe_3.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.arqui.tpe_3.dtos.queries.DegreeEnrollmentsDTO;
 import org.arqui.tpe_3.dtos.queries.DegreeReportDTO;
 import org.arqui.tpe_3.dtos.queries.DegreeYearlyStatsDTO;
 import org.arqui.tpe_3.dtos.queries.YearDTO;
+import org.arqui.tpe_3.entities.Degree;
 import org.arqui.tpe_3.repositories.interfaces.DegreeRepository;
 import org.arqui.tpe_3.repositories.jpa.DegreeJpaRepository;
 import org.springframework.stereotype.Repository;
@@ -18,6 +20,16 @@ import java.util.TreeMap;
 public class DegreeRepositoryImpl implements DegreeRepository {
 
     private final DegreeJpaRepository degreeRepository;
+
+    @Override
+    public void save(Degree degree) {
+        degreeRepository.save(degree);
+    }
+
+    @Override
+    public void saveAll(List<Degree> degrees) {
+        degreeRepository.saveAll(degrees);
+    }
 
     @Override
     public List<DegreeReportDTO> getReports() {
@@ -68,5 +80,10 @@ public class DegreeRepositoryImpl implements DegreeRepository {
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong fetching the report data ", e);
         }
+    }
+
+    @Override
+    public List<DegreeEnrollmentsDTO> getEnrollments() {
+        return degreeRepository.getEnrollments();
     }
 }
