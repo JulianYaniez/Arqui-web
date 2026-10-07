@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
@@ -19,12 +19,12 @@ public class StudentService {
     private StudentRepository studentRepository;
 
     // save student (a)
-    @Transactional
+    @Transactional(readOnly = true)
     public void save(SaveStudentDTO student){
         studentRepository.save(student.toEntity());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void saveAll(List<SaveStudentDTO> students){
         studentRepository.saveAll(students.stream().map(SaveStudentDTO::toEntity).toList());
     }
