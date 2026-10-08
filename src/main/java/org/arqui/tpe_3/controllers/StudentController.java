@@ -36,7 +36,7 @@ public class StudentController {
     }
 
     // Search all students (c)
-    @GetMapping
+    @GetMapping(params = {"column, order"})
     public List<StudentDTO> getStudents(
             @RequestParam(name = "column", required = false) String column,
             @RequestParam(name = "order", required = false) String order) {
@@ -55,15 +55,17 @@ public class StudentController {
         return studentService.findStudentsByGenre(genre);
     }
 
-    @GetMapping
+    @GetMapping("/by-degree")
     public List<StudentDTO> getByDegreeAndCity(
             @RequestParam(name = "degreeId", required = false) UUID degreeId,
             @RequestParam(name = "city", required = false) String city) {
         return studentService.getByDegreeAndCity(degreeId, city);
     }
 
-    @GetMapping
-    public StudentDTO getByRecordBook(@RequestParam(name = "recordBook", required = false) String recordBook) {
+    @GetMapping("/recordBook")
+    public StudentDTO getByRecordBook(
+            @RequestParam(name = "recordBook", required = false) String recordBook
+    ) {
         return studentService.getByRecordBook(recordBook);
     }
 }

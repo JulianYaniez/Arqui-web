@@ -23,7 +23,7 @@ public class DegreeController {
     }
 
     // Get all students by career (f)
-    @GetMapping()
+    @GetMapping("/enrollments")
     public List<DegreeEnrollmentsDTO> getStudentsByCareer() {
         return degreeService.getEnrollments();
     }
