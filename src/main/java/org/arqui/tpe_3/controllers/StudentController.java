@@ -58,7 +58,8 @@ public class StudentController {
     @GetMapping("/by-degree")
     public List<StudentDTO> getByDegreeAndCity(
             @RequestParam(name = "degreeId", required = false) UUID degreeId,
-            @RequestParam(name = "city", required = false) String city) {
+            @RequestParam(name = "city", required = false) String city
+    ) {
         return studentService.getByDegreeAndCity(degreeId, city);
     }
 
