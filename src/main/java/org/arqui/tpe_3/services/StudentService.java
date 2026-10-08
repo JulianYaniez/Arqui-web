@@ -8,6 +8,7 @@ import org.arqui.tpe_3.entities.Enrollment;
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.repositories.interfaces.DegreeRepository;
 import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class StudentService {
 
     @Transactional
     public Enrollment enrollStudent(UUID id, UUID degreeId) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
-        Degree degree = degreeRepository.findById(degreeId).orElseThrow(() -> new RuntimeException("Degree not found"));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Degree degree = degreeRepository.findById(degreeId).orElseThrow(() -> new ResourceNotFoundException("Degree not found"));
 
         Enrollment enrollment = new Enrollment(student, degree);
 
@@ -50,7 +51,7 @@ public class StudentService {
     public StudentDTO findStudentById(UUID id) {
         return studentRepository.findById(id)
                 .map(StudentDTO::from)
-                .orElseThrow(() -> new RuntimeException("Not found Student with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Not found Student with id " + id));
     }
 
     // Find students by genre (e)
@@ -65,6 +66,6 @@ public class StudentService {
     public StudentDTO getByRecordBook(String recordBook) {
         return studentRepository.getByRecordBook(recordBook)
                 .map(StudentDTO::from)
-                .orElseThrow(() -> new RuntimeException("Not found Student with recordBook " + recordBook));
+                .orElseThrow(() -> new ResourceNotFoundException("Not found Student with recordBook " + recordBook));
     }
 }
