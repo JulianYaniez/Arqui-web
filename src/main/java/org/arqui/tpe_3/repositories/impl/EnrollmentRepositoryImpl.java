@@ -15,7 +15,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     private final EnrollmentJpaRepository enrollmentRepository;
 
     @Override
-    public void save(Enrollment enrollment) {
-        enrollmentRepository.save(enrollment);
+    public Enrollment save(Enrollment enrollment) {
+        return enrollmentRepository.save(enrollment);
     }
 }

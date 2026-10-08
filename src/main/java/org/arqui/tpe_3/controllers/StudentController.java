@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Request;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
+import org.arqui.tpe_3.entities.Enrollment;
 import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.services.StudentService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,8 +28,11 @@ public class StudentController {
     }
 
     @PostMapping("/{id}")
-    public void enrollStudent(@PathVariable UUID id, @RequestBody UUID degreeId) {
-        studentService.enrollStudent(id, degreeId);
+    public ResponseEntity<Enrollment> enrollStudent(
+            @PathVariable UUID id,
+            @RequestBody UUID degreeId
+    ) {
+        return ResponseEntity.ok(studentService.enrollStudent(id, degreeId));
     }
 
     // Search all students (c)

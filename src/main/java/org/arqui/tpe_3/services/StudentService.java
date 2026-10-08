@@ -8,6 +8,7 @@ import org.arqui.tpe_3.entities.Enrollment;
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.repositories.interfaces.DegreeRepository;
 import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
@@ -25,11 +26,13 @@ public class StudentService {
     private DegreeRepository degreeRepository;
 
     @Transactional
-    public void enrollStudent(UUID id, UUID degreeId) {
+    public Enrollment enrollStudent(UUID id, UUID degreeId) {
         Student student = studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
         Degree degree = degreeRepository.findById(degreeId).orElseThrow(() -> new RuntimeException("Degree not found"));
 
-        enrollmentRepository.save(new Enrollment(student, degree));
+        Enrollment enrollment = new Enrollment(student, degree);
+
+        return enrollmentRepository.save(enrollment);
     }
 
     // save student (a)
