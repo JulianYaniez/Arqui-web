@@ -9,16 +9,6 @@ public record StudentDTO(
         String dni,
         Genre genre
 ) {
-    @Override
-    public String toString() {
-        return """
-        {
-            "recordNumber":  %s,
-            "name":  %s,
-            "dni":  %s,
-            "genre": %s
-        }""".formatted(recordNumber, name, dni, genre);
-    }
 
     public static StudentDTO from(Student s) {
         return new StudentDTO(

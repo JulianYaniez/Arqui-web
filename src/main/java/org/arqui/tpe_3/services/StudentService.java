@@ -28,8 +28,11 @@ public class StudentService {
 
     @Transactional
     public Enrollment enrollStudent(UUID id, UUID degreeId) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        Degree degree = degreeRepository.findById(degreeId).orElseThrow(() -> new ResourceNotFoundException("Degree not found"));
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        Degree degree = degreeRepository.findById(degreeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Degree not found"));
 
         Enrollment enrollment = new Enrollment(student, degree);
 
@@ -44,7 +47,9 @@ public class StudentService {
 
     // Find all students (c)
     public List<StudentDTO> getStudents(String column, String order) {
-        return studentRepository.getStudents(column, order).stream().map(StudentDTO::from).toList();
+        return studentRepository.getStudents(column, order).stream()
+                .map(StudentDTO::from)
+                .toList();
     }
 
     // Find student by ID (d)
@@ -56,7 +61,9 @@ public class StudentService {
 
     // Find students by genre (e)
     public List<StudentDTO> findStudentsByGenre(Genre genre) {
-        return studentRepository.getByGenre(genre).stream().map(StudentDTO::from).toList();
+        return studentRepository.getByGenre(genre).stream()
+                .map(StudentDTO::from)
+                .toList();
     }
 
     public List<StudentDTO> getByDegreeAndCity(UUID degreeId, String city) {

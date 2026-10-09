@@ -38,8 +38,24 @@ public class DegreeRepositoryImpl implements DegreeRepository {
 
             List<YearDTO> graduates = degreeRepository.graduatesYear();
 
+            /*
+            [
+                String degreeName: [
+                    Integer year: {
+                        DTO year(
+                            Integer enrollments,
+                            Integer graduates
+                        )
+                    }
+                ]
+            ]
+            */
             Map<String, Map<Integer, DegreeYearlyStatsDTO>> degrees = new TreeMap<>();
 
+            // Map year data into DegreeYearlyStatsDTO.
+            // Get degree's Map from YearDTO. Create if not exists.
+            // Assign YearDTO.year = DegreeYearlyStatsDTO
+            // Save degree's Map into the general Map.
             for (YearDTO year : enrollments) {
                 DegreeYearlyStatsDTO yearEnrollments = new DegreeYearlyStatsDTO(year.year(), year.count(), 0L);
                 Map<Integer, DegreeYearlyStatsDTO> degree = degrees.getOrDefault(year.degree(), new TreeMap<>());
@@ -48,6 +64,12 @@ public class DegreeRepositoryImpl implements DegreeRepository {
                 degrees.put(year.degree(), degree);
             }
 
+            // Map year data into DegreeYearlyDTO
+            // Get degree's Map from YearDTO. Create if not exists.
+            // Get year's entry based off graduate's DegreeYearlyStatsDTO
+            // If there's mapped enrollments, fuse enrollment's and graduate's DegreeYearlyStatsDTO
+            // If not, keep just graduate's.
+            // Save onto the greater Map.
             for (YearDTO year : graduates) {
                 DegreeYearlyStatsDTO yearGraduates = new DegreeYearlyStatsDTO(year.year(), 0L, year.count());
                 Map<Integer, DegreeYearlyStatsDTO> degree = degrees.getOrDefault(year.degree(), new TreeMap<>());
@@ -68,9 +90,11 @@ public class DegreeRepositoryImpl implements DegreeRepository {
                 degrees.put(year.degree(), degree);
             }
 
+            // Map degree's inner Map into list, then construct DegreeReportDTOs
             return degrees.entrySet().stream().map(degree -> {
                         String degreeName = degree.getKey();
-                        List<DegreeYearlyStatsDTO> stats = degree.getValue().values().stream().toList();
+                        List<DegreeYearlyStatsDTO> stats = degree.getValue().values().stream()
+                                .toList();
                         return new DegreeReportDTO(degreeName, stats);
                     })
                     .toList();
