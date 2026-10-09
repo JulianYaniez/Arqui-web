@@ -2,6 +2,7 @@ package org.arqui.tpe_3.dtos.commands;
 
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.enums.Genre;
+import org.arqui.tpe_3.exceptions.InvalidInputException;
 
 import java.time.LocalDate;
 
@@ -16,17 +17,17 @@ public record SaveStudentDTO(
 
     public SaveStudentDTO {
         if (name == null)
-            throw new IllegalArgumentException("Name is required");
+            throw new InvalidInputException("Name is required");
         if (dni == null)
-            throw new IllegalArgumentException("DNI is required");
+            throw new InvalidInputException("DNI is required");
         if (recordNumber == null)
-            throw new IllegalArgumentException("Record Number is required");
+            throw new InvalidInputException("Record Number is required");
         if (city == null)
-            throw new IllegalArgumentException("City is required");
+            throw new InvalidInputException("City is required");
         if (genre == null)
-            throw new IllegalArgumentException("Genre is required");
+            throw new InvalidInputException("Genre is required");
         if (dob == null)
-            throw new IllegalArgumentException("Date of Birth is required");
+            throw new InvalidInputException("Date of Birth is required");
     }
 
     public Student toEntity() {
