@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DegreeService {
     
-    private DegreeRepository degreeRepository;
+    private final DegreeRepository degreeRepository;
 
     @Transactional
     public UUID save(SaveDegreeDTO degree) {

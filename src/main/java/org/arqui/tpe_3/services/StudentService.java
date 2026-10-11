@@ -3,12 +3,14 @@ package org.arqui.tpe_3.services;
 import java.util.List;
 import java.util.UUID;
 
+import org.arqui.tpe_3.dtos.queries.StudentFilterDTO;
 import org.arqui.tpe_3.entities.Degree;
 import org.arqui.tpe_3.entities.Enrollment;
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.exceptions.ResourceNotFoundException;
 import org.arqui.tpe_3.repositories.interfaces.DegreeRepository;
 import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StudentService {
 
-    private StudentRepository studentRepository;
-    private EnrollmentRepository enrollmentRepository;
-    private DegreeRepository degreeRepository;
+    private final StudentRepository studentRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final DegreeRepository degreeRepository;
 
     @Transactional
     public Enrollment enrollStudent(UUID id, UUID degreeId) {
@@ -41,8 +43,17 @@ public class StudentService {
 
     // save student (a)
     @Transactional
-    public UUID save(SaveStudentDTO student){
+    public Student save(SaveStudentDTO student){
         return studentRepository.save(student.toEntity());
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<StudentDTO> filterStudents(StudentFilterDTO filter, Pageable pageable) {
+
+        return studentRepository.filterStudents(filter, pageable).stream()
+                .map(StudentDTO::from)
+                .toList();
     }
 
     // Find all students (c)

@@ -1,17 +1,18 @@
 package org.arqui.tpe_3.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.arqui.tpe_3.dtos.queries.StudentFilterDTO;
 import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.repositories.interfaces.StudentRepository;
 import org.arqui.tpe_3.repositories.jpa.StudentJpaRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,13 +21,25 @@ public class StudentRepositoryImpl implements StudentRepository {
     private final StudentJpaRepository studentRepository;
 
     @Override
-    public UUID save(Student student) {
-        return studentRepository.save(student).getId();
+    public Student save(Student student) {
+        return studentRepository.save(student);
     }
 
     @Override
     public Optional<Student> findById(UUID id) {
         return studentRepository.findById(id);
+    }
+
+    @Override
+    public List<Student> filterStudents(StudentFilterDTO filter, Pageable pageable) {
+        var students = studentRepository.filterStudents(
+                filter.genre(),
+                filter.city(),
+                filter.degreeId(),
+                pageable
+        );
+
+        return students.toList();
     }
 
     @Override

@@ -1,9 +1,5 @@
 package org.arqui.tpe_3.controllers;
 
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,15 +8,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Request;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
-import org.arqui.tpe_3.entities.Enrollment;
+import org.arqui.tpe_3.dtos.queries.StudentFilterDTO;
+import org.arqui.tpe_3.entities.Student;
 import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.services.StudentService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/students")
@@ -31,7 +32,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 )
 public class StudentController {
 
-    private StudentService studentService;
+    private final StudentService studentService;
 
     // Register student (a)
     @Operation(
@@ -60,13 +61,12 @@ public class StudentController {
     public ResponseEntity<Void> save(
             @Valid @RequestBody SaveStudentDTO request
     ) {
-        UUID id = studentService.save(request);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(id)
+        Student student = studentService.save(request);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{recordNumber}")
+                .buildAndExpand(student.getRecordNumber())
                 .toUri();
         return ResponseEntity.created(uri).build();
     }
-
 
 
     @Operation(
@@ -93,8 +93,31 @@ public class StudentController {
         return ResponseEntity.accepted().build();
     }
 
+
+    @Operation(
+            summary = "Get students by criteria (genre, city, enrolled degrees). (2-c, 2-e, 2-g)"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Resources fetched successfully"
+                    )
+            }
+    )
+    @GetMapping()
+    public ResponseEntity<List<StudentDTO>> getStudents(
+        StudentFilterDTO filter,
+        Pageable pageable
+    ) {
+        var students = studentService.filterStudents(filter, pageable);
+
+        return ResponseEntity.ok(students);
+    }
+
+
     // Search all students (c)
-    @GetMapping(params = {"column, order"})
+    // @GetMapping(params = {"column, order"})
     public List<StudentDTO> getStudents(
             @RequestParam(name = "column", required = false) String column,
             @RequestParam(name = "order", required = false) String order) {
@@ -102,7 +125,7 @@ public class StudentController {
     }
 
     // Search student by ID
-    @GetMapping("/{id}")
+    // @GetMapping("/{id}")
     public StudentDTO findStudentById(@PathVariable UUID id) {
         return studentService.findStudentById(id);
     }
@@ -113,7 +136,7 @@ public class StudentController {
         return studentService.findStudentsByGenre(genre);
     }
 
-    @GetMapping(params = {"degreeId", "city"})
+    // @GetMapping(params = {"degreeId", "city"})
     public List<StudentDTO> getByDegreeAndCity(
             @RequestParam(name = "degreeId", required = false) UUID degreeId,
             @RequestParam(name = "city", required = false) String city
@@ -137,9 +160,9 @@ public class StudentController {
                     )
             }
     )
-    @GetMapping(params = "recordNumber")
+    @GetMapping("/{recordNumber}")
     public StudentDTO getByRecordBook(
-            @Valid @RequestParam(name = "recordNumber") String recordNumber
+            @Valid @PathVariable(name = "recordNumber") String recordNumber
     ) {
         return studentService.getByRecordBook(recordNumber);
     }

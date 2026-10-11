@@ -36,8 +36,8 @@ public record SaveStudentDTO(
                 dob,
                 genre,
                 dni,
-                recordNumber,
-                city
+                city,
+                recordNumber
         );
     }
 }

@@ -41,7 +41,7 @@ public class Student {
     @Column(name = "city", nullable = false)
     private String city;
 
-    @Column(name = "recordNumber", nullable = false)
+    @Column(name = "recordNumber", nullable = false, unique = true)
     private String recordNumber;
 
     @OneToMany(mappedBy = "student")
