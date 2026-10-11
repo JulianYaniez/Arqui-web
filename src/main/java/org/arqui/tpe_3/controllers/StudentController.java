@@ -125,6 +125,18 @@ public class StudentController {
     @Operation(
             summary = "Get student by record number. (2-d)"
     )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Resource fetched successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "No entity found with given id."
+                    )
+            }
+    )
     @GetMapping(params = "recordNumber")
     public StudentDTO getByRecordBook(
             @Valid @RequestParam(name = "recordNumber") String recordNumber

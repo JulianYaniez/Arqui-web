@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveDegreeDTO;
+import org.arqui.tpe_3.dtos.queries.DegreeDTO;
 import org.arqui.tpe_3.dtos.queries.DegreeEnrollmentsDTO;
 import org.arqui.tpe_3.dtos.queries.DegreeReportDTO;
 import org.arqui.tpe_3.services.DegreeService;
@@ -67,6 +68,31 @@ public class DegreeController {
         return ResponseEntity.created(location).build();
     }
 
+
+    @Operation(
+            summary = "Get degree by id."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Data fetched successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "No entity found with given id."
+                    )
+            }
+    )
+    @GetMapping("/{id}")
+    public ResponseEntity<DegreeDTO> findById(
+            @Valid @PathVariable UUID id
+    ) {
+        var degree = degreeService.getById(id);
+        return ResponseEntity.ok(degree);
+    }
+
+
     // Get all students by career (f)
     @Operation(
             summary = "Get amount of enrolled students per degree. (2-f)"
@@ -83,7 +109,8 @@ public class DegreeController {
         return ResponseEntity.ok(enrollments);
     }
 
-    // Get report careers (h)@Operation(
+
+    // Get report careers (h)
     @Operation(
             summary = "Get degree's enrollments and graduates per year. (2-h)"
     )

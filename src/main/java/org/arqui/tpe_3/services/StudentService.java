@@ -40,12 +40,13 @@ public class StudentService {
     }
 
     // save student (a)
-    @Transactional(readOnly = true)
+    @Transactional
     public UUID save(SaveStudentDTO student){
         return studentRepository.save(student.toEntity());
     }
 
     // Find all students (c)
+    @Transactional(readOnly = true)
     public List<StudentDTO> getStudents(String column, String order) {
         return studentRepository.getStudents(column, order).stream()
                 .map(StudentDTO::from)
@@ -53,6 +54,7 @@ public class StudentService {
     }
 
     // Find student by ID (d)
+    @Transactional(readOnly = true)
     public StudentDTO findStudentById(UUID id) {
         return studentRepository.findById(id)
                 .map(StudentDTO::from)
@@ -60,16 +62,19 @@ public class StudentService {
     }
 
     // Find students by genre (e)
+    @Transactional(readOnly = true)
     public List<StudentDTO> findStudentsByGenre(Genre genre) {
         return studentRepository.getByGenre(genre).stream()
                 .map(StudentDTO::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<StudentDTO> getByDegreeAndCity(UUID degreeId, String city) {
         return studentRepository.getByDegreeAndCity(degreeId, city).stream().map(StudentDTO::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public StudentDTO getByRecordBook(String recordBook) {
         return studentRepository.getByRecordBook(recordBook)
                 .map(StudentDTO::from)
