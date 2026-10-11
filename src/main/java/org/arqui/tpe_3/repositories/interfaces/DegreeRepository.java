@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface DegreeRepository {
 
-    void save(Degree degree);
+    UUID save(Degree degree);
 
     Optional<Degree> findById(UUID id);
 

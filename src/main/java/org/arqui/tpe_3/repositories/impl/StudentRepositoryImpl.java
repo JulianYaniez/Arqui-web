@@ -20,8 +20,8 @@ public class StudentRepositoryImpl implements StudentRepository {
     private final StudentJpaRepository studentRepository;
 
     @Override
-    public void save(Student student) {
-        studentRepository.save(student);
+    public UUID save(Student student) {
+        return studentRepository.save(student).getId();
     }
 
     @Override

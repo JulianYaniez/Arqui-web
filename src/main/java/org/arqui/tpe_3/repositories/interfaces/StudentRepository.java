@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface StudentRepository {
 
-    void save(Student student);
+    UUID save(Student student);
 
     Optional<Student>  findById(UUID id);
 

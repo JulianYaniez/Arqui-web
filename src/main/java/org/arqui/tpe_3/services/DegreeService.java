@@ -2,6 +2,7 @@ package org.arqui.tpe_3.services;
 
 
 import java.util.List;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveDegreeDTO;
@@ -18,8 +19,8 @@ public class DegreeService {
     private DegreeRepository degreeRepository;
 
     @Transactional(readOnly = true)
-    public void save(SaveDegreeDTO degree) {
-        degreeRepository.save(degree.toEntity());
+    public UUID save(SaveDegreeDTO degree) {
+        return degreeRepository.save(degree.toEntity());
     }
 
     // get all students by career (f)

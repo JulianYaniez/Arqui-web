@@ -6,9 +6,9 @@ import java.util.UUID;
 import org.arqui.tpe_3.entities.Degree;
 import org.arqui.tpe_3.entities.Enrollment;
 import org.arqui.tpe_3.entities.Student;
+import org.arqui.tpe_3.exceptions.ResourceNotFoundException;
 import org.arqui.tpe_3.repositories.interfaces.DegreeRepository;
 import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +41,8 @@ public class StudentService {
 
     // save student (a)
     @Transactional(readOnly = true)
-    public void save(SaveStudentDTO student){
-        studentRepository.save(student.toEntity());
+    public UUID save(SaveStudentDTO student){
+        return studentRepository.save(student.toEntity());
     }
 
     // Find all students (c)

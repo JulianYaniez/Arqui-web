@@ -1,8 +1,16 @@
 package org.arqui.tpe_3.controllers;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Request;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
@@ -12,27 +20,77 @@ import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.services.StudentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/students")
 @RequiredArgsConstructor
+@Tag(
+        name = "Students",
+        description = "Endpoint for student and enrollments management."
+)
 public class StudentController {
 
     private StudentService studentService;
 
     // Register student (a)
-    // ** Must receive SaveStudentDTO
+    @Operation(
+            summary = "Save a student. (2-a)"
+    )
+    @ApiResponses(
+        value = {
+            @ApiResponse(
+                responseCode = "201",
+                description = "Entity saved successfully.",
+                headers = {
+                    @Header(
+                        name = "Location",
+                        description = "Created entity's URI.",
+                        schema = @Schema(type = "string")
+                    )
+                }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Request data was faulty."
+            )
+        }
+    )
     @PostMapping
-    public void save(@RequestBody SaveStudentDTO request) {
-        studentService.save(request);
+    public ResponseEntity<Void> save(
+            @Valid @RequestBody SaveStudentDTO request
+    ) {
+        UUID id = studentService.save(request);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(id)
+                .toUri();
+        return ResponseEntity.created(uri).build();
     }
 
+
+
+    @Operation(
+            summary = "Enroll student. (2-b)"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "202",
+                            description = "Enrollment completed successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Request data was faulty."
+                    )
+            }
+    )
     @PostMapping("/{id}")
-    public ResponseEntity<Enrollment> enrollStudent(
+    public ResponseEntity<Void> enrollStudent(
             @PathVariable UUID id,
             @RequestBody UUID degreeId
     ) {
-        return ResponseEntity.ok(studentService.enrollStudent(id, degreeId));
+        studentService.enrollStudent(id, degreeId);
+        return ResponseEntity.accepted().build();
     }
 
     // Search all students (c)
@@ -43,7 +101,7 @@ public class StudentController {
         return studentService.getStudents(column, order);
     }
 
-    // Search student by ID (d)
+    // Search student by ID
     @GetMapping("/{id}")
     public StudentDTO findStudentById(@PathVariable UUID id) {
         return studentService.findStudentById(id);
@@ -55,7 +113,7 @@ public class StudentController {
         return studentService.findStudentsByGenre(genre);
     }
 
-    @GetMapping("/by-degree")
+    @GetMapping(params = {"degreeId", "city"})
     public List<StudentDTO> getByDegreeAndCity(
             @RequestParam(name = "degreeId", required = false) UUID degreeId,
             @RequestParam(name = "city", required = false) String city
@@ -63,10 +121,14 @@ public class StudentController {
         return studentService.getByDegreeAndCity(degreeId, city);
     }
 
-    @GetMapping("/recordBook")
+    // d
+    @Operation(
+            summary = "Get student by record number. (2-d)"
+    )
+    @GetMapping(params = "recordNumber")
     public StudentDTO getByRecordBook(
-            @RequestParam(name = "recordBook", required = false) String recordBook
+            @Valid @RequestParam(name = "recordNumber") String recordNumber
     ) {
-        return studentService.getByRecordBook(recordBook);
+        return studentService.getByRecordBook(recordNumber);
     }
 }

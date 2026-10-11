@@ -20,8 +20,8 @@ public class DegreeRepositoryImpl implements DegreeRepository {
     private final DegreeJpaRepository degreeRepository;
 
     @Override
-    public void save(Degree degree) {
-        degreeRepository.save(degree);
+    public UUID save(Degree degree) {
+        return degreeRepository.save(degree).getId();
     }
 
     @Override
