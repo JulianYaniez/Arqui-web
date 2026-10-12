@@ -17,8 +17,8 @@ public interface StudentJpaRepository extends JpaRepository<Student, UUID> {
 
 
 
-    @Query("SELECT s FROM Student s WHERE s.recordNumber = :RecordBook")
-    Optional<Student> getByRecordNumber(@Param("RecordBook") String RecordBook);
+@Query("SELECT s FROM Student s WHERE s.recordNumber = :RecordBook")
+Optional<Student> getByRecordNumber(@Param("RecordBook") String RecordBook);
 
 
     @Query("SELECT s FROM Student s WHERE s.genre = :genre")
