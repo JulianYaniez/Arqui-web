@@ -3,10 +3,12 @@ package org.arqui.tpe_3.services;
 import java.util.List;
 import java.util.UUID;
 
+import org.arqui.tpe_3.dtos.queries.EnrollmentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentFilterDTO;
 import org.arqui.tpe_3.entities.Degree;
 import org.arqui.tpe_3.entities.Enrollment;
 import org.arqui.tpe_3.entities.Student;
+import org.arqui.tpe_3.exceptions.InvalidInputException;
 import org.arqui.tpe_3.exceptions.ResourceNotFoundException;
 import org.arqui.tpe_3.repositories.interfaces.DegreeRepository;
 import org.arqui.tpe_3.repositories.interfaces.EnrollmentRepository;
@@ -29,8 +31,8 @@ public class StudentService {
     private final DegreeRepository degreeRepository;
 
     @Transactional
-    public Enrollment enrollStudent(UUID id, UUID degreeId) {
-        Student student = studentRepository.findById(id)
+    public Enrollment enrollStudent(String recordNumber, UUID degreeId) {
+        Student student = studentRepository.getByRecordNumber(recordNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         Degree degree = degreeRepository.findById(degreeId)
@@ -89,6 +91,32 @@ public class StudentService {
     public StudentDTO getByRecordNumber(String recordBook) {
         return studentRepository.getByRecordNumber(recordBook)
                 .map(StudentDTO::from)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found Student with recordBook " + recordBook));
+                .orElseThrow(() -> new ResourceNotFoundException("No student found with record number " + recordBook));
+    }
+
+    @Transactional(readOnly = true)
+    public List<EnrollmentDTO> getEnrollmentsByRecordNumber(String recordNumber) {
+        if (!studentRepository.existsByRecordNumber(recordNumber)) {
+            throw new InvalidInputException("No student found with record number " + recordNumber);
+        }
+
+        return enrollmentRepository.getAllByStudent_RecordNumber(recordNumber).stream()
+                .map(EnrollmentDTO::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public EnrollmentDTO getEnrollmentByRecordNumberAndDegree(String recordNumber, UUID degreeId) {
+        if (!studentRepository.existsByRecordNumber(recordNumber)) {
+            throw new InvalidInputException("No student found with record number " + recordNumber);
+        }
+
+        if (!degreeRepository.existsById(degreeId)) {
+            throw new InvalidInputException("No degree found with id " + degreeId);
+        }
+
+        return enrollmentRepository.getByDegreeIdAndStudent_RecordNumber(degreeId, recordNumber)
+                .map(EnrollmentDTO::from)
+                .orElseThrow(() -> new ResourceNotFoundException("No enrollment found with degree id " + degreeId + "and record number " + recordNumber));
     }
 }

@@ -19,4 +19,7 @@ public interface DegreeRepository {
 
     List<DegreeEnrollmentsDTO> getEnrollments();
 
+    List<Degree> findAll();
+
+    boolean existsById(UUID id);
 }

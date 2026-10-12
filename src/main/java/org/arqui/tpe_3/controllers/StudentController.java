@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
+import org.arqui.tpe_3.dtos.queries.EnrollmentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentFilterDTO;
 import org.arqui.tpe_3.entities.Student;
@@ -68,82 +69,6 @@ public class StudentController {
         return ResponseEntity.created(uri).build();
     }
 
-
-    @Operation(
-            summary = "Enroll student. (2-b)"
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "202",
-                            description = "Enrollment completed successfully."
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Request data was faulty."
-                    )
-            }
-    )
-    @PostMapping("/{id}")
-    public ResponseEntity<Void> enrollStudent(
-            @PathVariable UUID id,
-            @RequestBody UUID degreeId
-    ) {
-        studentService.enrollStudent(id, degreeId);
-        return ResponseEntity.accepted().build();
-    }
-
-
-    @Operation(
-            summary = "Get students by criteria (genre, city, enrolled degrees). (2-c, 2-e, 2-g)"
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Resources fetched successfully"
-                    )
-            }
-    )
-    @GetMapping()
-    public ResponseEntity<List<StudentDTO>> getStudents(
-        StudentFilterDTO filter,
-        Pageable pageable
-    ) {
-        var students = studentService.filterStudents(filter, pageable);
-
-        return ResponseEntity.ok(students);
-    }
-
-
-    // Search all students (c)
-    // @GetMapping(params = {"column, order"})
-    public List<StudentDTO> getStudents(
-            @RequestParam(name = "column", required = false) String column,
-            @RequestParam(name = "order", required = false) String order) {
-        return studentService.getStudents(column, order);
-    }
-
-    // Search student by ID
-    // @GetMapping("/{id}")
-    public StudentDTO findStudentById(@PathVariable UUID id) {
-        return studentService.findStudentById(id);
-    }
-
-    // Search student by genre (e)
-    @GetMapping(params = "genre")
-    public List<StudentDTO> findStudentByGenre(@RequestParam(name = "genre", required = false) Genre genre) {
-        return studentService.findStudentsByGenre(genre);
-    }
-
-    // @GetMapping(params = {"degreeId", "city"})
-    public List<StudentDTO> getByDegreeAndCity(
-            @RequestParam(name = "degreeId", required = false) UUID degreeId,
-            @RequestParam(name = "city", required = false) String city
-    ) {
-        return studentService.getByDegreeAndCity(degreeId, city);
-    }
-
     // d
     @Operation(
             summary = "Get student by record number. (2-d)"
@@ -166,4 +91,145 @@ public class StudentController {
     ) {
         return studentService.getByRecordNumber(recordNumber);
     }
+
+    // c, e, g; all in one
+    @Operation(
+            summary = "Get students by criteria (genre, city, enrolled degrees). (2-c, 2-e, 2-g)"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Resources fetched successfully"
+                    )
+            }
+    )
+    @GetMapping()
+    public ResponseEntity<List<StudentDTO>> getStudents(
+        StudentFilterDTO filter,
+        Pageable pageable
+    ) {
+        var students = studentService.filterStudents(filter, pageable);
+
+        return ResponseEntity.ok(students);
+    }
+
+
+
+
+
+    @Operation(
+            summary = "Enroll student. (2-b)"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "Enrollment completed successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Request data was faulty."
+                    )
+            }
+    )
+    @PostMapping("/{recordNumber}/enrollments")
+    public ResponseEntity<Void> enrollStudent(
+            @PathVariable String recordNumber,
+            @RequestBody UUID degreeId
+    ) {
+        studentService.enrollStudent(recordNumber, degreeId);
+        var uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{degreeId}")
+                .buildAndExpand(degreeId)
+                .toUri();
+
+        return ResponseEntity.created(uri).build();
+    }
+
+    @Operation(
+            summary = "Get enrollments of a given student by record number."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Data fetched successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description =  "Given record number does not exist."
+                    )
+            }
+    )
+    @GetMapping("/{recordNumber}/enrollments")
+    public ResponseEntity<List<EnrollmentDTO>> getEnrollments(
+            @PathVariable String recordNumber
+    ) {
+        var enrollments = studentService.getEnrollmentsByRecordNumber(recordNumber);
+
+        return ResponseEntity.ok(enrollments);
+    }
+
+    @Operation(
+            summary = "Get a student's inscription to a given degree."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Data fetched successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Given record number or degree id does not exist."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Given student is not enrolled to this degree."
+                    )
+            }
+    )
+    @GetMapping("/{recordNumber}/enrollments/{degreeId}")
+    public ResponseEntity<EnrollmentDTO> getEnrollment(
+            @PathVariable String recordNumber,
+            @PathVariable UUID degreeId
+    ) {
+        EnrollmentDTO enrollment = studentService.getEnrollmentByRecordNumberAndDegree(recordNumber, degreeId);
+        return ResponseEntity.ok(enrollment);
+    }
+
+
+
+
+
+    /*
+    // Search student by ID
+    @GetMapping("/{id}")
+    public StudentDTO findStudentById(@PathVariable UUID id) {
+        return studentService.findStudentById(id);
+    }
+
+    // Search all students (c)
+    @GetMapping(params = {"column, order"})
+    public List<StudentDTO> getStudents(
+            @RequestParam(name = "column", required = false) String column,
+            @RequestParam(name = "order", required = false) String order) {
+        return studentService.getStudents(column, order);
+    }
+
+    // Search student by genre (e)
+    @GetMapping(params = "genre")
+    public List<StudentDTO> findStudentByGenre(@RequestParam(name = "genre", required = false) Genre genre) {
+        return studentService.findStudentsByGenre(genre);
+    }
+
+    @GetMapping(params = {"degreeId", "city"})
+    public List<StudentDTO> getByDegreeAndCity(
+            @RequestParam(name = "degreeId", required = false) UUID degreeId,
+            @RequestParam(name = "city", required = false) String city
+    ) {
+        return studentService.getByDegreeAndCity(degreeId, city);
+    }
+    */
 }

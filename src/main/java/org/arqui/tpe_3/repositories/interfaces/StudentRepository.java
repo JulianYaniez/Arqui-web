@@ -24,4 +24,6 @@ public interface StudentRepository {
     Optional<Student> getByRecordNumber(String RecordBook);
 
     List<Student> getByGenre(Genre genre);
+
+    boolean existsByRecordNumber(String recordNumber);
 }

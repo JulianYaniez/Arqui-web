@@ -49,4 +49,6 @@ Optional<Student> getByRecordNumber(@Param("RecordBook") String RecordBook);
             @Param("degree") UUID degree,
             Pageable pageable
     );
+
+    boolean existsByRecordNumber(String recordNumber);
 }

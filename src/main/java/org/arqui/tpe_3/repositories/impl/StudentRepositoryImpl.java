@@ -75,4 +75,9 @@ public class StudentRepositoryImpl implements StudentRepository {
     public List<Student> getByGenre(Genre genre) {
         return studentRepository.getByGenre(genre);
     }
+
+    @Override
+    public boolean existsByRecordNumber(String recordNumber) {
+        return studentRepository.existsByRecordNumber(recordNumber);
+    }
 }

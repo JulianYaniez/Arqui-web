@@ -30,6 +30,17 @@ public class DegreeRepositoryImpl implements DegreeRepository {
     }
 
     @Override
+    public List<Degree> findAll() {
+        return degreeRepository.findAll();
+    }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return  degreeRepository.existsById(id);
+    }
+
+
+    @Override
     public List<DegreeReportDTO> getReports() {
         try {
 

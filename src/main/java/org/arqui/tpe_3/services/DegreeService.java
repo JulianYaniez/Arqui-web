@@ -47,4 +47,11 @@ public class DegreeService {
         return degreeRepository.getReports();
     }
 
+
+    @Transactional(readOnly = true)
+    public List<DegreeDTO> getDegrees(){
+        return degreeRepository.findAll().stream()
+                .map(DegreeDTO::from)
+                .toList();
+    }
 }

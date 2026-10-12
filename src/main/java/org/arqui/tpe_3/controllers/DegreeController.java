@@ -93,6 +93,23 @@ public class DegreeController {
     }
 
 
+    @Operation(
+            summary = "Get all existing degrees"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Data fetched successfully"
+                    )
+            }
+    )
+    @GetMapping
+    public ResponseEntity<List<DegreeDTO>> findAll() {
+        var degrees = degreeService.getDegrees();
+        return ResponseEntity.ok(degrees);
+    }
+
     // Get all students by career (f)
     @Operation(
             summary = "Get amount of enrolled students per degree. (2-f)"
