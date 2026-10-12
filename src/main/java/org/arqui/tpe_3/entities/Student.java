@@ -3,6 +3,7 @@ package org.arqui.tpe_3.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.arqui.tpe_3.enums.Genre;
