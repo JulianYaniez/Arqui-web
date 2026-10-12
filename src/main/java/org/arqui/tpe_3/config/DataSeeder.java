@@ -45,12 +45,12 @@ public class DataSeeder implements CommandLineRunner {
 
         for (int i = 0; i < 300; i++) {
             Student student = new Student(
-                faker.name().firstName(),
+                faker.name().firstName() + " " + faker.name().lastName(),
                 faker.date().birthday().toLocalDateTime().toLocalDate(),
                 Genre.values()[random.nextInt(Genre.values().length)],
                 faker.idNumber().valid(),
                 faker.address().city(),
-                faker.bothify("LO-?#?#?")
+                faker.bothify("LO-?#?#?#?")
             );
             students.add(student);
         }

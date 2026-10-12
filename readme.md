@@ -10,6 +10,10 @@
 
 ---
 
-## ERD Diagram
+## Requisitos:
+    - Docker
 
-![Entity-Relation Diagram](/ERD_Diagram.png)
+## Api Docs
+UI para testeo y documentacion de endpoints usando Swagger.
+
+[URL: localhost:8080/swagger.html](http://localhost:8080/swagger.html)
