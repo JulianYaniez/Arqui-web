@@ -6,18 +6,19 @@ import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.arqui.tpe_3.controllers.exceptions.ErrorResponse;
 import org.arqui.tpe_3.dtos.commands.SaveDegreeDTO;
 import org.arqui.tpe_3.dtos.queries.DegreeDTO;
 import org.arqui.tpe_3.dtos.queries.DegreeEnrollmentsDTO;
 import org.arqui.tpe_3.dtos.queries.DegreeReportDTO;
 import org.arqui.tpe_3.services.DegreeService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -51,7 +52,11 @@ public class DegreeController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Request data was faulty."
+                    description = "Request data was faulty.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
         }
     )
@@ -80,7 +85,11 @@ public class DegreeController {
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "No entity found with given id."
+                            description = "No entity found with given id.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
                     )
             }
     )

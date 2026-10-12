@@ -2,18 +2,19 @@ package org.arqui.tpe_3.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.arqui.tpe_3.controllers.exceptions.ErrorResponse;
 import org.arqui.tpe_3.dtos.commands.SaveStudentDTO;
 import org.arqui.tpe_3.dtos.queries.EnrollmentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentDTO;
 import org.arqui.tpe_3.dtos.queries.StudentFilterDTO;
 import org.arqui.tpe_3.entities.Student;
-import org.arqui.tpe_3.enums.Genre;
 import org.arqui.tpe_3.services.StudentService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +55,11 @@ public class StudentController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Request data was faulty."
+                    description = "Request data was faulty.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
         }
     )
@@ -81,7 +86,11 @@ public class StudentController {
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "No entity found with given id."
+                            description = "No entity found with given id.",
+                            content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = ErrorResponse.class)
+                            )
                     )
             }
     )
@@ -125,11 +134,22 @@ public class StudentController {
             value = {
                     @ApiResponse(
                             responseCode = "201",
-                            description = "Enrollment completed successfully."
+                            description = "Enrollment completed successfully.",
+                            headers = {
+                                @Header(
+                                    name = "Location",
+                                    description = "Created entity's URI.",
+                                    schema = @Schema(type = "string")
+                                )
+                            }
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "Request data was faulty."
+                            description = "Request data was faulty.",
+                            content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = ErrorResponse.class)
+                            )
                     )
             }
     )
@@ -158,7 +178,11 @@ public class StudentController {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description =  "Given record number does not exist."
+                            description =  "Given record number does not exist.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
                     )
             }
     )
@@ -182,11 +206,19 @@ public class StudentController {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "Given record number or degree id does not exist."
+                            description = "Given record number or degree id does not exist.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "Given student is not enrolled to this degree."
+                            description = "Given student is not enrolled to this degree.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            )
                     )
             }
     )
