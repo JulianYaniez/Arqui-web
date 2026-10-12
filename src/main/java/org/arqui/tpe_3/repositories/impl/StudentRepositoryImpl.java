@@ -67,8 +67,8 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public Optional<Student> getByRecordBook(String RecordBook) {
-        return studentRepository.getByRecordBook(RecordBook);
+    public Optional<Student> getByRecordNumber(String RecordBook) {
+        return studentRepository.getByRecordNumber(RecordBook);
     }
 
     @Override

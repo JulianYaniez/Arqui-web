@@ -161,9 +161,9 @@ public class StudentController {
             }
     )
     @GetMapping("/{recordNumber}")
-    public StudentDTO getByRecordBook(
+    public StudentDTO getByRecordNumber(
             @Valid @PathVariable(name = "recordNumber") String recordNumber
     ) {
-        return studentService.getByRecordBook(recordNumber);
+        return studentService.getByRecordNumber(recordNumber);
     }
 }

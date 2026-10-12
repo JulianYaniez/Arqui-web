@@ -21,7 +21,7 @@ public interface StudentRepository {
 
     List<Student> getByDegreeAndCity(UUID degreeId, String city);
 
-    Optional<Student> getByRecordBook(String RecordBook);
+    Optional<Student> getByRecordNumber(String RecordBook);
 
     List<Student> getByGenre(Genre genre);
 }

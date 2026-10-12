@@ -86,8 +86,8 @@ public class StudentService {
     }
 
     @Transactional(readOnly = true)
-    public StudentDTO getByRecordBook(String recordBook) {
-        return studentRepository.getByRecordBook(recordBook)
+    public StudentDTO getByRecordNumber(String recordBook) {
+        return studentRepository.getByRecordNumber(recordBook)
                 .map(StudentDTO::from)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found Student with recordBook " + recordBook));
     }
