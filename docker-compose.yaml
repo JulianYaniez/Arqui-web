@@ -1,0 +1,113 @@
+services: 
+  # --- DBs ---
+  # * Ticketing *
+  postgres-ticketing:
+    image: postgres:15
+    environment: 
+      POSTGRES_USER: group_7
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: ticketing
+    ports: 
+      - "5432:5432"
+
+  # * Management *
+  postgres-management:
+    image: postgres:15
+    environment: 
+      POSTGRES_USER: group_7
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: management
+    ports: 
+      - "5433:5432"
+
+  # * Identity *
+  postgres-identity:
+    image: postgres:15
+    environment: 
+      POSTGRES_USER: group_7
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: identity
+    ports: 
+      - "5434:5432"
+
+  # * Payment *
+  postgres-payment:
+    image: postgres:15
+    environment: 
+      POSTGRES_USER: group_7
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: payment
+    ports: 
+      - "5435:5432"
+
+  # * Catalog *
+  mongo-catalog:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+
+
+  # --- Services ---
+  # * Ticketing *
+  ticketing-service:
+    build: ./ticketing-service
+    ports: 
+      - "8081:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-ticketing:5432/ticketing
+      - SPRING_DATASOURCE_USERNAME=group_7
+      - SPRING_DATASOURCE_PASSWORD=root
+    depends_on:
+      - postgres-ticketing
+
+  # * Management *
+  management-service:
+    build: ./management-service
+    ports: 
+      - "8082:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-management:5432/management
+      - SPRING_DATASOURCE_USERNAME=group_7
+      - SPRING_DATASOURCE_PASSWORD=root
+    depends_on:
+      - postgres-management
+
+  # * Identity *
+  identity-service:
+    build: ./identity-service
+    ports: 
+      - "8083:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-identity:5432/identity
+      - SPRING_DATASOURCE_USERNAME=group_7
+      - SPRING_DATASOURCE_PASSWORD=root
+    depends_on:
+      - postgres-identity
+
+  # * Payment *
+  payment-service:
+    build: ./payment-service
+    ports: 
+      - "8084:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-payment:5432/payment
+      - SPRING_DATASOURCE_USERNAME=group_7
+      - SPRING_DATASOURCE_PASSWORD=root
+    depends_on:
+      - postgres-payment
+
+  # * Catalog *
+  catalog-service:
+    build: ./catalog-service
+    ports: 
+      - "8085:8080"
+    environment:
+      - SPRING_MONGODB_URI=mongodb://mongo-catalog:27017/catalog
+    depends_on:
+      - mongo-catalog
+
+  # --- Gateway ---
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"

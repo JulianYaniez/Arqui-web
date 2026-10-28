@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: TicketYa
+  datasource:
+    url: jdbc:postgresql://localhost/5434
+    username: group_7
+    password: root

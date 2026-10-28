@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: TicketYa
+  mongodb:
+    uri: mongodb://localhost:27017/catalog
