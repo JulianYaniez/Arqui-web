@@ -2,6 +2,7 @@ package com.arquiweb.catalog.venues.domain;
 
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Sector {
 
     String id;
@@ -45,8 +47,8 @@ public class Sector {
             if (capacity == null) errors.put("capacity", "Capacity-based sector capacity cannot be null.");
             else if (capacity <= 0) errors.put("capacity", "Capacity-based sector capacity must be positive.");
 
-            if (rows != null) errors.put("rows", "Capacity-based sectors cannot have rows assigned.");
-            if (seatsPerRow != null) errors.put("seatsPerRow", "Capacity-based sectors cannot have seats per row assigned.");
+            if (rows != null && rows > 0) errors.put("rows", "Capacity-based sectors cannot have rows assigned.");
+            if (seatsPerRow != null && seatsPerRow > 0) errors.put("seatsPerRow", "Capacity-based sectors cannot have seats per row assigned.");
         }
 
         if (!errors.isEmpty()) throw new InvalidInputException("Given sector has invalid field/s.", errors);
