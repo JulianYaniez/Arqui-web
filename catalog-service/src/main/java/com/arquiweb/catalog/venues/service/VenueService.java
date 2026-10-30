@@ -28,7 +28,7 @@ public class VenueService {
     public VenueResponse findVenueById(String venueId) {
 
         if (!ObjectId.isValid(venueId))
-            throw new InvalidInputException("Given ID format is invalid", null);
+            throw new InvalidInputException("Given venue ID format is invalid", null);
 
         Optional<Venue> optionalVenue = venueRepository.findById(venueId);
 
