@@ -2,4 +2,4 @@ spring:
   application:
     name: TicketYa
   mongodb:
-    uri: mongodb://localhost:27017/catalog
+    uri: mongodb://group_7:root@localhost:27017/catalog?authSource=admin
