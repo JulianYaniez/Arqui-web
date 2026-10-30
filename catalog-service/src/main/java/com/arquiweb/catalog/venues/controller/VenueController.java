@@ -1,6 +1,6 @@
 package com.arquiweb.catalog.venues.controller;
 
-import com.arquiweb.catalog.venues.domain.Venue;
+import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.dto.request.CreateVenueRequest;
 import com.arquiweb.catalog.venues.service.VenueService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -53,5 +50,29 @@ class VenueController {
                 .toUri();
 
         return ResponseEntity.created(location).build();
+    }
+
+    @Operation(summary = "Find venue by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Venue fetched successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Given ID has invalid format."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No venue found with ID given."
+            )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<VenueResponse> findVenueById(
+            @PathVariable String id
+    ) {
+        VenueResponse venueQuery = venueService.findVenueById(id);
+
+        return ResponseEntity.ok(venueQuery);
     }
 }
