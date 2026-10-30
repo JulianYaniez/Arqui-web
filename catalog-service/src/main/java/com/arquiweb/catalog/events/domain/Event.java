@@ -14,10 +14,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Document(collection = "events")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,6 +41,7 @@ public class Event {
             EventType type,
             LocalDateTime dateTime,
             String organizerId,
+            List<String> participants,
             VenueResponse venue,
             List<EventSector> sectors
     ) {
@@ -55,6 +53,16 @@ public class Event {
         if (dateTime == null) errors.put("dateTime", "Event date cannot be null.");
         if (dateTime != null && dateTime.isBefore(LocalDateTime.now())) errors.put("dateTime", "Event date cannot be before current time.");
         if (organizerId == null) errors.put("organizerId", "Event organizer cannot be null.");
+        if (participants == null) errors.put("participants", "Event participants cannot be null.");
+        if (participants != null) {
+            if (participants.isEmpty()) errors.put("participants", "Event participants cannot be empty.");
+
+            Set<String> processedParticipants = new HashSet<>();
+            for (String participant : participants) {
+                if (!processedParticipants.add(participant)) errors.put("participants", "Event should not have duplicated participants:  " + participant);
+            }
+        }
+
         // Venue comes from DB -> Trustful
         if (venue == null) errors.put("venue", "Event venue cannot be null.");
 
@@ -63,8 +71,10 @@ public class Event {
         this.name = name;
         this.description = description;
         this.type = type;
+        this.status = EventStatus.DRAFT;
         this.dateTime = dateTime;
         this.organizerId = organizerId;
+        this.participants = participants;
         this.venueId = venue.id();
         this.city = venue.city();
         this.sectors = sectors != null ? sectors : Collections.emptyList();
@@ -76,6 +86,15 @@ public class Event {
 
         if (this.sectors.contains(sector)) return false;
         this.sectors.add(sector);
-        return  true;
+        return true;
+    }
+
+
+    public void publish() {
+        if (this.status != EventStatus.DRAFT) throw new IllegalEventStateException("Only DRAFT events can be published.");
+
+        if (this.sectors.isEmpty()) throw new IllegalEventStateException("Events cannot be published without assigned sector/s.");
+
+        this.status = EventStatus.PUBLISHED;
     }
 }

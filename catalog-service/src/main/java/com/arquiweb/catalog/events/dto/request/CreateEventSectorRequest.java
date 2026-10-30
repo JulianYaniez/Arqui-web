@@ -19,7 +19,7 @@ public record CreateEventSectorRequest(
         Map<String, String> errors = new HashMap<>();
 
         if (sectorId == null || sectorId.isBlank()) errors.put("sectorId", "Sector ID cannot be null or blank.");
-        if (sectorId != null && ObjectId.isValid(sectorId)) errors.put("sectorId", "Sector ID must have a valid format.");
+        if (sectorId != null && !ObjectId.isValid(sectorId)) errors.put("sectorId", "Sector ID must have a valid format.");
 
         if (!errors.isEmpty()) throw new InvalidInputException("Given sector with ID '" + sectorId + "' has invalid field/s.", errors);
     }

@@ -5,6 +5,8 @@ import com.arquiweb.catalog.events.domain.EventSector;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.repository.EventRepository;
+import com.arquiweb.catalog.infrastructure.client.TicketingClient;
+import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityRequest;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
@@ -24,6 +26,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final VenueService venueService;
+    private final TicketingClient ticketingClient;
 
     public String createEvent(CreateEventRequest request) {
         VenueResponse venue = venueService.findVenueById(request.venueId());
@@ -52,13 +55,9 @@ public class EventService {
         return eventRepository.save(event).getId();
     }
 
+
     public String addSector(String eventId, CreateEventSectorRequest request) {
-        if (eventId == null) throw new InvalidInputException("Event ID cannot be null.", null);
-        if (!ObjectId.isValid(eventId)) throw new InvalidInputException("Event ID format is not valid.", null);
-
-        Event event = eventRepository.findById(eventId).orElse(null);
-
-        if (event == null) throw new ResourceNotFoundException("No event found with given ID: " + eventId);
+        Event event = this.getEventValidated(eventId);
 
         VenueResponse venue = venueService.findVenueById(event.getVenueId());
 
@@ -77,4 +76,27 @@ public class EventService {
         return eventSector.getSectorId();
     }
 
+    public void publishEvent(String eventId) {
+        Event event = this.getEventValidated(eventId);
+
+        event.publish();
+
+        InitCapacityRequest ticketingRequest = InitCapacityRequest.fromDomain(event);
+
+        if (!ticketingRequest.capacities().isEmpty()) {
+            ticketingClient.initializeSectors(ticketingRequest);
+        }
+
+        eventRepository.save(event);
+    }
+
+    private Event getEventValidated(String eventId) {
+        if (eventId == null) throw new InvalidInputException("Event ID cannot be null.", null);
+        if (!ObjectId.isValid(eventId)) throw new InvalidInputException("Event ID format is not valid.", null);
+
+        Event event = eventRepository.findById(eventId).orElse(null);
+        if (event == null) throw new ResourceNotFoundException("No event found with given ID: " + eventId);
+
+        return event;
+    }
 }

@@ -30,7 +30,7 @@ public class EventSector {
         if (sector == null) errors.put("sector", "Event sector must refer to an existing venue sector.");
 
         if (price == null) errors.put("price", "Event sector must have a defined price.");
-        if (price != null && price.compareTo(BigDecimal.ZERO) == 0) errors.put("price", "Event sector price cannot be lower than $0.");
+        if (price != null && price.compareTo(BigDecimal.ZERO) < 0) errors.put("price", "Event sector price cannot be lower than $0.");
 
         if (!errors.isEmpty()) throw new InvalidInputException("Given event sector has invalid field/s", errors);
 

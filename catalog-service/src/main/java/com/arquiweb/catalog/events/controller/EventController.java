@@ -99,4 +99,28 @@ class EventController {
 
         return ResponseEntity.created(uri).build();
     }
+
+
+    @Operation(summary = "Publish a drafted event.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Event published successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Given event could not be found."
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Ticketing service could not respond properly."
+            )
+    })
+    @PostMapping("/{id}/publish")
+    public ResponseEntity<Void> publishEvent(
+            @PathVariable String id
+    ) {
+        eventService.publishEvent(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -29,7 +29,7 @@ public record CreateEventRequest(
         Map<String, String> errors = new HashMap<>();
 
         if (venueId == null || venueId.isBlank()) errors.put("venueId", "Venue ID cannot be null.");
-        if (venueId != null && ObjectId.isValid(venueId)) errors.put("venueId", "Venue ID must have a valid format.");
+        if (venueId != null && !ObjectId.isValid(venueId)) errors.put("venueId", "Venue ID must have a valid format.");
 
         if (!errors.isEmpty()) throw new InvalidInputException("Given venue has invalid field/s.", errors);
     }
@@ -43,6 +43,7 @@ public record CreateEventRequest(
                 this.dateTime,
                 // Replace for method param later
                 this.organizerId,
+                this.participants,
                 venue,
                 sectors
         );
