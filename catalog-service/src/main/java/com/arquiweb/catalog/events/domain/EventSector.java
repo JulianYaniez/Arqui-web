@@ -2,6 +2,7 @@ package com.arquiweb.catalog.events.domain;
 
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.venues.domain.Sector;
+import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -20,7 +21,7 @@ public class EventSector {
     Integer seatsPerRow;
     BigDecimal price;
 
-    public EventSector(Sector sector, BigDecimal price) {
+    public EventSector(SectorResponse sector, BigDecimal price) {
         Map<String, String> errors = new HashMap<>();
 
         // Sector comes from DB -> Trust Sector is pre-validated.
@@ -31,12 +32,12 @@ public class EventSector {
 
         if (!errors.isEmpty()) throw new InvalidInputException("Given event sector has invalid field/s", errors);
 
-        this.sectorId = sector.getId();
-        this.name = sector.getName();
+        this.sectorId = sector.id();
+        this.name = sector.name();
         this.isNumbered = sector.isNumbered();
-        this.capacity = sector.getCapacity();
-        this.rows = sector.getRows();
-        this.seatsPerRow = sector.getSeatsPerRow();
+        this.capacity = sector.capacity();
+        this.rows = sector.rows();
+        this.seatsPerRow = sector.seatsPerRow();
         this.price = price;
     }
 

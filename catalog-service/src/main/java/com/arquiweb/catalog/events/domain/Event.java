@@ -4,8 +4,11 @@ import com.arquiweb.catalog.events.domain.enums.EventStatus;
 import com.arquiweb.catalog.events.domain.enums.EventType;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.venues.domain.Venue;
+import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +20,7 @@ import java.util.Map;
 
 @Document(collection = "events")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Event {
 
     @Id
@@ -39,7 +43,7 @@ public class Event {
             EventType type,
             LocalDateTime dateTime,
             String organizerId,
-            Venue venue,
+            VenueResponse venue,
             List<EventSector> sectors
     ) {
         Map<String, String> errors = new HashMap<>();
@@ -60,8 +64,8 @@ public class Event {
         this.type = type;
         this.dateTime = dateTime;
         this.organizerId = organizerId;
-        this.venueId = venue.getId();
-        this.city = venue.getCity();
+        this.venueId = venue.id();
+        this.city = venue.city();
         this.sectors = sectors != null ? sectors : Collections.emptyList();
     }
 }

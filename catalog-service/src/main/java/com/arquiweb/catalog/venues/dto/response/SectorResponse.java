@@ -1,8 +1,8 @@
-package com.arquiweb.catalog.venues.dto.query;
+package com.arquiweb.catalog.venues.dto.response;
 
 import com.arquiweb.catalog.venues.domain.Sector;
 
-public record SectorQuery(
+public record SectorResponse(
         String id,
         String name,
         boolean isNumbered,
@@ -11,8 +11,8 @@ public record SectorQuery(
         Integer seatsPerRow
 ) {
 
-    public static SectorQuery fromDomain(Sector sector) {
-        return new SectorQuery(
+    public static SectorResponse fromDomain(Sector sector) {
+        return new SectorResponse(
                 sector.getId(),
                 sector.getName(),
                 sector.isNumbered(),

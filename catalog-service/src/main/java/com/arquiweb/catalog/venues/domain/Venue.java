@@ -16,7 +16,6 @@ import java.util.Map;
 @Document(collection = "Venues")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
 public class Venue {
 
     @Id

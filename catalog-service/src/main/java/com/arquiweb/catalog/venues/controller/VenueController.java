@@ -1,7 +1,6 @@
 package com.arquiweb.catalog.venues.controller;
 
-import com.arquiweb.catalog.venues.domain.Venue;
-import com.arquiweb.catalog.venues.dto.query.VenueQuery;
+import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.dto.request.CreateVenueRequest;
 import com.arquiweb.catalog.venues.service.VenueService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,10 +68,10 @@ class VenueController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<VenueQuery> findVenueById(
+    public ResponseEntity<VenueResponse> findVenueById(
             @PathVariable String id
     ) {
-        VenueQuery venueQuery = venueService.findVenueById(id);
+        VenueResponse venueQuery = venueService.findVenueById(id);
 
         return ResponseEntity.ok(venueQuery);
     }

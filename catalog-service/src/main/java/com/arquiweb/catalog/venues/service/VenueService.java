@@ -3,7 +3,7 @@ package com.arquiweb.catalog.venues.service;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.catalog.venues.domain.Venue;
-import com.arquiweb.catalog.venues.dto.query.VenueQuery;
+import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.dto.request.CreateVenueRequest;
 import com.arquiweb.catalog.venues.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class VenueService {
         return  venueRepository.save(venue).getId();
     }
 
-    public VenueQuery findVenueById(String venueId) {
+    public VenueResponse findVenueById(String venueId) {
 
         if (!ObjectId.isValid(venueId))
             throw new InvalidInputException("Given ID format is invalid", null);
@@ -37,7 +37,7 @@ public class VenueService {
 
         Venue venue = optionalVenue.get();
 
-        return VenueQuery.fromDomain(venue);
+        return VenueResponse.fromDomain(venue);
     }
 
 }
