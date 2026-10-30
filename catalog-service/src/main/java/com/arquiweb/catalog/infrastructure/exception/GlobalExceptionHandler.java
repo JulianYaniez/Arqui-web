@@ -1,5 +1,6 @@
 package com.arquiweb.catalog.infrastructure.exception;
 
+import com.arquiweb.catalog.events.domain.exceptions.IllegalEventStateException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,20 @@ class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI(),
                 ex.getValidationErrors()
+        );
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
+    @ExceptionHandler(IllegalEventStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalEventStateException(
+            IllegalEventStateException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        ErrorResponse response = new ErrorResponse(
+                httpStatus,
+                ex.getMessage(),
+                request.getRequestURI()
         );
         return ResponseEntity.status(httpStatus).body(response);
     }

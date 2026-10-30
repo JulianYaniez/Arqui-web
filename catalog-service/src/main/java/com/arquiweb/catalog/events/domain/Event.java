@@ -2,6 +2,7 @@ package com.arquiweb.catalog.events.domain;
 
 import com.arquiweb.catalog.events.domain.enums.EventStatus;
 import com.arquiweb.catalog.events.domain.enums.EventType;
+import com.arquiweb.catalog.events.domain.exceptions.IllegalEventStateException;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.venues.domain.Venue;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
@@ -67,5 +68,14 @@ public class Event {
         this.venueId = venue.id();
         this.city = venue.city();
         this.sectors = sectors != null ? sectors : Collections.emptyList();
+    }
+
+    public boolean addSector(EventSector sector) {
+
+        if (this.status != EventStatus.DRAFT) throw new IllegalEventStateException("Only DRAFT events can add new sectors.");
+
+        if (this.sectors.contains(sector)) return false;
+        this.sectors.add(sector);
+        return  true;
     }
 }

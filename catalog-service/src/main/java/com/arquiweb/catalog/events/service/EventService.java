@@ -6,10 +6,13 @@ import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.repository.EventRepository;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
+import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.service.VenueService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -47,6 +50,31 @@ public class EventService {
         Event event = request.toDomain(venue, eventSectors);
 
         return eventRepository.save(event).getId();
+    }
+
+    public String addSector(String eventId, CreateEventSectorRequest request) {
+        if (eventId == null) throw new InvalidInputException("Event ID cannot be null.", null);
+        if (!ObjectId.isValid(eventId)) throw new InvalidInputException("Event ID format is not valid.", null);
+
+        Event event = eventRepository.findById(eventId).orElse(null);
+
+        if (event == null) throw new ResourceNotFoundException("No event found with given ID: " + eventId);
+
+        VenueResponse venue = venueService.findVenueById(event.getVenueId());
+
+        Map<String, SectorResponse> venueSectors = venue.sectors().stream()
+                .collect(Collectors.toMap(SectorResponse::id, sector -> sector));
+
+        SectorResponse venueSector = venueSectors.get(request.sectorId());
+
+        if (venueSector == null) throw new ResourceNotFoundException("Given sector does not belong to this event's venue.");
+
+        EventSector eventSector = new EventSector(venueSector, request.price());
+        event.addSector(eventSector); // Might throw IllegalEventStateException (409)
+
+        eventRepository.save(event);
+
+        return eventSector.getSectorId();
     }
 
 }

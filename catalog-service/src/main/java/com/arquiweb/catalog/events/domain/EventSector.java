@@ -4,6 +4,7 @@ import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.venues.domain.Sector;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class EventSector {
 
     String sectorId;
