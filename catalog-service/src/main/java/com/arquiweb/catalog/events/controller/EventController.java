@@ -2,23 +2,30 @@ package com.arquiweb.catalog.events.controller;
 
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
+import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
+import com.arquiweb.catalog.events.dto.response.EventResponse;
 import com.arquiweb.catalog.events.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
 @RestController
 @RequestMapping("/event")
 @RequiredArgsConstructor
+@Tag(name = "Event Management", description = "Operations pertaining events.")
 class EventController {
 
     private final EventService eventService;
@@ -122,5 +129,23 @@ class EventController {
     ) {
         eventService.publishEvent(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(summary = "Get all events filtered by multiple criteria.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fetched successfully."
+            )
+    })
+    @GetMapping
+    public ResponseEntity<Page<EventResponse>> findAllEvents(
+            @ModelAttribute EventCriteriaQuery criteria,
+            @PageableDefault(size = 20, sort = "dateTime", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        Page<EventResponse> page = eventService.getAll(criteria, pageable);
+
+        return ResponseEntity.ok(page);
     }
 }

@@ -30,12 +30,11 @@ public class VenueService {
         if (!ObjectId.isValid(venueId))
             throw new InvalidInputException("Given venue ID format is invalid", null);
 
-        Optional<Venue> optionalVenue = venueRepository.findById(venueId);
+        Venue venue = venueRepository.findById(venueId).orElse(null);
 
-        if (optionalVenue.isEmpty())
+        if (venue == null)
             throw new ResourceNotFoundException("No venue found with the given ID: " + venueId);
 
-        Venue venue = optionalVenue.get();
 
         return VenueResponse.fromDomain(venue);
     }
