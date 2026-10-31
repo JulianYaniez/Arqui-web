@@ -1,0 +1,499 @@
+
+/* =========================
+   MANAGEMENT
+========================= */
+
+.management {
+  width: 80%;
+  max-width: 1200px;
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 3.5rem 0;
+}
+
+/* HEADER */
+
+.management__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.management__tag {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.management__header h1 {
+  margin: 0.6rem 0;
+  font-size: 2.4rem;
+}
+
+.management__header p {
+  margin: 0;
+  color: var(--text);
+}
+
+.management__button {
+  padding: 0.85rem 1.3rem;
+  border-radius: 0.6rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.management__button:hover {
+  background: var(--accent-hover);
+}
+
+/* STATISTICS */
+
+.management__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+.management__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.management__stat span {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.management__stat strong {
+  color: var(--text-h);
+  font-size: 2rem;
+}
+
+.management__stat small {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+/* CONTENT */
+
+.management__content {
+  margin-bottom: 3rem;
+}
+
+.management__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.management__section-header h2,
+.management__quick-actions h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.management__section-header p {
+  margin: 0;
+  color: var(--text);
+}
+
+.management__section-header a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* TABLE */
+
+.management__table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.management__table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.management__table th,
+.management__table td {
+  padding: 1.1rem 1.3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.management__table th {
+  background: var(--bg-secondary);
+  color: var(--text-h);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.management__table td {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.management__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* STATUS */
+
+.management__status {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.management__status--publicado {
+  background: #e5f7ed;
+  color: #21834b;
+}
+
+.management__status--borrador {
+  background: #fff4dc;
+  color: #a66b12;
+}
+
+.management__status--cancelado {
+  background: #fde8e8;
+  color: #bd3838;
+}
+
+.management__view {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.management__view:hover {
+  text-decoration: underline;
+}
+
+/* QUICK ACTIONS */
+
+.management__quick-actions h2 {
+  margin-bottom: 1.2rem;
+}
+
+.management__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.management__action {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--bg);
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.management__action:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.management__action span {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.management__action small {
+  color: var(--text);
+}
+
+
+/* Acciones del encabezado */
+
+.management__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.management__button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.85rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.management__button:hover {
+  background: var(--accent-hover);
+}
+
+.management__button--secondary {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.management__button--secondary:hover {
+  background: var(--bg-secondary);
+}
+
+/* Formulario */
+
+.management__form-container {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.management__form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.management__form-header h2 {
+  margin: 0 0 0.4rem;
+  color: var(--text-h);
+}
+
+.management__form-header p {
+  margin: 0;
+  color: var(--text);
+}
+
+.management__close {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.management__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.management__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.management__form-field label {
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.management__form-field input,
+.management__form-field select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+}
+
+.management__form-field input:focus,
+.management__form-field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.management__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.8rem;
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+}
+
+.management__cancel {
+  padding: 0.85rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Acciones de la tabla */
+
+.management__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.management__view,
+.management__edit,
+.management__publish,
+.management__delete {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.management__edit {
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+.management__publish {
+  color: #16834a;
+  border-color: #b9e4cc;
+}
+
+.management__delete {
+  color: #c03939;
+  border-color: #efc2c2;
+}
+
+.management__edit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.management__empty {
+  padding: 2rem;
+  color: var(--text);
+  text-align: center;
+}
+
+/* Acciones rápidas */
+
+.management__action {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text-h);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.management__action:hover {
+  border-color: var(--accent-border);
+}
+
+.management__action span {
+  font-weight: 600;
+}
+
+.management__action small {
+  color: var(--text);
+}
+
+@media (max-width: 650px) {
+  .management__header-actions {
+    flex-wrap: wrap;
+  }
+
+  .management__form {
+    grid-template-columns: 1fr;
+  }
+
+  .management__form-actions {
+    flex-wrap: wrap;
+  }
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .management {
+    width: 90%;
+  }
+
+  .management__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .management {
+    padding: 2.5rem 0;
+  }
+
+  .management__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .management__header h1 {
+    font-size: 2rem;
+  }
+
+  .management__section-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .management__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .management__stats {
+    gap: 0.8rem;
+  }
+
+  .management__stat {
+    padding: 1rem;
+  }
+}

@@ -1,5 +1,44 @@
 
+import { Link } from 'react-router-dom'
+import SearchBar from '../components/SearchBar'
+import EventCard from '../components/EventCard'
+import '../styles/home.css'
+
 function Home() {
+  // Eventos temporales para visualizar la sección
+  const featuredEvents = [
+    {
+      id: 1,
+      name: 'Festival de Música',
+      category: 'Música',
+      date: '15/11/2026',
+      location: 'Tandil',
+      price: 25000,
+      image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800',
+      status: 'PUBLICADO'
+    },
+    {
+      id: 2,
+      name: 'Tech Conference',
+      category: 'Tecnología',
+      date: '30/11/2026',
+      location: 'Centro de Convenciones',
+      price: 18000,
+      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
+      status: 'PUBLICADO'
+    },
+    {
+      id: 3,
+      name: 'Noche de Teatro',
+      category: 'Teatro',
+      date: '25/11/2026',
+      location: 'Teatro Central',
+      price: 12000,
+      image: 'https://images.unsplash.com/photo-1503095396549-807759245b35?w=800',
+      status: 'PUBLICADO'
+    }
+  ]
+
   return (
     <main className="home">
       <section className="home__hero">
@@ -40,7 +79,13 @@ function Home() {
         </div>
 
         <div className="home__events">
-          {/* Acá van los EventCard */}
+          {/*
+            Cuando conectemos el backend, reemplazamos
+            los eventos temporales por los eventos recibidos.
+          */}
+          {featuredEvents.map(event => (
+            <EventCard key={event.id} event={event} />
+          ))}
         </div>
       </section>
 

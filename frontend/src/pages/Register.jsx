@@ -44,10 +44,9 @@ function Register() {
             Crear cuenta
           </button>
         </form>
-
-        <Link to="/inicio-sesion" className="register__login">
-          ¿Ya tenés cuenta? Iniciá sesión.
-        </Link>
+        <p className="register__login">
+          ¿Ya tenés cuenta?  <Link to="/inicio-sesion">Iniciá sesión.</Link>
+        </p>
       </section>
     </main>
   )

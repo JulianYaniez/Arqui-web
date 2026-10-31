@@ -85,16 +85,16 @@
 }
 
 .register__login {
-  display: block;
-  margin-top: 1.5rem;
-  color: #6c4bdd;
+  margin: 1.5rem 0 0;
+  color: var(--text);
   font-size: 0.9rem;
   text-align: center;
-  text-decoration: none;
 }
 
-.register__login:hover {
-  text-decoration: underline;
+.register__login a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 @media (max-width: 480px) {

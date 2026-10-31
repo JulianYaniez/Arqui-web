@@ -1,0 +1,137 @@
+
+/* =========================
+   EVENT CARD
+========================= */
+
+.event-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 35px rgba(25, 20, 60, 0.13);
+}
+
+/* IMAGE */
+
+.event-card__image-container {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.event-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.event-card:hover .event-card__image {
+  transform: scale(1.05);
+}
+
+/* CATEGORY */
+
+.event-card__category {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 2rem;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* SOLD OUT */
+
+.event-card__sold-out {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  background: #b83232;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* CONTENT */
+
+.event-card__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1.2rem;
+}
+
+.event-card__content h3 {
+  margin: 0 0 1rem;
+  color: var(--text-h);
+  font-size: 1.15rem;
+}
+
+/* INFO */
+
+.event-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.event-card__info span {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+/* FOOTER */
+
+.event-card__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.event-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.event-card__price small {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.event-card__price strong {
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+.event-card__arrow {
+  color: var(--accent);
+  font-size: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.event-card:hover .event-card__arrow {
+  transform: translateX(5px);
+}

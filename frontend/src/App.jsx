@@ -2,8 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import Navbar from './components/NavBar.jsx'
 import Footer from './components/Footer.jsx'
-import EventCard from './components/EventCard.jsx'
-import SearchBar from './components/SearchBar.jsx'
 
 
 import Home from './pages/Home.jsx'
@@ -19,6 +17,7 @@ import Profile from './pages/Profile.jsx'
 
 
 import './App.css'
+import Checkout from './pages/Checkout.jsx'
 
 function App() {
 
@@ -49,7 +48,9 @@ function App() {
         <Route path="/mis-entradas" element={<MyTickets />} />
 
         {/* Administración */}
-        <Route path="/administracion" element={<Management />} />
+        <Route path="/administracion" element={<Managment />} />
+
+        <Route path="/eventos/:id/comprar" element={<Checkout/>} ></Route>
 
         {/* Página no encontrada */}
         <Route path="*" element={<h2>404 - Página no encontrada</h2>} />
