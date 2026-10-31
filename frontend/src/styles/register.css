@@ -1,0 +1,108 @@
+
+.register {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 3rem 1.5rem;
+  background-color: #f7f7fb;
+}
+
+.register__card {
+  width: 100%;
+  max-width: 430px;
+  padding: 2.5rem;
+  background-color: #ffffff;
+  border: 1px solid #e8e8ef;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(25, 20, 60, 0.08);
+}
+
+.register__title {
+  margin: 0 0 0.5rem;
+  color: #1b1730;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.register__description {
+  margin: 0 0 2rem;
+  color: #777487;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.register__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.register__form label {
+  margin-top: 0.6rem;
+  color: #302b42;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.register__form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid #dcd9e8;
+  border-radius: 9px;
+  background-color: #ffffff;
+  color: #1b1730;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.register__form input:focus {
+  border-color: #7654e8;
+  box-shadow: 0 0 0 3px rgba(118, 84, 232, 0.14);
+}
+
+.register__submit {
+  margin-top: 1.2rem;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 9px;
+  background-color: #7654e8;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.register__submit:hover {
+  background-color: #6340d0;
+}
+
+.register__submit:active {
+  transform: scale(0.98);
+}
+
+.register__login {
+  margin: 1.5rem 0 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.register__login a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .register {
+    padding: 2rem 1rem;
+  }
+
+  .register__card {
+    padding: 1.75rem 1.25rem;
+  }
+}

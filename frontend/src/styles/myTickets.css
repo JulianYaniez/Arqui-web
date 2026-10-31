@@ -1,0 +1,364 @@
+
+/* =========================
+   MY TICKETS
+========================= */
+
+.my-tickets {
+  width: 80%;
+  max-width: 1100px;
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 3.5rem 0;
+}
+
+/* HEADER */
+
+.my-tickets__header {
+  margin-bottom: 2.5rem;
+}
+
+.my-tickets__tag {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.my-tickets__header h1 {
+  margin: 0.6rem 0;
+  font-size: 2.4rem;
+}
+
+.my-tickets__header p {
+  margin: 0;
+  color: var(--text);
+}
+
+/* SUMMARY */
+
+.my-tickets__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+.my-tickets__summary div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.my-tickets__summary span {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.my-tickets__summary strong {
+  color: var(--text-h);
+  font-size: 2rem;
+}
+
+/* CONTENT */
+
+.my-tickets__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.my-tickets__section-header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.my-tickets__section-header p {
+  margin: 0;
+  color: var(--text);
+}
+
+.my-tickets__section-header a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* TICKET LIST */
+
+.my-tickets__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* TICKET CARD */
+
+.ticket-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.ticket-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ticket-card__header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ticket-card__header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.ticket-card__status {
+  padding: 0.35rem 0.7rem;
+  border-radius: 2rem;
+  background: #e5f7ed;
+  color: #21834b;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ticket-card__details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.ticket-card__details div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ticket-card__details span {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.ticket-card__details strong {
+  color: var(--text-h);
+  font-size: 0.9rem;
+}
+
+/* ACTIONS */
+
+.ticket-card__actions {
+  flex-shrink: 0;
+}
+
+.ticket-card__qr {
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.ticket-card__qr:hover {
+  background: var(--accent-hover);
+}
+
+/* EMPTY */
+
+.my-tickets__empty {
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.8rem;
+  text-align: center;
+}
+
+.my-tickets__empty h3 {
+  margin: 0 0 0.7rem;
+}
+
+.my-tickets__empty p {
+  margin: 0 0 1.5rem;
+  color: var(--text);
+}
+
+.my-tickets__empty a {
+  display: inline-block;
+  padding: 0.8rem 1.3rem;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+
+/* Modal del código QR */
+
+.ticket-qr__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(20, 16, 35, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.ticket-qr__modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  text-align: center;
+  animation: ticketQrAppear 0.2s ease;
+}
+
+.ticket-qr__close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.ticket-qr__modal h2 {
+  margin: 1rem 0 0.4rem;
+  color: var(--text-h);
+}
+
+.ticket-qr__event {
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+
+.ticket-qr__code {
+  display: inline-flex;
+  justify-content: center;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+}
+
+.ticket-qr__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  color: var(--text);
+}
+
+.ticket-qr__details strong {
+  color: var(--text-h);
+  font-size: 1.1rem;
+}
+
+.ticket-qr__details small {
+  margin-top: 0.5rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.ticket-qr__notice {
+  margin: 1.5rem 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.ticket-qr__button {
+  width: 100%;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ticket-qr__button:hover {
+  background: var(--accent-hover);
+}
+
+@keyframes ticketQrAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .my-tickets {
+    width: 90%;
+  }
+
+  .ticket-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ticket-card__actions {
+    width: 100%;
+  }
+
+  .ticket-card__qr {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .my-tickets {
+    padding: 2.5rem 0;
+  }
+
+  .my-tickets__header h1 {
+    font-size: 2rem;
+  }
+
+  .my-tickets__section-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ticket-card__details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-tickets__summary div {
+    padding: 1rem;
+  }
+}
