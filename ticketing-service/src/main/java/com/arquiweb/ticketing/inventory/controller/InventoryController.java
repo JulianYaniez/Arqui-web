@@ -1,7 +1,7 @@
-package com.arquiweb.ticketing.capacity.controller;
+package com.arquiweb.ticketing.inventory.controller;
 
-import com.arquiweb.ticketing.capacity.dto.requests.CreateCapacityRequest;
-import com.arquiweb.ticketing.capacity.service.SectorCapacityService;
+import com.arquiweb.ticketing.inventory.dto.requests.InitInventoryRequest;
+import com.arquiweb.ticketing.inventory.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
-@RequestMapping("/capacities")
+@RequestMapping("/inventory")
 @RequiredArgsConstructor
-public class SectorCapacityController {
+public class InventoryController {
 
-    private  final SectorCapacityService capacityService;
+    private  final InventoryService inventoryService;
 
 
     @Operation(summary = "Initialize sector capacities. Used by Catalog Module")
@@ -33,9 +33,9 @@ public class SectorCapacityController {
     })
     @PostMapping("/init")
     public ResponseEntity<Void> initSectorCapacity(
-            @RequestBody CreateCapacityRequest request
+            @RequestBody InitInventoryRequest request
     ) {
-        capacityService.createSectorCapacityService(request);
+        inventoryService.initSector(request);
 
         return ResponseEntity.noContent().build();
     }

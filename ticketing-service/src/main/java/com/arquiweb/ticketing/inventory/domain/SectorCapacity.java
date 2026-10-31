@@ -1,4 +1,4 @@
-package com.arquiweb.ticketing.capacity.domain;
+package com.arquiweb.ticketing.inventory.domain;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import jakarta.persistence.*;
@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -41,7 +42,8 @@ public class SectorCapacity {
     public SectorCapacity(
             String eventId,
             String sectorId,
-            int capacity
+            int capacity,
+            BigDecimal price
     ) {
         Map<String, String> errors = new HashMap<>();
 
@@ -49,6 +51,9 @@ public class SectorCapacity {
         if (sectorId == null || sectorId.isBlank()) errors.put("sectorId", "Sector id cannot be null or blank");
 
         if (capacity <= 0) errors.put("capacity", "Capacity cannot be 0 or less.");
+
+        if (price == null) errors.put("price", "Price cannot be null.");
+        if (price != null && price.compareTo(BigDecimal.ZERO) <= 0) errors.put("price", "Price cannot be negative.");
 
         if (!errors.isEmpty()) throw new InvalidInputException("Given sector capacity has invalid field/s.", errors);
 

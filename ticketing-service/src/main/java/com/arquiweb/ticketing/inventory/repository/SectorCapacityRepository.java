@@ -1,6 +1,6 @@
-package com.arquiweb.ticketing.capacity.repository;
+package com.arquiweb.ticketing.inventory.repository;
 
-import com.arquiweb.ticketing.capacity.domain.SectorCapacity;
+import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "ticketing-client", url = "${ticketing.service.url}")
 public interface TicketingClient {
 
-    @PostMapping("/capacities/init")
+    @PostMapping("/inventory/init")
     void initializeSectors(@RequestBody InitCapacityRequest request);
 
 }
