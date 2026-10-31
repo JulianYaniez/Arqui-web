@@ -1,8 +1,4 @@
 
-import { Link } from 'react-router-dom'
-import SearchBar from '../components/SearchBar'
-import '../styles/home.css'
-
 function Home() {
   return (
     <main className="home">
