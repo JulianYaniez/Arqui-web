@@ -5,3 +5,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/ticketing
     username: group_7
     password: root
+
+
+catalog:
+  service:
+    url: https://localhost:8085

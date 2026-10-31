@@ -1,15 +1,21 @@
 package com.arquiweb.ticketing.capacity.domain;
 
+import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "sector_capacity")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SectorCapacity {
 
     @Id
@@ -32,4 +38,23 @@ public class SectorCapacity {
     @Column(name = "version")
     private Long version;
 
+    public SectorCapacity(
+            String eventId,
+            String sectorId,
+            int capacity
+    ) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (eventId == null || eventId.isBlank()) errors.put("eventId", "Event id cannot be null or blank");
+        if (sectorId == null || sectorId.isBlank()) errors.put("sectorId", "Sector id cannot be null or blank");
+
+        if (capacity <= 0) errors.put("capacity", "Capacity cannot be 0 or less.");
+
+        if (!errors.isEmpty()) throw new InvalidInputException("Given sector capacity has invalid field/s.", errors);
+
+        this.eventId = eventId;
+        this.sectorId = sectorId;
+        this.totalCapacity = capacity;
+        this.availableCapacity = capacity;
+    }
 }
