@@ -1,0 +1,144 @@
+
+/* =========================
+   EVENTS
+========================= */
+
+.events {
+  width: 80%;
+  max-width: 1200px;
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 4rem 0;
+}
+
+/* HEADER */
+
+.events__header {
+  margin-bottom: 2rem;
+}
+
+.events__header h1 {
+  margin: 0 0 0.75rem;
+  font-size: 2.5rem;
+}
+
+.events__header p {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+/* CONTENT */
+
+.events__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* FILTERS */
+
+.events__filters h2 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+}
+
+.events__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.events__category {
+  padding: 0.65rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.events__category:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.events__category--active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.events__category--active:hover {
+  background: var(--accent-hover);
+  color: #fff;
+}
+
+/* EVENT LIST */
+
+.events__list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.events__list-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.events__list-header span {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* GRID */
+
+.events__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.events__empty {
+  grid-column: 1 / -1;
+  padding: 3rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.75rem;
+  color: var(--text);
+  text-align: center;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .events {
+    width: 90%;
+  }
+
+  .events__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .events {
+    padding: 2.5rem 0;
+  }
+
+  .events__header h1 {
+    font-size: 2rem;
+  }
+
+  .events__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .events__list-header {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
