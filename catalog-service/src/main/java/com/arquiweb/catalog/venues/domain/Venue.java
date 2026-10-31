@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Document(collection = "Venues")
+@Document(collection = "venues")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Venue {

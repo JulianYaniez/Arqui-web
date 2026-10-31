@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,9 @@ public class Event {
     @Id
     private String id;
 
+    @Indexed(collation = "{ locale: 'en', strength: 2 }")
     private String name;
+
     private String description;
     private EventType type;
     private EventStatus status;

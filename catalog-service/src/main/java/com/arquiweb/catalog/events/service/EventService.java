@@ -4,6 +4,9 @@ import com.arquiweb.catalog.events.domain.Event;
 import com.arquiweb.catalog.events.domain.EventSector;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
+import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
+import com.arquiweb.catalog.events.dto.response.EventResponse;
+import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
 import com.arquiweb.catalog.infrastructure.client.TicketingClient;
 import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityRequest;
@@ -12,9 +15,10 @@ import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.service.VenueService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,6 +29,7 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final EventCustomRepository eventCustomRepository;
     private final VenueService venueService;
     private final TicketingClient ticketingClient;
 
@@ -89,6 +94,13 @@ public class EventService {
 
         eventRepository.save(event);
     }
+
+    public Page<EventResponse> getAll(EventCriteriaQuery criteria, Pageable pageable) {
+        Page<Event> eventsPage = eventCustomRepository.findEventsWithDynamicFilters(criteria, pageable);
+
+        return eventsPage.map(EventResponse::fromDomain);
+    }
+
 
     private Event getEventValidated(String eventId) {
         if (eventId == null) throw new InvalidInputException("Event ID cannot be null.", null);
