@@ -15,7 +15,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "sector_capacity")
+@Table(name = "sector_capacity",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_event_sector_capacity",
+                        columnNames = {"event_id", "sector_id"}
+                )
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SectorCapacity {
 
@@ -34,6 +41,9 @@ public class SectorCapacity {
 
     @Column(name = "available_capacity", nullable = false)
     private int availableCapacity;
+
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 
     @Version
     @Column(name = "version")
@@ -61,5 +71,6 @@ public class SectorCapacity {
         this.sectorId = sectorId;
         this.totalCapacity = capacity;
         this.availableCapacity = capacity;
+        this.price = price;
     }
 }

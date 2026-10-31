@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "ticket")
+@Table(name = "ticket", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_event_sector_seat", columnNames = {"event_id", "sector_id", "row_number", "seat_number"})
+})
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

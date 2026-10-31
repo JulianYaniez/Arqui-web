@@ -2,7 +2,7 @@ package com.arquiweb.ticketing.infrastructure.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 
-@FeignClient(name = "catalog-client", url = "${catalog.service.url}")
+@FeignClient(name = "catalog-client", url = "${app.feign.catalog.url")
 public interface CatalogClient {
 
 }
