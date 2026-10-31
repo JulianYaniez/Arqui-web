@@ -1,0 +1,261 @@
+
+/* =========================
+   HOME
+========================= */
+
+.home {
+  width: 100%;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.home__hero {
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+  padding: 5rem 10%;
+  background:
+    radial-gradient(
+      circle at 85% 30%,
+      rgba(118, 84, 232, 0.35),
+      transparent 35%
+    ),
+    linear-gradient(120deg, #21183c, #302052);
+  color: #fff;
+}
+
+.home__hero-content {
+  max-width: 650px;
+}
+
+.home__tag {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 2rem;
+  color: #d8c9ff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.home__hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.8rem, 6vw, 4.5rem);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.home__hero h1 span {
+  color: #a88cff;
+}
+
+.home__hero p {
+  max-width: 480px;
+  margin: 1.5rem 0 2rem;
+  color: #d8d0e8;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.home__button {
+  display: inline-block;
+  padding: 0.9rem 1.7rem;
+  border-radius: 0.6rem;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.home__button:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+.home__search {
+  position: relative;
+  z-index: 1;
+  width: 80%;
+  max-width: 1000px;
+  margin: -2.5rem auto 0;
+  padding: 1.8rem 2rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.home__search h2 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.home__search input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  outline: none;
+  background: var(--bg-secondary);
+  color: var(--text-h);
+  transition: border-color 0.2s ease;
+}
+
+.home__search input:focus {
+  border-color: var(--accent);
+}
+
+/* =========================
+   FEATURED EVENTS
+========================= */
+
+.home__featured {
+  width: 80%;
+  max-width: 1200px;
+  margin: 5rem auto;
+}
+
+.home__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.home__section-header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.8rem;
+}
+
+.home__section-header p {
+  margin: 0;
+  color: var(--text);
+}
+
+.home__section-header a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.home__section-header a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.home__events {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+/* =========================
+   CTA
+========================= */
+
+.home__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 10%;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.home__cta h2 {
+  margin: 0 0 0.8rem;
+  font-size: 2rem;
+}
+
+.home__cta p {
+  margin: 0 0 1.5rem;
+  color: var(--text);
+}
+
+.home__cta a {
+  padding: 0.85rem 1.5rem;
+  border-radius: 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.home__cta a:hover {
+  background: var(--accent-hover);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+  .home__hero {
+    min-height: 400px;
+    padding: 4rem 7%;
+  }
+
+  .home__hero h1 {
+    font-size: 3rem;
+  }
+
+  .home__search,
+  .home__featured {
+    width: 90%;
+  }
+
+  .home__search {
+    padding: 1.4rem;
+  }
+
+  .home__events {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home__section-header {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .home__hero {
+    min-height: 360px;
+    padding: 3rem 6%;
+  }
+
+  .home__hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .home__hero p {
+    font-size: 1rem;
+  }
+
+  .home__events {
+    grid-template-columns: 1fr;
+  }
+
+  .home__section-header {
+    flex-direction: column;
+  }
+
+  .home__cta {
+    padding: 3rem 6%;
+  }
+
+  .home__cta h2 {
+    font-size: 1.6rem;
+  }
+}
