@@ -5,3 +5,7 @@ spring:
     url: jdbc:postgresql://localhost:5435/payment
     username: group_7
     password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
