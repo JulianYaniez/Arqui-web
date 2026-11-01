@@ -2,6 +2,7 @@ package com.arquiweb.ticketing.inventory.domain;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
+import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -96,6 +97,12 @@ public class Ticket {
         this.sectorId = sectorId;
         this.isNumbered = false;
         this.price = price;
+        this.status = TicketStatus.LOCKED_TEMPORARY;
+    }
+
+    public void lockTemporary() {
+        if (this.status != TicketStatus.AVAILABLE) throw new IllegalStateChangeException("Only available tickets can be locked.");
+
         this.status = TicketStatus.LOCKED_TEMPORARY;
     }
 

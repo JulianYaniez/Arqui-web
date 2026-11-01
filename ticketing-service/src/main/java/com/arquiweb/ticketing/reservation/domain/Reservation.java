@@ -1,7 +1,9 @@
 package com.arquiweb.ticketing.reservation.domain;
 
+import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
+import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,9 +12,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -32,7 +32,7 @@ public class Reservation {
     private String eventId;
 
     @Column(name = "status", nullable = false)
-    private TicketStatus status;
+    private ReservationStatus status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -48,4 +48,33 @@ public class Reservation {
 
     @OneToMany(mappedBy = "reservation", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Ticket> tickets = new HashSet<>();
+
+    public Reservation(
+            String clientId,
+            String eventId,
+            BigDecimal totalAmount,
+            List<Ticket> tickets
+    ) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (clientId == null || clientId.isBlank()) errors.put("clientId", "Client ID cannot be null or blank.");
+        if (eventId == null || eventId.isBlank()) errors.put("eventId", "Event ID cannot be blank.");
+        if (totalAmount == null) errors.put("totalAmount", "Total amount cannot be null.");
+        if (totalAmount != null && totalAmount.compareTo(BigDecimal.ZERO) < 0) errors.put("totalAmount", "Total amount cannot be negative.");
+        if (tickets == null || tickets.isEmpty()) errors.put("tickets", "Tickets cannot be null or empty.");
+
+        if (!errors.isEmpty()) throw new InvalidInputException("Given reservation has invalid field/s.", errors);
+
+        this.clientId = clientId;
+        this.eventId = eventId;
+        this.status = ReservationStatus.PENDING;
+        this.totalAmount = totalAmount;
+        this.createdAt = LocalDateTime.now();
+        this.expiresAt = LocalDateTime.now().plusMinutes(10);
+
+        for (Ticket ticket : tickets) {
+            ticket.setReservation(this);
+            this.tickets.add(ticket);
+        }
+    }
 }

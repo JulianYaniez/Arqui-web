@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.inventory.domain;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
+import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -72,5 +73,11 @@ public class SectorCapacity {
         this.totalCapacity = capacity;
         this.availableCapacity = capacity;
         this.price = price;
+    }
+
+    public void reduceCapacity(int amount) {
+        if (this.availableCapacity - amount < 0) throw new OccupiedSpotException("Given sector has maxed it's capacity.");
+
+        this.availableCapacity -= amount;
     }
 }

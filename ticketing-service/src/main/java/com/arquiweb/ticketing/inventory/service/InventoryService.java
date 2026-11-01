@@ -4,15 +4,17 @@ import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.dto.requests.InitInventoryRequest;
-import com.arquiweb.ticketing.inventory.dto.requests.SectorSeatsDto;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
 import com.arquiweb.ticketing.inventory.repository.SectorCapacityRepository;
 import com.arquiweb.ticketing.inventory.repository.TicketRepository;
+import com.arquiweb.ticketing.reservation.domain.Reservation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -65,4 +67,25 @@ public class InventoryService {
     }
 
 
+
+    public SectorCapacity getSectorCapacity(String eventId, String sectorId) {
+        SectorCapacity sector = sectorCapacityRepository.findByEventIdAndSectorId(eventId, sectorId)
+                .orElse(null);
+
+        if (sector == null) throw new ResourceNotFoundException("No sector exists with given event and sector IDs.");
+
+        return sector;
+    }
+
+    public void saveSectorCapacity(SectorCapacity sectorCapacity) {
+        this.sectorCapacityRepository.save(sectorCapacity);
+    }
+
+    public List<Ticket> findTicketWithIdIn(List<UUID> ticketIds) {
+        return ticketRepository.findByIdIn(ticketIds);
+    }
+
+    public void unlockExpiredTickets(List<UUID> reservations) {
+        ticketRepository.unlockTickets(reservations);
+    }
 }
