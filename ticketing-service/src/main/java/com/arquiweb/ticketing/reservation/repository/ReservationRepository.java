@@ -30,8 +30,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 
     @Modifying
     @Query("""
-        UPDATE Reservation r 
-        SET r.status = 'EXPIRED' WHERE 
+        UPDATE Reservation r
+        SET r.status = 'EXPIRED' WHERE
            r.id IN :ids
         """)
     void expire(

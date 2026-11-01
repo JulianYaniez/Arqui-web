@@ -96,16 +96,12 @@ public class ReservationService {
 
 
     @Transactional
-    public void expireOldReservations() {
-        LocalDateTime now = LocalDateTime.now();
-
-        List<UUID> expired = reservationRepository.findExpired(now);
-
-        if (expired.isEmpty()) return;
-
-        inventoryService.unlockExpiredTickets(expired);
-
+    public void expire(List<UUID> expired) {
         reservationRepository.expire(expired);
+    }
+
+    public List<UUID> findExpired(LocalDateTime now) {
+        return reservationRepository.findExpired(now);
     }
 
 

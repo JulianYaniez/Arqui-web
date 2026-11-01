@@ -3,16 +3,15 @@ package com.arquiweb.ticketing.inventory.service;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
+import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.dto.requests.InitInventoryRequest;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
 import com.arquiweb.ticketing.inventory.repository.SectorCapacityRepository;
 import com.arquiweb.ticketing.inventory.repository.TicketRepository;
-import com.arquiweb.ticketing.reservation.domain.Reservation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,7 +84,19 @@ public class InventoryService {
         return ticketRepository.findByIdIn(ticketIds);
     }
 
-    public void unlockExpiredTickets(List<UUID> reservations) {
-        ticketRepository.unlockTickets(reservations);
+    public void releaseNumberedTickets(List<UUID> reservations) {
+        ticketRepository.unlockNumberedTickets(reservations);
+    }
+
+    public void deleteUnnumberedTickets(List<UUID> reservations) {
+        ticketRepository.deleteExpiredUnnumbered(reservations);
+    }
+
+    public List<CapacityRefundDto> countCapacities(List<UUID> reservations) {
+        return ticketRepository.countUnnumberedCapacitiesToRefund(reservations);
+    }
+
+    public void refundCapacity(CapacityRefundDto refund) {
+        sectorCapacityRepository.refundCapacity(refund.eventId(), refund.sectorId(), refund.count());
     }
 }

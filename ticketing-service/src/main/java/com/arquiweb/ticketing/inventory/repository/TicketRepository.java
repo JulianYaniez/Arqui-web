@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.inventory.repository;
 
 import com.arquiweb.ticketing.inventory.domain.Ticket;
+import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -23,9 +24,29 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
     @Modifying
     @Query("""
-        UPDATE Ticket t 
-        SET t.status = 'AVAILABLE', t.reservation = null 
-        WHERE t.reservation.id IN :reservations
+        UPDATE Ticket t
+        SET t.status = 'AVAILABLE', t.reservation = null
+        WHERE t.reservation.id IN :reservations AND
+                t.isNumbered = true
         """)
-    void unlockTickets(@Param("reservations") List<UUID> reservations);
+    void unlockNumberedTickets(@Param("reservations") List<UUID> reservations);
+
+
+    @Query("""
+        SELECT new com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto(t.eventId, t.sectorId, COUNT(t))
+        FROM Ticket t WHERE
+                t.reservation.id IN :reservations AND
+                t.isNumbered = false
+        GROUP BY t.eventId, t.sectorId
+        """)
+    List<CapacityRefundDto> countUnnumberedCapacitiesToRefund(@Param("reservations") List<UUID> reservations);
+
+
+    @Modifying
+    @Query("""
+        DELETE FROM Ticket t WHERE
+                t.reservation.id IN :reservations AND
+                t.isNumbered = false
+        """)
+    void deleteExpiredUnnumbered(@Param("reservations") List<UUID> reservations);
 }
