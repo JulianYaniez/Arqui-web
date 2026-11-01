@@ -14,3 +14,6 @@ app:
   feign:
     catalog:
       url: http://catalog-service:8080
+  config:
+    reservation:
+      max-tickets: 5

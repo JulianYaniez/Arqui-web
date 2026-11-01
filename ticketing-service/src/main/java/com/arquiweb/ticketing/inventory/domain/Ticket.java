@@ -2,6 +2,7 @@ package com.arquiweb.ticketing.inventory.domain;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
+import com.arquiweb.ticketing.reservation.domain.Reservation;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -48,8 +49,9 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
 
-    @Version
-    private Integer version;
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "reservation_id", nullable = true)
+    private Reservation reservation;
 
     public Ticket(  // Pre-Charge Numbered Tickets
             String eventId,
