@@ -3,6 +3,7 @@ package com.arquiweb.ticketing.inventory.service;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
+import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.dto.requests.InitInventoryRequest;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
@@ -85,7 +86,7 @@ public class InventoryService {
     }
 
     public void releaseNumberedTickets(List<UUID> reservations) {
-        ticketRepository.unlockNumberedTickets(reservations);
+        ticketRepository.unlockNumberedTickets(reservations, TicketStatus.AVAILABLE);
     }
 
     public void deleteUnnumberedTickets(List<UUID> reservations) {

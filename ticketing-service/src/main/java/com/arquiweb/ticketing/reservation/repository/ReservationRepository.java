@@ -31,19 +31,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     @Modifying
     @Query("""
         UPDATE Reservation r
-        SET r.status = 'EXPIRED' WHERE
+        SET r.status = :status WHERE
            r.id IN :ids
         """)
     void expire(
-            @Param("ids") List<UUID> ids
+            @Param("ids") List<UUID> ids,
+            @Param("status") ReservationStatus status
     );
 
 
     @Query("""
         SELECT r.id
         FROM Reservation r WHERE
-            r.status = 'PENDING' AND
+            r.status = :status AND
             r.expiresAt < :now
         """)
-    List<UUID> findExpired(@Param("now") LocalDateTime now);
+    List<UUID> findExpired(
+            @Param("now") LocalDateTime now,
+            @Param("status") ReservationStatus status
+    );
 }

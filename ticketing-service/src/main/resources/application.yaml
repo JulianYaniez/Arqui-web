@@ -17,3 +17,4 @@ app:
   config:
     reservation:
       max-tickets: 5
+      max-ttl: 10

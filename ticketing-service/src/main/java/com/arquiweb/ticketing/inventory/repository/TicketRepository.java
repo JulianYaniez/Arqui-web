@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.inventory.repository;
 
 import com.arquiweb.ticketing.inventory.domain.Ticket;
+import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,11 +26,14 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     @Modifying
     @Query("""
         UPDATE Ticket t
-        SET t.status = 'AVAILABLE', t.reservation = null
+        SET t.status = :status, t.reservation = null
         WHERE t.reservation.id IN :reservations AND
                 t.isNumbered = true
         """)
-    void unlockNumberedTickets(@Param("reservations") List<UUID> reservations);
+    void unlockNumberedTickets(
+            @Param("reservations") List<UUID> reservations,
+            @Param("status") TicketStatus status
+            );
 
 
     @Query("""

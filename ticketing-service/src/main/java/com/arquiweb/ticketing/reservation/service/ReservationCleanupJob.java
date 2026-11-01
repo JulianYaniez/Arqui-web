@@ -25,18 +25,7 @@ public class ReservationCleanupJob {
 
         List<UUID> toExpire = reservationService.findExpired(now);
 
-        if (toExpire.isEmpty()) return;
-
-        inventoryService.releaseNumberedTickets(toExpire);
-
-        List<CapacityRefundDto> refunds = inventoryService.countCapacities(toExpire);
-
-        for (CapacityRefundDto refund : refunds) {
-            inventoryService.refundCapacity(refund);
-        }
-
-        inventoryService.deleteUnnumberedTickets(toExpire);
-
-        reservationService.expire(toExpire);
+        reservationService.cancelReservations(toExpire);
     }
+
 }

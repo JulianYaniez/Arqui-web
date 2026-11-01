@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -53,7 +54,8 @@ public class Reservation {
             String clientId,
             String eventId,
             BigDecimal totalAmount,
-            List<Ticket> tickets
+            List<Ticket> tickets,
+            int ttl
     ) {
         Map<String, String> errors = new HashMap<>();
 

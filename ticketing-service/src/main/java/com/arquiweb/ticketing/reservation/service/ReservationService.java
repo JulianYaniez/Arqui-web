@@ -4,9 +4,11 @@ import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
+import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
+import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
@@ -27,19 +29,19 @@ import java.util.stream.Stream;
 @Service
 public class ReservationService {
 
-    private final TicketRepository ticketRepository;
-
     public ReservationService(
            @Value("${app.config.reservation.max-tickets}") int maxTickets,
+           @Value("${app.config.reservation.max-ttl}") int ttl,
            ReservationRepository reservationRepository,
-           InventoryService inventoryService,
-           TicketRepository ticketRepository) {
+           InventoryService inventoryService
+    ) {
         this.maxTickets = maxTickets;
+        this.ttl = ttl;
         this.reservationRepository = reservationRepository;
         this.inventoryService = inventoryService;
-        this.ticketRepository = ticketRepository;
     }
 
+    private final int ttl;
     private final int maxTickets;
     private final ReservationRepository reservationRepository;
     private final InventoryService inventoryService;
@@ -61,7 +63,8 @@ public class ReservationService {
                 clientId,
                 sector.getEventId(),
                 sector.getPrice().multiply(BigDecimal.valueOf(request.ticketQuantity())),
-                tickets
+                tickets,
+                ttl
         );
 
         inventoryService.saveSectorCapacity(sector);
@@ -88,20 +91,42 @@ public class ReservationService {
         tickets.forEach(Ticket::lockTemporary);
         BigDecimal total = tickets.get(0).getPrice().multiply(BigDecimal.valueOf(tickets.size()));
 
-        Reservation reservation = new Reservation(clientId, request.eventId(), total, tickets);
+        Reservation reservation = new Reservation(clientId, request.eventId(), total, tickets, ttl);
         reservationRepository.save(reservation);
 
         return ReservationResponse.fromDomain(reservation);
     }
 
-
     @Transactional
+    public void handlePaymentFailure(UUID reservation) {
+        cancelReservations(List.of(reservation));
+    }
+
+
+    public void cancelReservations(List<UUID> toExpire) {
+        if (toExpire.isEmpty()) return;
+
+        inventoryService.releaseNumberedTickets(toExpire);
+
+        List<CapacityRefundDto> refunds = inventoryService.countCapacities(toExpire);
+
+        for (CapacityRefundDto refund : refunds) {
+            inventoryService.refundCapacity(refund);
+        }
+
+        inventoryService.deleteUnnumberedTickets(toExpire);
+
+        expire(toExpire);
+    }
+
+
+
     public void expire(List<UUID> expired) {
-        reservationRepository.expire(expired);
+        reservationRepository.expire(expired, ReservationStatus.EXPIRED);
     }
 
     public List<UUID> findExpired(LocalDateTime now) {
-        return reservationRepository.findExpired(now);
+        return reservationRepository.findExpired(now, ReservationStatus.PENDING);
     }
 
 

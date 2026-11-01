@@ -9,10 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -75,7 +72,7 @@ class ReservationController {
             )
     })
     @PostMapping("/numbered")
-    public  ResponseEntity<ReservationResponse> reserveNumbered(
+    public ResponseEntity<ReservationResponse> reserveNumbered(
             @RequestBody ReserveNumberedRequest request
     ) {
         // Placeholder
@@ -83,5 +80,21 @@ class ReservationController {
         ReservationResponse response = reservationService.reserveNumbered(request, userId);
 
         return  ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Cancel reservation pending confirmation.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reservation cancelled."
+            )
+    })
+    @PostMapping("/{reservationId}/cancel")
+    public ResponseEntity<Void> paymentFailure(
+            @PathVariable("reservationId") UUID id
+    ) {
+        reservationService.handlePaymentFailure(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
