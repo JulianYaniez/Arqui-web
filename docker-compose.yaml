@@ -115,7 +115,7 @@ services:
     ports: 
       - "8085:8080"
     environment:
-      - SPRING_MONGODB_URI=mongodb://mongo-catalog:27017/catalog
+      - SPRING_MONGODB_URI=mongodb://group_7:root@mongo-catalog:27017/catalog?authSource=admin
     depends_on:
       - mongo-catalog
 
