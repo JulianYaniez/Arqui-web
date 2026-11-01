@@ -18,7 +18,7 @@ public record SectorAvailabilityResponse(
 
         Integer capacity,
 
-        Map<Integer, SeatResponse> rows
+        Map<Integer, List<SeatResponse>> rows
 ) {
 
     public static SectorAvailabilityResponse fromCapacity(SectorCapacity capacity) {
@@ -42,10 +42,10 @@ public record SectorAvailabilityResponse(
                 seat.getPrice(),
                 true,
                 null,
-                tickets.stream().
-                        collect(Collectors.toMap(
+                tickets.stream()
+                        .collect(Collectors.groupingBy(
                                 Ticket::getRowNumber,
-                                SeatResponse::fromDomain
+                                Collectors.mapping(SeatResponse::fromDomain, Collectors.toList())
                         ))
         );
     }

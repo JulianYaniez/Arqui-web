@@ -20,6 +20,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ public class EventService {
     private final VenueService venueService;
     private final TicketingClient ticketingClient;
 
+    @Transactional
     public String createEvent(CreateEventRequest request) {
         VenueResponse venue = venueService.findVenueById(request.venueId());
 
@@ -61,6 +63,7 @@ public class EventService {
     }
 
 
+    @Transactional
     public String addSector(String eventId, CreateEventSectorRequest request) {
         Event event = this.getEventValidated(eventId);
 
@@ -81,6 +84,7 @@ public class EventService {
         return eventSector.getSectorId();
     }
 
+    @Transactional
     public void publishEvent(String eventId) {
         Event event = this.getEventValidated(eventId);
 
