@@ -9,14 +9,12 @@ import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
 import com.arquiweb.catalog.events.service.EventService;
 import com.arquiweb.catalog.infrastructure.client.TicketingClient;
-import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityRequest;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.catalog.venues.domain.Sector;
 import com.arquiweb.catalog.venues.domain.Venue;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
-import com.arquiweb.catalog.venues.repository.VenueRepository;
 import com.arquiweb.catalog.venues.service.VenueService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,13 +41,7 @@ public class EventServiceTest {
 
     private static final String VALID_EVENT_ID = "64b1f2c3d4e5f6a7b8c9d0e1";
     private static final String VALID_VENUE_ID = "64b1f2c3d4e5f6a7b8c9d0e2";
-
-    /**
-     * String createEvent(CreateEventRequest request)
-     * String addSector(String eventId, CreateEventSectorRequest request)
-     * void publishEvent(String eventId)
-     * Page<EventResponse> getAll(EventCriteriaQuery criteria, Pageable pag)
-     * */
+    private static final String NON_EXISTENT_ID = "64b1f2c3d4e5f6a7b8c9d000";
 
     @InjectMocks
     private EventService eventService;
@@ -65,9 +57,6 @@ public class EventServiceTest {
 
     @Mock
     private VenueService venueService;
-
-    @Mock
-    private VenueRepository venueRepository;
 
     private AutoCloseable closeable;
 
@@ -161,10 +150,9 @@ public class EventServiceTest {
     @Test
     void testAddSector_Successful() {
         // Arrange
-        String sectorId = "sec-01";
 
         CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
-        when(request.sectorId()).thenReturn(sectorId);
+        when(request.sectorId()).thenReturn(NON_EXISTENT_ID);
         when(request.price()).thenReturn(BigDecimal.valueOf(12000));
 
         Event mockEvent = mock(Event.class);
@@ -172,7 +160,7 @@ public class EventServiceTest {
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
         SectorResponse sectorResponse = mock(SectorResponse.class);
-        when(sectorResponse.id()).thenReturn(sectorId);
+        when(sectorResponse.id()).thenReturn(NON_EXISTENT_ID);
 
         VenueResponse venueResponse = mock(VenueResponse.class);
         when(venueResponse.sectors()).thenReturn(List.of(sectorResponse));
@@ -184,7 +172,7 @@ public class EventServiceTest {
 
         // Assert
         Assert.assertNotNull(returnedSectorId);
-        Assert.assertEquals(returnedSectorId, sectorId);
+        Assert.assertEquals(returnedSectorId, NON_EXISTENT_ID);
 
         verify(eventRepository, times(1)).save(mockEvent);
     }
@@ -233,10 +221,9 @@ public class EventServiceTest {
     @Test(expectedExceptions = IllegalEventStateException.class)
     public void testAddSector_StateInvalid() {
         // Arrange
-        String sectorId = "sec-01";
 
         CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
-        when(request.sectorId()).thenReturn(sectorId);
+        when(request.sectorId()).thenReturn(NON_EXISTENT_ID);
         when(request.price()).thenReturn(BigDecimal.valueOf(10000));
 
         Event mockEvent = mock(Event.class);
@@ -244,7 +231,7 @@ public class EventServiceTest {
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
         SectorResponse sectorResponse = mock(SectorResponse.class);
-        when(sectorResponse.id()).thenReturn(sectorId);
+        when(sectorResponse.id()).thenReturn(NON_EXISTENT_ID);
 
         VenueResponse venueResponse = mock(VenueResponse.class);
         when(venueResponse.sectors()).thenReturn(List.of(sectorResponse));
@@ -253,7 +240,7 @@ public class EventServiceTest {
         when(mockVenue.getId()).thenReturn(VALID_VENUE_ID);
 
         Sector mockSector = mock(Sector.class);
-        when(mockSector.getId()).thenReturn(sectorId);
+        when(mockSector.getId()).thenReturn(NON_EXISTENT_ID);
         when(mockVenue.getSectors()).thenReturn(List.of(mockSector));
 
         when(venueService.findVenueById(VALID_VENUE_ID)).thenReturn(venueResponse);
