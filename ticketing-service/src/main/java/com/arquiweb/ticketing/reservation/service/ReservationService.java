@@ -1,6 +1,8 @@
 package com.arquiweb.ticketing.reservation.service;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
+import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
+import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
@@ -9,10 +11,13 @@ import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
+import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
+import com.arquiweb.ticketing.reservation.domain.exceptions.QrGenerationException;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
+import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -32,17 +37,20 @@ public class ReservationService {
     public ReservationService(
            @Value("${app.config.reservation.max-tickets}") int maxTickets,
            @Value("${app.config.reservation.max-ttl}") int ttl,
+           @Value("${app.url}") String appUrl,
            ReservationRepository reservationRepository,
            InventoryService inventoryService
     ) {
         this.maxTickets = maxTickets;
         this.ttl = ttl;
+        this.appUrl = appUrl;
         this.reservationRepository = reservationRepository;
         this.inventoryService = inventoryService;
     }
 
     private final int ttl;
     private final int maxTickets;
+    private final String appUrl;
     private final ReservationRepository reservationRepository;
     private final InventoryService inventoryService;
 
@@ -119,8 +127,6 @@ public class ReservationService {
         expire(toExpire);
     }
 
-
-
     public void expire(List<UUID> expired) {
         reservationRepository.expire(expired, ReservationStatus.EXPIRED);
     }
@@ -129,6 +135,41 @@ public class ReservationService {
         return reservationRepository.findExpired(now, ReservationStatus.PENDING);
     }
 
+    public void confirmReservation(UUID reservationId, UUID paymentId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        if (reservation.getStatus() != ReservationStatus.PENDING) throw new IllegalReservationStateChangeException("Given reservation is not valid.");
+
+        inventoryService.confirmTickets(reservation.getTickets());
+        reservation.setStatus(ReservationStatus.PAID);
+        reservation.setPaymentId(paymentId);
+    }
+
+    public TicketQrResponse getTicketQr(UUID reservationId, UUID ticketId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        if (reservation.getStatus() != ReservationStatus.PAID) throw new IllegalReservationStateChangeException("Given reservation is not valid.");
+
+        Ticket ticket = reservation.getTickets().stream()
+                .filter(t -> t.getId().equals(ticketId)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("No ticket found with given ID for this reservation"));
+
+        try {
+            String qrCode = QrHandler.generateQrBase64(ticket.getQrToken());
+            String usageLink = appUrl + "/reservation/use?token=" + ticket.getQrToken();
+            return new TicketQrResponse(ticketId, usageLink);
+
+
+        } catch (Exception e) {
+            throw new QrGenerationException("Something went wrong generating QR code.");
+        }
+    }
+
+    public void spendTicket(UUID ticketId) {
+        inventoryService.useTicket(ticketId);
+    }
 
     private void checkMaxTickets(String eventId, String clientId, int amount) {
         if (amount > this.maxTickets)
@@ -138,4 +179,5 @@ public class ReservationService {
         if (previousTickets + amount > this.maxTickets)
             throw new InvalidInputException("Given has previously bough more tickets (" + previousTickets + "), and the max limit is " + maxTickets + ".", null);
     }
+
 }

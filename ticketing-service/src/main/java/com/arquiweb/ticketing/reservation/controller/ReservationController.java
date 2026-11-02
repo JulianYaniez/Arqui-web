@@ -3,7 +3,9 @@ package com.arquiweb.ticketing.reservation.controller;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
+import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
+import feign.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -94,6 +96,85 @@ class ReservationController {
             @PathVariable("reservationId") UUID id
     ) {
         reservationService.handlePaymentFailure(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Confirm reservation payment.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Reservation successfully confirmed."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No reservation found with given ID."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Reservation or tickets are not valid to confirm."
+            )
+    })
+    @PostMapping("/{reservationId}/confirm")
+    public ResponseEntity<Void> confirmReservation(
+            @PathVariable("reservationId") UUID reservationId,
+            @RequestBody UUID paymentId
+    ) {
+        reservationService.confirmReservation(reservationId, paymentId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(summary = "Get Ticket QR code.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully get Ticket QR code."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No reservation or ticket found with given IDs."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Given reservation or ticket/s are not valid."
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Something went wrong creating the QR."
+            )
+    })
+    @GetMapping("/{reservationId}/ticket/{ticketId}/qr")
+    public ResponseEntity<TicketQrResponse> getTicketQr(
+            @PathVariable("reservationId") UUID reservationId,
+            @PathVariable("ticketId") UUID ticketId
+    ) {
+        TicketQrResponse response = reservationService.getTicketQr(reservationId, ticketId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Spend Ticket (QR).")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Successful ticket use."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No ticket found with given IDs."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Given ticket is not valid."
+            )
+    })
+    @PostMapping("/use/{ticketId}")
+    public ResponseEntity<Void> spendTicket(
+            @PathVariable("ticketId") UUID ticketId
+    ) {
+        reservationService.spendTicket(ticketId);
 
         return ResponseEntity.noContent().build();
     }
