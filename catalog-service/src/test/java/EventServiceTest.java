@@ -1,5 +1,7 @@
 import com.arquiweb.catalog.events.domain.Event;
 import com.arquiweb.catalog.events.domain.EventSector;
+import com.arquiweb.catalog.events.domain.enums.EventStatus;
+import com.arquiweb.catalog.events.domain.enums.EventType;
 import com.arquiweb.catalog.events.domain.exceptions.IllegalEventStateException;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
@@ -19,16 +21,15 @@ import com.arquiweb.catalog.venues.service.VenueService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -373,5 +374,50 @@ public class EventServiceTest {
 
         verify(eventCustomRepository, times(1))
                 .findEventsWithDynamicFilters(criteria, pageable);
+    }
+
+    @Test
+    public void testSearchEvents_WithFiltersAndPagination_Successful() {
+        // 1. Arrange
+        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("date").ascending());
+
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getId()).thenReturn(VALID_EVENT_ID);
+
+        Page<Event> mockPage = new PageImpl<>(List.of(mockEvent));
+
+        when(eventCustomRepository.findEventsWithDynamicFilters(eq(criteria), eq(pageable)))
+                .thenReturn(mockPage);
+
+        // 2. Act
+        Page<?> result = eventService.getAll(criteria, pageable);
+
+        // 3. Assert
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getTotalElements(), 1);
+        verify(eventCustomRepository, times(1))
+                .findEventsWithDynamicFilters(eq(criteria), eq(pageable));
+    }
+
+    @Test
+    public void testSearchEvents_EmptyResults_ReturnsEmptyPage() {
+        // 1. Arrange
+        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<Event> emptyPage = new PageImpl<>(Collections.emptyList());
+
+        when(eventCustomRepository.findEventsWithDynamicFilters(eq(criteria), eq(pageable)))
+                .thenReturn(emptyPage);
+
+        // 2. Act
+        Page<?> result = eventService.getAll(criteria, pageable);
+
+        // 3. Assert
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.isEmpty());
+        verify(eventCustomRepository, times(1))
+                .findEventsWithDynamicFilters(eq(criteria), eq(pageable));
     }
 }
