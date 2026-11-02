@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.reservation.service;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
+import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
@@ -9,6 +10,7 @@ import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
+import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
@@ -119,14 +121,23 @@ public class ReservationService {
         expire(toExpire);
     }
 
-
-
     public void expire(List<UUID> expired) {
         reservationRepository.expire(expired, ReservationStatus.EXPIRED);
     }
 
     public List<UUID> findExpired(LocalDateTime now) {
         return reservationRepository.findExpired(now, ReservationStatus.PENDING);
+    }
+
+    public void confirmReservation(UUID reservationId, UUID paymentId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        if (reservation.getStatus() != ReservationStatus.PENDING) throw new IllegalReservationStateChangeException("Given reservation is not valid.");
+
+        inventoryService.confirmTickets(reservation.getTickets());
+        reservation.setStatus(ReservationStatus.PAID);
+        reservation.setPaymentId(paymentId);
     }
 
 

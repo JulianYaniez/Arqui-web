@@ -2,7 +2,7 @@ package com.arquiweb.ticketing.inventory.domain;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
-import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalStateChangeException;
+import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -49,6 +49,9 @@ public class Ticket {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
+
+    @Column(name = "qr_token")
+    private String qrToken;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "reservation_id", nullable = true)
@@ -101,7 +104,7 @@ public class Ticket {
     }
 
     public void lockTemporary() {
-        if (this.status != TicketStatus.AVAILABLE) throw new IllegalStateChangeException("Only available tickets can be locked.");
+        if (this.status != TicketStatus.AVAILABLE) throw new IllegalTicketStateChangeException("Only available tickets can be locked.");
 
         this.status = TicketStatus.LOCKED_TEMPORARY;
     }

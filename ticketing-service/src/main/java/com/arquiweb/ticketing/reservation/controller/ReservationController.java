@@ -97,4 +97,30 @@ class ReservationController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Confirm reservation payment.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Reservation successfully confirmed."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No reservation found with given ID."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Reservation or tickets are not valid to confirm."
+            )
+    })
+    @PostMapping("/{reservationId}/confirm")
+    public ResponseEntity<Void> confirmReservation(
+            @PathVariable("reservationId") UUID reservationId,
+            @RequestBody UUID paymentId
+    ) {
+        reservationService.confirmReservation(reservationId, paymentId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

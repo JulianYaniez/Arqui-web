@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.infrastructure.exception;
 
-import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalStateChangeException;
+import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
+import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -41,7 +42,8 @@ class GlobalExceptionHandler {
             OptimisticLockingFailureException.class,
             PessimisticLockingFailureException.class,
             OccupiedSpotException.class,
-            IllegalStateChangeException.class
+            IllegalTicketStateChangeException.class,
+            IllegalReservationStateChangeException.class
     })
     public ResponseEntity<ErrorResponse> handleOptimisticLockingFailureException(
             OptimisticLockingFailureException ex,

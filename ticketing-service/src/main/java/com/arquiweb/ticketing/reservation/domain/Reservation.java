@@ -45,7 +45,7 @@ public class Reservation {
     private BigDecimal totalAmount;
 
     @Column(name = "payment_id")
-    private String paymentId;
+    private UUID paymentId;
 
     @OneToMany(mappedBy = "reservation", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Ticket> tickets = new HashSet<>();

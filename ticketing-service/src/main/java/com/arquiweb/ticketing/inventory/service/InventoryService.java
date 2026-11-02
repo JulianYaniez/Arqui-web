@@ -4,6 +4,7 @@ import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
+import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.dto.requests.InitInventoryRequest;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -99,5 +101,13 @@ public class InventoryService {
 
     public void refundCapacity(CapacityRefundDto refund) {
         sectorCapacityRepository.refundCapacity(refund.eventId(), refund.sectorId(), refund.count());
+    }
+
+    public void confirmTickets(Set<Ticket> tickets) {
+        for (Ticket ticket : tickets) {
+            if (ticket.getStatus() != TicketStatus.LOCKED_TEMPORARY) throw new IllegalTicketStateChangeException("Given ticket/s is not valid.");
+            ticket.setStatus(TicketStatus.SOLD);
+            ticket.setQrToken(UUID.randomUUID().toString());
+        }
     }
 }
