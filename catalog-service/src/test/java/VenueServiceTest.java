@@ -23,7 +23,6 @@ public class VenueServiceTest {
     @Mock
     private VenueRepository venueRepository;
 
-    @InjectMocks
     private VenueService venueService; // Clase REAL bajo prueba
 
     private AutoCloseable closeable;
@@ -33,6 +32,7 @@ public class VenueServiceTest {
     @BeforeMethod
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
+        venueService = new VenueService(venueRepository);
     }
 
     @AfterMethod
