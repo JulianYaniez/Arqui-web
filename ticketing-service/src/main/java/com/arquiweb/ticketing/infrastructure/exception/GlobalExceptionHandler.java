@@ -3,6 +3,7 @@ package com.arquiweb.ticketing.infrastructure.exception;
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
+import com.arquiweb.ticketing.reservation.domain.exceptions.QrGenerationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.dao.PessimisticLockingFailureException;
@@ -46,12 +47,22 @@ class GlobalExceptionHandler {
             IllegalReservationStateChangeException.class
     })
     public ResponseEntity<ErrorResponse> handleOptimisticLockingFailureException(
-            OptimisticLockingFailureException ex,
+            RuntimeException ex,
             HttpServletRequest request
     ) {
         return buildBasicErrorResponse(HttpStatus.CONFLICT, ex, request);
     }
 
+
+    @ExceptionHandler({ // 500
+            QrGenerationException.class
+    })
+    public ResponseEntity<ErrorResponse> handleHttp500(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return buildBasicErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
+    }
 
     private ResponseEntity<ErrorResponse> buildBasicErrorResponse(HttpStatus httpStatus, RuntimeException ex, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse(
