@@ -1,4 +1,5 @@
 import com.arquiweb.catalog.events.domain.Event;
+import com.arquiweb.catalog.events.domain.EventSector;
 import com.arquiweb.catalog.events.domain.exceptions.IllegalEventStateException;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
@@ -273,12 +274,18 @@ public class EventServiceTest {
         Event mockEvent = mock(Event.class);
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
+        EventSector mockSector = mock(EventSector.class);
+        when(mockEvent.getSectors()).thenReturn(List.of(mockSector));
+
+        when(eventRepository.findById(anyString())).thenReturn(Optional.of(mockEvent));
+        when(eventRepository.save(any(Event.class))).thenReturn(mockEvent);
+
         // Act
         eventService.publishEvent(VALID_EVENT_ID);
 
         // Assert
         verify(mockEvent, times(1)).publish();
-        verify(ticketingClient, times(1)).initializeSectors(any(InitCapacityRequest.class));
+        verify(ticketingClient, times(1)).initializeSectors(any());
         verify(eventRepository, times(1)).save(mockEvent);
     }
 

@@ -7,7 +7,6 @@ import com.arquiweb.catalog.venues.repository.VenueRepository;
 import com.arquiweb.catalog.venues.service.VenueService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
