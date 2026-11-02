@@ -43,7 +43,6 @@ public class EventServiceTest {
     private static final String VALID_VENUE_ID = "64b1f2c3d4e5f6a7b8c9d0e2";
     private static final String NON_EXISTENT_ID = "64b1f2c3d4e5f6a7b8c9d000";
 
-    @InjectMocks
     private EventService eventService;
 
     @Mock
@@ -63,6 +62,12 @@ public class EventServiceTest {
     @BeforeMethod
     void setup() throws Exception {
         closeable = MockitoAnnotations.openMocks(this);
+        this.eventService = new EventService(
+                                eventRepository,
+                                eventCustomRepository,
+                                venueService,
+                                ticketingClient
+                            );
     }
 
     @AfterMethod
