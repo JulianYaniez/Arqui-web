@@ -110,4 +110,13 @@ public class InventoryService {
             ticket.setQrToken(UUID.randomUUID().toString());
         }
     }
+
+    public void useTicket(UUID ticketId){
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Given ticket ID does not exist."));
+
+        if (ticket.getStatus() != TicketStatus.SOLD) throw new  IllegalTicketStateChangeException("Given ticket status is not valid.");
+
+        ticket.setStatus(TicketStatus.USED);
+    }
 }

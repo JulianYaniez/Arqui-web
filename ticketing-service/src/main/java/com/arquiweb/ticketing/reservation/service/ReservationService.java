@@ -167,6 +167,10 @@ public class ReservationService {
         }
     }
 
+    public void spendTicket(UUID ticketId) {
+        inventoryService.useTicket(ticketId);
+    }
+
     private void checkMaxTickets(String eventId, String clientId, int amount) {
         if (amount > this.maxTickets)
             throw new InvalidInputException("Only " + maxTickets + " can be bought at once.", null);

@@ -154,4 +154,28 @@ class ReservationController {
 
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "Spend Ticket (QR).")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Successful ticket use."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No ticket found with given IDs."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Given ticket is not valid."
+            )
+    })
+    @PostMapping("/use/{ticketId}")
+    public ResponseEntity<Void> spendTicket(
+            @PathVariable("ticketId") UUID ticketId
+    ) {
+        reservationService.spendTicket(ticketId);
+
+        return ResponseEntity.noContent().build();
+    }
 }
