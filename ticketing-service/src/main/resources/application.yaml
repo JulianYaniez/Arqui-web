@@ -5,3 +5,17 @@ spring:
     url: jdbc:postgresql://localhost:5432/ticketing
     username: group_7
     password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+
+app:
+  feign:
+    catalog:
+      url: http://catalog-service:8080
+  config:
+    reservation:
+      max-tickets: 5
+      max-ttl: 10
+  url: http://ticketya.com/
