@@ -1,7 +1,13 @@
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
+import com.arquiweb.ticketing.inventory.domain.Ticket;
+import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
+import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
+import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
+import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
+import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
@@ -14,6 +20,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -58,6 +66,8 @@ public class ReservationServiceTest {
 
     @Test
     public void testReserveUnnumbered_Successful() {
+
+        // Arrange
         int quantity = 2;
         ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, quantity);
 
@@ -70,8 +80,10 @@ public class ReservationServiceTest {
 
         when(inventoryService.getSectorCapacity(EVENT_ID, SECTOR_ID)).thenReturn(sector);
 
+        // Act
         ReservationResponse response = reservationService.reserveUnnumbered(request, CLIENT_ID);
 
+        // Assert
         Assert.assertNotNull(response);
         verify(sector, times(1)).reduceCapacity(quantity);
         verify(inventoryService, times(1)).saveSectorCapacity(sector);
@@ -80,16 +92,142 @@ public class ReservationServiceTest {
 
     @Test(expectedExceptions = InvalidInputException.class)
     public void testReserveUnnumbered_ExceedsMaxBatchLimit() {
+
+        // Arrange
         ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, MAX_TICKETS + 1);
 
+        // Act
         reservationService.reserveUnnumbered(request, CLIENT_ID);
     }
 
     @Test(expectedExceptions = InvalidInputException.class)
     public void testReserveUnnumbered_ExceedsAccumulatedLimit() {
+
+        // Arrange
         ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, 2);
         when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(3);
 
+        // Act
         reservationService.reserveUnnumbered(request, CLIENT_ID);
+    }
+
+    @Test
+    public void testReserveNumbered_Successful() {
+
+        // Arrange
+        List<UUID> ticketIds = List.of(TICKET_ID);
+        ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
+
+        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+
+        Ticket mockTicket = mock(Ticket.class);
+        when(mockTicket.getStatus()).thenReturn(TicketStatus.AVAILABLE);
+        when(mockTicket.getEventId()).thenReturn(EVENT_ID);
+        when(mockTicket.getPrice()).thenReturn(BigDecimal.valueOf(10000));
+
+        when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(mockTicket));
+
+        // Act
+        ReservationResponse response = reservationService.reserveNumbered(request, CLIENT_ID);
+
+        // Assert
+        Assert.assertNotNull(response);
+        verify(mockTicket, times(1)).lockTemporary();
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testReserveNumbered_TicketCountMismatch() {
+
+        // Arrange
+        List<UUID> ticketIds = List.of(TICKET_ID, UUID.randomUUID());
+        ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
+
+        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+        when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(mock(Ticket.class)));
+
+        // Act
+        reservationService.reserveNumbered(request, CLIENT_ID);
+    }
+
+    @Test(expectedExceptions = OccupiedSpotException.class)
+    public void testReserveNumbered_SeatUnavailable() {
+
+        // Arrange
+        List<UUID> ticketIds = List.of(TICKET_ID);
+        ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
+
+        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+
+        Ticket occupiedTicket = mock(Ticket.class);
+        when(occupiedTicket.getStatus()).thenReturn(TicketStatus.LOCKED_TEMPORARY);
+        when(occupiedTicket.getEventId()).thenReturn(EVENT_ID);
+
+        when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(occupiedTicket));
+
+        // Act
+        reservationService.reserveNumbered(request, CLIENT_ID);
+    }
+
+    @Test(expectedExceptions = OccupiedSpotException.class)
+    public void testReserveNumbered_WrongEvent() {
+
+        // Arrange
+        List<UUID> ticketIds = List.of(TICKET_ID);
+        ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
+
+        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+
+        Ticket wrongEventTicket = mock(Ticket.class);
+        when(wrongEventTicket.getStatus()).thenReturn(TicketStatus.AVAILABLE);
+        when(wrongEventTicket.getEventId()).thenReturn("other-event-id");
+
+        when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(wrongEventTicket));
+
+        // Act
+        reservationService.reserveNumbered(request, CLIENT_ID);
+    }
+
+    @Test
+    public void testCancelReservations_Successful() {
+
+        // Arrange
+        List<UUID> expiredIds = List.of(RESERVATION_ID);
+        CapacityRefundDto refundDto = mock(CapacityRefundDto.class);
+
+        when(inventoryService.countCapacities(expiredIds)).thenReturn(List.of(refundDto));
+
+        // Act
+        reservationService.cancelReservations(expiredIds);
+
+        // Assert
+        verify(inventoryService, times(1)).releaseNumberedTickets(expiredIds);
+        verify(inventoryService, times(1)).refundCapacity(refundDto);
+        verify(inventoryService, times(1)).deleteUnnumberedTickets(expiredIds);
+        verify(reservationRepository, times(1)).expire(expiredIds, ReservationStatus.EXPIRED);
+    }
+
+    @Test
+    public void testCancelReservations_EmptyList_DoesNothing() {
+
+        // Act
+        reservationService.cancelReservations(Collections.emptyList());
+
+        //Assert
+        verify(inventoryService, never()).releaseNumberedTickets(any());
+        verify(reservationRepository, never()).expire(any(), any());
+    }
+
+    @Test
+    public void testHandlePaymentFailure_DelegatesToCancelReservations() {
+
+        //Act
+        when(inventoryService.countCapacities(anyList())).thenReturn(Collections.emptyList());
+
+        reservationService.handlePaymentFailure(RESERVATION_ID);
+
+        // Assert
+        verify(inventoryService, times(1)).releaseNumberedTickets(List.of(RESERVATION_ID));
+        verify(reservationRepository, times(1)).expire(List.of(RESERVATION_ID), ReservationStatus.EXPIRED);
     }
 }
