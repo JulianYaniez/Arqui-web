@@ -148,6 +148,35 @@ class ReservationController {
     }
 
 
+    @Operation(summary = "Set reservation into pending refund. Used by Management.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Successfully set for refund"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No reservation found with given ID."
+            )
+    })
+    @PostMapping("/{reservationId}/request-refund")
+    public ResponseEntity<Void> setReservationPendingRequest(
+            @PathVariable("reservationId") UUID reservationId
+    ) {
+        reservationService.setPendingRefund(reservationId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{reservationId}/refund")
+    public ResponseEntity<Void> refundReservation(
+            @PathVariable("reservationId") UUID reservationId
+    ) {
+        reservationService.refund(reservationId);
+
+        return  ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Get Ticket QR code.")
     @ApiResponses(value = {
             @ApiResponse(
@@ -194,9 +223,9 @@ class ReservationController {
     })
     @PostMapping("/use")
     public ResponseEntity<Void> spendTicket(
-            @RequestParam("ticketId") UUID ticketId
+            @RequestParam("token") String qrToken
     ) {
-        reservationService.spendTicket(ticketId);
+        reservationService.spendTicket(qrToken);
 
         return ResponseEntity.noContent().build();
     }

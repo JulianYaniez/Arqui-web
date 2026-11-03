@@ -1,5 +1,6 @@
 package com.arquiweb.management.infrastructure.exception;
 
+import com.arquiweb.management.refunding.domain.exceptions.InvalidRefundStatusException;
 import com.arquiweb.management.refunding.domain.exceptions.UnauthorizedRefundRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -37,11 +38,41 @@ class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             UnauthorizedRefundRequestException.class
     })
-    private ResponseEntity<ErrorResponse>  handle403(
+    public ResponseEntity<ErrorResponse>  handle403(
                 RuntimeException ex,
                 HttpServletRequest request
     ) {
         return buildBasicErrorResponse(HttpStatus.FORBIDDEN, ex, request);
+    }
+
+    @ExceptionHandler(value = {
+            ServiceUnavailableException.class
+    })
+    public ResponseEntity<ErrorResponse> handle500(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return buildBasicErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
+    }
+
+    @ExceptionHandler(value = {
+            InvalidRefundStatusException.class
+    })
+    public ResponseEntity<ErrorResponse> handle409(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return buildBasicErrorResponse(HttpStatus.CONFLICT, ex, request);
+    }
+
+    @ExceptionHandler(value = {
+            UnprocessableEntityException.class
+    })
+    public ResponseEntity<ErrorResponse> handle422(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return  buildBasicErrorResponse(HttpStatus.UNPROCESSABLE_CONTENT, ex, request);
     }
 
     private ResponseEntity<ErrorResponse> buildBasicErrorResponse(HttpStatus httpStatus, RuntimeException ex, HttpServletRequest request) {

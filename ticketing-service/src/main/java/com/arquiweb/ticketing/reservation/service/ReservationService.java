@@ -7,7 +7,6 @@ import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
-import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
@@ -115,6 +114,25 @@ public class ReservationService {
         cancelReservations(List.of(reservation));
     }
 
+    @Transactional
+    public void setPendingRefund(UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        reservation.requestRefund();
+    }
+
+    @Transactional
+    public void refund(UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        reservation.refund();
+
+        List<CapacityRefundDto> capacities = inventoryService.countCapacities(List.of(reservation.getId()));
+
+        for (CapacityRefundDto capacity : capacities) inventoryService.refundCapacity(capacity);
+    }
 
     public void cancelReservations(List<UUID> toExpire) {
         if (toExpire.isEmpty()) return;
@@ -172,8 +190,8 @@ public class ReservationService {
         }
     }
 
-    public void spendTicket(UUID ticketId) {
-        inventoryService.useTicket(ticketId);
+    public void spendTicket(String qrToken) {
+        inventoryService.useTicket(qrToken);
     }
 
     private void checkMaxTickets(String eventId, UUID clientId, int amount) {

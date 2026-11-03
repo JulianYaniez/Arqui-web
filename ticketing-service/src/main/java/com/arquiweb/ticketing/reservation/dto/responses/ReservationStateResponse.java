@@ -8,6 +8,7 @@ import java.util.UUID;
 public record ReservationStateResponse(
         UUID reservationId,
         UUID clientId,
+        String eventId,
         BigDecimal totalPrice,
         String status
 ){
@@ -16,6 +17,7 @@ public record ReservationStateResponse(
         return new ReservationStateResponse(
                 reservation.getId(),
                 reservation.getClientId(),
+                reservation.getEventId(), 
                 reservation.getTotalAmount(),
                 reservation.getStatus().toString()
         );

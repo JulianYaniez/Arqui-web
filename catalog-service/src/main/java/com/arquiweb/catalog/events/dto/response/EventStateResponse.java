@@ -5,7 +5,7 @@ import com.arquiweb.catalog.events.domain.Event;
 import java.time.LocalDateTime;
 
 public record EventStateResponse(
-    String id,
+    String eventId,
     String name,
     String type,
     LocalDateTime dateTime,

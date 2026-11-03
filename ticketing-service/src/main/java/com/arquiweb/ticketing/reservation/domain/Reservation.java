@@ -4,6 +4,7 @@ import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
+import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -78,5 +79,21 @@ public class Reservation {
             ticket.setReservation(this);
             this.tickets.add(ticket);
         }
+    }
+
+    public void requestRefund() {
+        if (!this.getStatus().equals(ReservationStatus.PAID)) throw new IllegalReservationStateChangeException("Only reservations on a PAID state can request refunds.");
+
+        this.setStatus(ReservationStatus.REFUND_REQUEST);
+    }
+
+    public void refund() {
+        if (!this.getStatus().equals(ReservationStatus.REFUND_REQUEST)) throw new IllegalReservationStateChangeException("Only reservations pending refunds can be refunded.");
+
+        for (Ticket ticket : this.getTickets()) {
+            ticket.refund();
+        }
+
+        this.status = ReservationStatus.REFUNDED;
     }
 }

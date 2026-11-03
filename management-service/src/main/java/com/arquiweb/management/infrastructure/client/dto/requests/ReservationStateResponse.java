@@ -6,6 +6,7 @@ import java.util.UUID;
 public record ReservationStateResponse(
         UUID reservationId,
         UUID clientId,
+        String eventId,
         BigDecimal totalPrice,
         String status
 ) {
