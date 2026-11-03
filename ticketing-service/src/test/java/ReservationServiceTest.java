@@ -1,4 +1,5 @@
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
+import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
@@ -6,6 +7,7 @@ import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
+import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
@@ -20,9 +22,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -229,5 +230,85 @@ public class ReservationServiceTest {
         // Assert
         verify(inventoryService, times(1)).releaseNumberedTickets(List.of(RESERVATION_ID));
         verify(reservationRepository, times(1)).expire(List.of(RESERVATION_ID), ReservationStatus.EXPIRED);
+    }
+
+    @Test
+    public void testConfirmReservation_Successful() {
+
+        // Arrange
+        Reservation reservation = mock(Reservation.class);
+        Set<Ticket> tickets = Set.of(mock(Ticket.class));
+
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PENDING);
+        when(reservation.getTickets()).thenReturn(tickets);
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        // Act
+        reservationService.confirmReservation(RESERVATION_ID, PAYMENT_ID);
+
+        // Assert
+        verify(inventoryService, times(1)).confirmTickets(tickets);
+        verify(reservation, times(1)).setStatus(ReservationStatus.PAID);
+        verify(reservation, times(1)).setPaymentId(PAYMENT_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testConfirmReservation_NotFound() {
+
+        when(reservationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        // Act
+        reservationService.confirmReservation(RESERVATION_ID, PAYMENT_ID);
+    }
+
+    @Test(expectedExceptions = IllegalReservationStateChangeException.class)
+    public void testConfirmReservation_NotPending() {
+
+        // Arrange
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PAID);
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        // Act
+        reservationService.confirmReservation(RESERVATION_ID, PAYMENT_ID);
+    }
+
+    @Test
+    public void testExpire_DelegatesToRepository() {
+
+        // Arrange
+        List<UUID> ids = List.of(RESERVATION_ID);
+
+        // Act
+        reservationService.expire(ids);
+
+        // Assert
+        verify(reservationRepository, times(1)).expire(ids, ReservationStatus.EXPIRED);
+    }
+
+    @Test
+    public void testFindExpired_DelegatesToRepository() {
+
+        // Arrange
+        LocalDateTime now = LocalDateTime.now();
+        when(reservationRepository.findExpired(eq(now), eq(ReservationStatus.PENDING)))
+                .thenReturn(List.of(RESERVATION_ID));
+
+        // Act
+        List<UUID> result = reservationService.findExpired(now);
+
+        // Assert
+        Assert.assertEquals(result.size(), 1);
+        verify(reservationRepository, times(1)).findExpired(now, ReservationStatus.PENDING);
+    }
+
+    @Test
+    public void testSpendTicket_DelegatesToInventoryService() {
+
+        // Act
+        reservationService.spendTicket(TICKET_ID);
+
+        // Assert
+        verify(inventoryService, times(1)).useTicket(TICKET_ID);
     }
 }
