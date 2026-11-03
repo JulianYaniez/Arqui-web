@@ -12,6 +12,7 @@ import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotExceptio
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
+import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
 import org.junit.jupiter.api.AfterEach;
@@ -310,5 +311,62 @@ public class ReservationServiceTest {
 
         // Assert
         verify(inventoryService, times(1)).useTicket(TICKET_ID);
+    }
+
+    @Test
+    public void testGetTicketQr_Successful() {
+
+        // Arrange
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PAID);
+
+        Ticket ticket = mock(Ticket.class);
+        when(ticket.getId()).thenReturn(TICKET_ID);
+        when(ticket.getQrToken()).thenReturn("qr-token-abc");
+
+        when(reservation.getTickets()).thenReturn(Set.of(ticket));
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        // Act
+        TicketQrResponse response = reservationService.getTicketQr(RESERVATION_ID, TICKET_ID);
+
+        // Assert
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.ticketId(), TICKET_ID);
+        Assert.assertTrue(response.qrImage().contains("qr-token-abc"));
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testGetTicketQr_ReservationNotFound() {
+
+        when(reservationRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        // Act
+        reservationService.getTicketQr(RESERVATION_ID, TICKET_ID);
+    }
+
+    @Test(expectedExceptions = IllegalReservationStateChangeException.class)
+    public void testGetTicketQr_ReservationNotPaid() {
+
+        // Arrange
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PENDING);
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        // Act
+        reservationService.getTicketQr(RESERVATION_ID, TICKET_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testGetTicketQr_TicketNotInReservation() {
+
+        // Arrange
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PAID);
+        when(reservation.getTickets()).thenReturn(Set.of());
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        // Act
+        reservationService.getTicketQr(RESERVATION_ID, TICKET_ID);
     }
 }
