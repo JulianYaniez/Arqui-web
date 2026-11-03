@@ -170,9 +170,9 @@ class ReservationController {
                     description = "Given ticket is not valid."
             )
     })
-    @PostMapping("/use/{ticketId}")
+    @PostMapping("/use")
     public ResponseEntity<Void> spendTicket(
-            @PathVariable("ticketId") UUID ticketId
+            @RequestParam("ticketId") UUID ticketId
     ) {
         reservationService.spendTicket(ticketId);
 
