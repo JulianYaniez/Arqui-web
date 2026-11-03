@@ -1,7 +1,5 @@
 import com.arquiweb.catalog.events.domain.Event;
 import com.arquiweb.catalog.events.domain.EventSector;
-import com.arquiweb.catalog.events.domain.enums.EventStatus;
-import com.arquiweb.catalog.events.domain.enums.EventType;
 import com.arquiweb.catalog.events.domain.exceptions.IllegalEventStateException;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
@@ -28,8 +26,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
