@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cd3ae202-26ec-4d78-a968-5cee22c75f66" name="Changes" comment="" />
+    <list default="true" id="cd3ae202-26ec-4d78-a968-5cee22c75f66" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -12,11 +15,11 @@
   </component>
   <component name="DatabaseLocalColorSettings">
     <colors>
-      <entry key="88d7e612-8238-4e90-a204-42c8ab094db5" value="" />
+      <entry key="d44ebbf9-4f55-47a9-9aea-ef95fef6bcd7" value="" />
     </colors>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="49" />
+    <option name="cachedIndexableFilesCount" value="167" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -33,6 +36,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JulianYaniez&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JulianYaniez/Arqui-web.git&quot;,
+    &quot;accountId&quot;: &quot;83ac58bd-daa5-4181-948b-4347cf1ea41d&quot;
+  }
+}</component>
   <component name="JsbtTreeLayoutManager">
     <layout place="tools.popupGrunt">
       <scroll-view-position x="0" y="0" />
@@ -44,61 +59,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.000000000049668" />
-      <entry key="MS500" value="1.0151763761611865" />
-      <entry key="S2" value="1.9361541095979213" />
-      <entry key="S5" value="3.4701170575575717" />
-      <entry key="S10" value="4.546184715334427" />
-      <entry key="S30" value="6.631583972980745" />
-      <entry key="S60" value="8.621681729552453" />
-      <entry key="M2" value="11.209544356709385" />
-      <entry key="M5" value="21.41500427680996" />
-      <entry key="M10" value="51.493741454641764" />
-      <entry key="M15" value="87.71432228092094" />
-      <entry key="M30" value="196.93123654269792" />
-      <entry key="H1" value="386.84340948578364" />
-      <entry key="H2" value="702.2949244198215" />
-      <entry key="H4" value="1201.1569316290104" />
-      <entry key="D1" value="2550.3288131525733" />
-      <entry key="W1" value="3022.221050932477" />
+      <entry key="MS100" value="1.0226747676612706" />
+      <entry key="MS500" value="2.8087576339065814" />
+      <entry key="S2" value="10.301361407710017" />
+      <entry key="S5" value="15.054731860817656" />
+      <entry key="S10" value="17.717126921292223" />
+      <entry key="S30" value="20.805015169112234" />
+      <entry key="S60" value="23.373620511558325" />
+      <entry key="M2" value="27.02836488449227" />
+      <entry key="M5" value="36.39848308485849" />
+      <entry key="M10" value="56.96975939210705" />
+      <entry key="M15" value="83.98610830547926" />
+      <entry key="M30" value="180.05065343213403" />
+      <entry key="H1" value="367.83880850844486" />
+      <entry key="H2" value="689.945303269944" />
+      <entry key="H4" value="1200.6846022244083" />
+      <entry key="D1" value="2598.941745464677" />
+      <entry key="W1" value="3093.572898023295" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="4.9920779941272065E-5" />
-      <entry key="MS500" value="0.13819051845700922" />
-      <entry key="S2" value="0.7365571931324002" />
-      <entry key="S5" value="1.2586631436484086" />
-      <entry key="S10" value="1.5838068476810447" />
-      <entry key="S30" value="2.2444833549161234" />
-      <entry key="S60" value="2.912921153384953" />
-      <entry key="M2" value="3.9640739601880908" />
-      <entry key="M5" value="9.79333505826776" />
-      <entry key="M10" value="23.88742403853508" />
-      <entry key="M15" value="37.89657600276272" />
-      <entry key="M30" value="75.51229911041237" />
-      <entry key="H1" value="139.68395714573316" />
-      <entry key="H2" value="252.6236036334267" />
-      <entry key="H4" value="438.2424928307253" />
-      <entry key="D1" value="932.0796859128725" />
-      <entry key="W1" value="1100.7544479567805" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="8.446868147749371E-201" />
+      <entry key="S5" value="1.329551643737025E-80" />
+      <entry key="S10" value="1.6277963274642256E-40" />
+      <entry key="S30" value="1.0513540814640545E-13" />
+      <entry key="S60" value="6.304418537312554E-7" />
+      <entry key="M2" value="0.0018441655410008112" />
+      <entry key="M5" value="0.4549816431665978" />
+      <entry key="M10" value="5.148739861882081" />
+      <entry key="M15" value="13.623469588906286" />
+      <entry key="M30" value="45.27532435362641" />
+      <entry key="H1" value="108.1604457100069" />
+      <entry key="H2" value="222.2976620803825" />
+      <entry key="H4" value="411.09762701879515" />
+      <entry key="D1" value="922.1993044810495" />
+      <entry key="W1" value="1099.0799115251743" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="5.3155429653210025E-5" />
-      <entry key="MS500" value="0.18058149475444535" />
-      <entry key="S2" value="1.985157578575851" />
-      <entry key="S5" value="4.305942784494092" />
-      <entry key="S10" value="5.870959339828843" />
-      <entry key="S30" value="8.742648506681064" />
-      <entry key="S60" value="11.43680051283997" />
-      <entry key="M2" value="15.098732077467492" />
-      <entry key="M5" value="31.13652543650078" />
-      <entry key="M10" value="75.29170939480754" />
-      <entry key="M15" value="125.51235519902104" />
-      <entry key="M30" value="272.3360670142583" />
-      <entry key="H1" value="526.4215378452514" />
-      <entry key="H2" value="954.8221757300215" />
-      <entry key="H4" value="1639.317247865654" />
-      <entry key="D1" value="3482.3802043256273" />
-      <entry key="W1" value="4122.9707551082565" />
+      <entry key="MS100" value="1.0017764608519182" />
+      <entry key="MS500" value="2.7774154371140014" />
+      <entry key="S2" value="10.170389312846266" />
+      <entry key="S5" value="14.927957051014205" />
+      <entry key="S10" value="17.614162989897356" />
+      <entry key="S30" value="20.748693908177348" />
+      <entry key="S60" value="23.334887614111175" />
+      <entry key="M2" value="27.001591114200263" />
+      <entry key="M5" value="36.826748635255775" />
+      <entry key="M10" value="62.07785479849872" />
+      <entry key="M15" value="97.55543903298164" />
+      <entry key="M30" value="225.24878674049407" />
+      <entry key="H1" value="475.9097643475965" />
+      <entry key="H2" value="912.1540643493591" />
+      <entry key="H4" value="1611.7029919791753" />
+      <entry key="D1" value="3521.1126830843004" />
+      <entry key="W1" value="4192.648019490875" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -127,19 +142,23 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Spring Boot.Tpe3Application.executor": "Run",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "tpe__final",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "feature/testing",
+    "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/kessy/Me/Coding/ArquiWeb/Arqui-web/src/main/java/org/arquiweb/services",
+    "last_opened_file_path": "C:/Users/julia/OneDrive/Documentos/TUDAI/segundo año/Segundo cuatrimestre/Arqui/tpe/tpe_final",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.jshint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.jshint": "",
     "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true"
   },
   "keyToStringList": {
     "DatabaseDriversLRU": [
+      "mongo",
       "postgresql"
     ]
   }
@@ -156,15 +175,6 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <configuration name="Tpe3Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="Arquitecturas_Web_G7" />
@@ -177,8 +187,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+        <option value="bundled-jdk-30f59d01ecdd-2df11533d9fe-intellij.indexing.shared.core-IU-262.11879.100" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.11879.100" />
       </set>
     </attachedChunks>
   </component>
@@ -206,6 +216,11 @@
           <properties class="java.lang.IllegalStateException" package="java.lang" />
           <option name="timeStamp" value="2" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/frontend/src/pages/EventDetails.jsx</url>
+          <line>1</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
