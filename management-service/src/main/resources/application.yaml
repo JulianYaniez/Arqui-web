@@ -5,3 +5,13 @@ spring:
     url: jdbc:postgresql://localhost:5433/management
     username: group_7
     password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+app:
+  feign:
+    catalog:
+      url: http://catalog-service:8080
+    ticketing:
+      url: http://ticketing-service:8080

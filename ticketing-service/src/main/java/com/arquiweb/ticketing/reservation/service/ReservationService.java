@@ -17,6 +17,7 @@ import com.arquiweb.ticketing.reservation.domain.exceptions.QrGenerationExceptio
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
+import com.arquiweb.ticketing.reservation.dto.responses.ReservationStateResponse;
 import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +57,7 @@ public class ReservationService {
 
     @Transactional
     @Retryable(maxRetries = 3, includes = OptimisticLockingFailureException.class)
-    public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, String clientId) {
+    public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, UUID clientId) {
         this.checkMaxTickets(request.eventId(), clientId, request.ticketQuantity());
 
         SectorCapacity sector = inventoryService.getSectorCapacity(request.eventId(), request.sectorId());
@@ -82,9 +83,13 @@ public class ReservationService {
         return ReservationResponse.fromDomain(reservation);
     }
 
+    public ReservationStateResponse getReservationStatus(UUID reservationId) {
+        return reservationRepository.findById(reservationId).map(ReservationStateResponse::fromDomain)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+    }
 
 
-    public ReservationResponse reserveNumbered(ReserveNumberedRequest request, String clientId) {
+    public ReservationResponse reserveNumbered(ReserveNumberedRequest request, UUID clientId) {
         checkMaxTickets(request.eventId(), clientId, request.ticketIds().size());
 
         List<Ticket> tickets = inventoryService.findTicketWithIdIn(request.ticketIds());
@@ -171,7 +176,7 @@ public class ReservationService {
         inventoryService.useTicket(ticketId);
     }
 
-    private void checkMaxTickets(String eventId, String clientId, int amount) {
+    private void checkMaxTickets(String eventId, UUID clientId, int amount) {
         if (amount > this.maxTickets)
             throw new InvalidInputException("Only " + maxTickets + " can be bought at once.", null);
 

@@ -6,6 +6,7 @@ import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
 import com.arquiweb.catalog.events.dto.response.EventResponse;
+import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
 import com.arquiweb.catalog.infrastructure.client.TicketingClient;
@@ -105,6 +106,10 @@ public class EventService {
         return eventsPage.map(EventResponse::fromDomain);
     }
 
+    public EventStateResponse getById(String eventId) {
+        return eventRepository.findById(eventId).map(EventStateResponse::fromDomain)
+                .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
+    }
 
     private Event getEventValidated(String eventId) {
         if (eventId == null) throw new InvalidInputException("Event ID cannot be null.", null);

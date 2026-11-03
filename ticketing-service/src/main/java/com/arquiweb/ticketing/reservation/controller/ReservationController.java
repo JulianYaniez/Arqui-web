@@ -1,8 +1,10 @@
 package com.arquiweb.ticketing.reservation.controller;
 
+import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
+import com.arquiweb.ticketing.reservation.dto.responses.ReservationStateResponse;
 import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
 import feign.Response;
@@ -47,8 +49,28 @@ class ReservationController {
             @RequestBody ReserveUnnumberedRequest request
     ) {
         // Placeholder
-        String userId = UUID.randomUUID().toString();
+        UUID userId = UUID.randomUUID();
         ReservationResponse response = reservationService.reserveUnnumbered(request, userId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get reservation state by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fetched successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Reservation not found with given ID."
+            )
+    })
+    @GetMapping("/{reservationId}/state")
+    public ResponseEntity<ReservationStateResponse> getReservationState(
+            @PathVariable("reservationId") UUID reservationId
+    ) {
+        ReservationStateResponse response = reservationService.getReservationStatus(reservationId);
 
         return ResponseEntity.ok(response);
     }
@@ -78,7 +100,7 @@ class ReservationController {
             @RequestBody ReserveNumberedRequest request
     ) {
         // Placeholder
-        String userId = UUID.randomUUID().toString();
+        UUID userId = UUID.randomUUID();
         ReservationResponse response = reservationService.reserveNumbered(request, userId);
 
         return  ResponseEntity.ok(response);

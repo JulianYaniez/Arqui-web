@@ -27,7 +27,7 @@ public class Reservation {
     private UUID id;
 
     @Column(name = "client_id", nullable = false)
-    private String clientId;
+    private UUID clientId;
 
     @Column(name = "event_id", nullable = false)
     private String eventId;
@@ -51,7 +51,7 @@ public class Reservation {
     private Set<Ticket> tickets = new HashSet<>();
 
     public Reservation(
-            String clientId,
+            UUID clientId,
             String eventId,
             BigDecimal totalAmount,
             List<Ticket> tickets,
@@ -59,7 +59,7 @@ public class Reservation {
     ) {
         Map<String, String> errors = new HashMap<>();
 
-        if (clientId == null || clientId.isBlank()) errors.put("clientId", "Client ID cannot be null or blank.");
+        if (clientId == null) errors.put("clientId", "Client ID cannot be null.");
         if (eventId == null || eventId.isBlank()) errors.put("eventId", "Event ID cannot be blank.");
         if (totalAmount == null) errors.put("totalAmount", "Total amount cannot be null.");
         if (totalAmount != null && totalAmount.compareTo(BigDecimal.ZERO) < 0) errors.put("totalAmount", "Total amount cannot be negative.");

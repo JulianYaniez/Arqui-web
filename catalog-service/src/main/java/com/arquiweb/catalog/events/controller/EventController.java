@@ -4,6 +4,7 @@ import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
 import com.arquiweb.catalog.events.dto.response.EventResponse;
+import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -65,6 +66,27 @@ class EventController {
                 .toUri();
 
         return ResponseEntity.created(uri).build();
+    }
+
+
+    @Operation(summary = "Get event state by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fetched successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No event found with given ID."
+            )
+    })
+    @GetMapping("/{eventId}/state")
+    public ResponseEntity<EventStateResponse> getEventStateById(
+            @PathVariable("eventId") String eventId
+    ) {
+        EventStateResponse response = eventService.getById(eventId);
+
+        return ResponseEntity.ok(response);
     }
 
 

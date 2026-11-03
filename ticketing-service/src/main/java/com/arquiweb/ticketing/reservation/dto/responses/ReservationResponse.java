@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ReservationResponse(
-        UUID id,
-        String clientId,
+        UUID reservationId,
+        UUID clientId,
         String eventId,
         BigDecimal totalPrice,
         LocalDateTime expiresAt
