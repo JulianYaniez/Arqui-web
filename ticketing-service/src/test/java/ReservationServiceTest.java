@@ -15,23 +15,23 @@ import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
 import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
 public class ReservationServiceTest {
 
     private static final int MAX_TICKETS = 4;
-    private static final int TTL_MINUTES = 15;
+    private static final int TTL_MINUTES = 900;
     private static final String APP_URL = "http://localhost:8080";
     private static final String EVENT_ID = "64b1f2c3d4e5f6a7b8c9d0e1";
     private static final String CLIENT_ID = "client-user-123";
@@ -49,9 +49,10 @@ public class ReservationServiceTest {
     private ReservationService reservationService;
     private AutoCloseable closeable;
 
-    @BeforeEach
+    @BeforeMethod
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
+        Mockito.reset(reservationRepository, inventoryService);
         this.reservationService = new ReservationService(
                                     MAX_TICKETS,
                                     TTL_MINUTES,
@@ -60,7 +61,7 @@ public class ReservationServiceTest {
                                     inventoryService
                                 );
     }
-    @AfterEach
+    @AfterMethod
     void tearDown() throws Exception {
         if(closeable != null)
             closeable.close();
