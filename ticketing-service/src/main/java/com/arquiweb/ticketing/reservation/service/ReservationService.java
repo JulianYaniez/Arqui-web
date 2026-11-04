@@ -7,7 +7,6 @@ import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
-import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
@@ -17,6 +16,7 @@ import com.arquiweb.ticketing.reservation.domain.exceptions.QrGenerationExceptio
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
+import com.arquiweb.ticketing.reservation.dto.responses.ReservationStateResponse;
 import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +56,7 @@ public class ReservationService {
 
     @Transactional
     @Retryable(maxRetries = 3, includes = OptimisticLockingFailureException.class)
-    public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, String clientId) {
+    public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, UUID clientId) {
         this.checkMaxTickets(request.eventId(), clientId, request.ticketQuantity());
 
         SectorCapacity sector = inventoryService.getSectorCapacity(request.eventId(), request.sectorId());
@@ -82,9 +82,13 @@ public class ReservationService {
         return ReservationResponse.fromDomain(reservation);
     }
 
+    public ReservationStateResponse getReservationStatus(UUID reservationId) {
+        return reservationRepository.findById(reservationId).map(ReservationStateResponse::fromDomain)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+    }
 
 
-    public ReservationResponse reserveNumbered(ReserveNumberedRequest request, String clientId) {
+    public ReservationResponse reserveNumbered(ReserveNumberedRequest request, UUID clientId) {
         checkMaxTickets(request.eventId(), clientId, request.ticketIds().size());
 
         List<Ticket> tickets = inventoryService.findTicketWithIdIn(request.ticketIds());
@@ -110,21 +114,62 @@ public class ReservationService {
         cancelReservations(List.of(reservation));
     }
 
+    @Transactional
+    public void setPendingRefund(UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
 
-    public void cancelReservations(List<UUID> toExpire) {
-        if (toExpire.isEmpty()) return;
+        reservation.requestRefund();
+    }
 
-        inventoryService.releaseNumberedTickets(toExpire);
+    @Transactional
+    public void acceptRefund(UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
 
-        List<CapacityRefundDto> refunds = inventoryService.countCapacities(toExpire);
+        reservation.refund();
+
+        List<CapacityRefundDto> capacities = inventoryService.countCapacities(List.of(reservation.getId()));
+
+        for (CapacityRefundDto capacity : capacities) inventoryService.refundCapacity(capacity);
+    }
+
+    @Transactional
+    public void rejectRefund(UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        reservation.rejectRefund();
+    }
+
+
+
+    public void cancelReservations(List<UUID> toCancel) {
+        if (toCancel.isEmpty()) return;
+
+        inventoryService.releaseNumberedTickets(toCancel);
+
+        List<CapacityRefundDto> refunds = inventoryService.countCapacities(toCancel);
 
         for (CapacityRefundDto refund : refunds) {
             inventoryService.refundCapacity(refund);
         }
 
-        inventoryService.deleteUnnumberedTickets(toExpire);
+        inventoryService.deleteUnnumberedTickets(toCancel);
 
-        expire(toExpire);
+        expire(toCancel);
+    }
+
+    public List<ReservationStateResponse> getSoldReservationsByEvent(String eventId, String statusString) {
+        ReservationStatus status;
+        try {
+            status = ReservationStatus.valueOf(statusString);
+        } catch (Exception e) {
+            throw new InvalidInputException("Given status is not valid", null);
+        }
+
+        List<Reservation> reservations = reservationRepository.findByEventIdAndStatus(eventId, status);
+        return reservations.stream().map(ReservationStateResponse::fromDomain).toList();
     }
 
     public void expire(List<UUID> expired) {
@@ -167,11 +212,11 @@ public class ReservationService {
         }
     }
 
-    public void spendTicket(UUID ticketId) {
-        inventoryService.useTicket(ticketId);
+    public void spendTicket(String qrToken) {
+        inventoryService.useTicket(qrToken);
     }
 
-    private void checkMaxTickets(String eventId, String clientId, int amount) {
+    private void checkMaxTickets(String eventId, UUID clientId, int amount) {
         if (amount > this.maxTickets)
             throw new InvalidInputException("Only " + maxTickets + " can be bought at once.", null);
 

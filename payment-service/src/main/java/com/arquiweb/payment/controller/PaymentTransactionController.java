@@ -48,6 +48,10 @@ public class PaymentTransactionController {
                     @ApiResponse(
                             responseCode = "400",
                             description = "Request data was faulty or invalid."
+                    ),
+                    @ApiResponse(
+                            responseCode = "502",
+                            description = "The release of the reservation could not be confirmed"
                     )
             }
     )

@@ -78,7 +78,7 @@ function Profile() {
               <span>→</span>
             </Link>
 
-            <Link to="/eventos" className="profile__link">
+            <Link to="/events" className="profile__link">
               <div>
                 <strong>Explorar eventos</strong>
                 <small>Encontrá tu próxima experiencia.</small>

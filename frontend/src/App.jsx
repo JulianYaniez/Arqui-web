@@ -34,23 +34,23 @@ function App() {
         <Route path="/" element={<Home />} />
 
         {/* Eventos */}
-        <Route path="/eventos" element={<Events />} />
-        <Route path="/eventos/:id" element={<EventDetails />} />
+        <Route path="/event" element={<Events />} />
+        <Route path="/event/:id" element={<EventDetails />} />
 
         {/* Autenticación */}
-        <Route path="/inicio-sesion" element={<Login />} />
-        <Route path="/registro" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Perfil del usuario */}
-        <Route path="/perfil" element={<Profile />} />
+        <Route path="/profile" element={<Profile />} />
 
         {/* Mis entradas */}
-        <Route path="/mis-entradas" element={<MyTickets />} />
+        <Route path="/my-tickets" element={<MyTickets />} />
 
         {/* Administración */}
-        <Route path="/administracion" element={<Managment />} />
+        <Route path="/managment" element={<Managment />} />
 
-        <Route path="/eventos/:id/comprar" element={<Checkout/>} ></Route>
+        <Route path="/event/:id/buy" element={<Checkout />} ></Route>
 
         {/* Página no encontrada */}
         <Route path="*" element={<h2>404 - Página no encontrada</h2>} />

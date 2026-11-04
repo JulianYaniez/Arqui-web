@@ -72,9 +72,8 @@ public class InventoryService {
 
     public SectorCapacity getSectorCapacity(String eventId, String sectorId) {
         SectorCapacity sector = sectorCapacityRepository.findByEventIdAndSectorId(eventId, sectorId)
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("No sector exists with given event and sector IDs."));
 
-        if (sector == null) throw new ResourceNotFoundException("No sector exists with given event and sector IDs.");
 
         return sector;
     }
@@ -111,9 +110,9 @@ public class InventoryService {
         }
     }
 
-    public void useTicket(UUID ticketId){
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new ResourceNotFoundException("Given ticket ID does not exist."));
+    public void useTicket(String qrCode){
+        Ticket ticket = ticketRepository.findByQrToken(qrCode)
+                .orElseThrow(() -> new ResourceNotFoundException("This QR token has no ticket assigned."));
 
         if (ticket.getStatus() != TicketStatus.SOLD) throw new  IllegalTicketStateChangeException("Given ticket status is not valid.");
 

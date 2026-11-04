@@ -57,7 +57,7 @@ function Home() {
             y asegurá tu lugar.
           </p>
 
-          <Link to="/eventos" className="home__button">
+          <Link to="/events" className="home__button">
             Explorar eventos
           </Link>
         </div>
@@ -75,7 +75,7 @@ function Home() {
             <p>Descubrí los eventos que no te podés perder.</p>
           </div>
 
-          <Link to="/eventos">Ver todos</Link>
+          <Link to="/events">Ver todos</Link>
         </div>
 
         <div className="home__events">
@@ -92,7 +92,7 @@ function Home() {
       <section className="home__cta">
         <h2>¿Listo para tu próximo evento?</h2>
         <p>Encontrá tu próxima experiencia en TicketYa.</p>
-        <Link to="/eventos">Ver eventos</Link>
+        <Link to="/events">Ver eventos</Link>
       </section>
     </main>
   )

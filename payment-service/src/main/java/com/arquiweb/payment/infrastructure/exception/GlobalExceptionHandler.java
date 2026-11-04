@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
@@ -37,6 +40,16 @@ class GlobalExceptionHandler {
                 ex.getValidationErrors()
         );
         return ResponseEntity.status(httpStatus).body(response);
+    }
+
+    @ExceptionHandler(ReservationReleaseException.class)
+    public ResponseEntity<Map<String, Object>> handleReservationReleaseException(ReservationReleaseException ex) {
+        Map<String, Object> body = Map.of(
+                "error", "Error de integración con Ticketing",
+                "message", ex.getMessage(),
+                "timestamp", LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
     }
 
 }

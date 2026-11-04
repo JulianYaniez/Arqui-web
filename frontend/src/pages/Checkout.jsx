@@ -84,7 +84,7 @@ function Checkout() {
   return (
     <main className="checkout">
       <Link
-        to={`/eventos/${id}`}
+        to={`/events/${id}`}
         className="checkout__back"
       >
         ← Volver al evento
