@@ -24,7 +24,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         WHERE r.clientId = :clientId AND r.eventId = :eventId
     """)
     int countTicketsByClientIdAndEventId(
-            @Param("client_id") String clientId,
+            @Param("client_id") UUID clientId,
             @Param("event_id") String eventId
     );
 
@@ -50,4 +50,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
             @Param("now") LocalDateTime now,
             @Param("status") ReservationStatus status
     );
+
+    List<Reservation> findByEventIdAndStatus(String eventId, ReservationStatus status);
 }

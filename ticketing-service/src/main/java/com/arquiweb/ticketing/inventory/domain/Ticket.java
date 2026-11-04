@@ -50,7 +50,7 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
 
-    @Column(name = "qr_token")
+    @Column(name = "qr_token", nullable = true, unique = true)
     private String qrToken;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -104,9 +104,17 @@ public class Ticket {
     }
 
     public void lockTemporary() {
-        if (this.status != TicketStatus.AVAILABLE) throw new IllegalTicketStateChangeException("Only available tickets can be locked.");
+        if (!this.status.equals(TicketStatus.AVAILABLE)) throw new IllegalTicketStateChangeException("Only available tickets can be locked.");
 
         this.status = TicketStatus.LOCKED_TEMPORARY;
+    }
+
+    public void refund() {
+        if (!this.isNumbered) return;
+
+        if (!this.status.equals(TicketStatus.SOLD)) throw new IllegalTicketStateChangeException("Only sold tickets can be refunded.");
+
+        this.status = TicketStatus.AVAILABLE;
     }
 
 }
