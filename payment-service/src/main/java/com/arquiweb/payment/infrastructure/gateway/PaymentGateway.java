@@ -7,5 +7,6 @@ import java.util.concurrent.TimeoutException;
 
 public interface PaymentGateway {
     GatewayResponse processPayment(String cardToken, BigDecimal amount) throws TimeoutException;
+    boolean refund(String transactionId, BigDecimal amount, boolean gatewaySuccess);
 
 }

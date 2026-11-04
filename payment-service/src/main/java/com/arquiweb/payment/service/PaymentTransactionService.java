@@ -6,6 +6,7 @@ import com.arquiweb.payment.entity.PaymentTransaction;
 import com.arquiweb.payment.enums.TransactionStatus;
 import com.arquiweb.payment.infrastructure.client.TicketingClient;
 import com.arquiweb.payment.infrastructure.exception.InvalidInputException;
+import com.arquiweb.payment.infrastructure.exception.PaymentGatewayException;
 import com.arquiweb.payment.infrastructure.exception.ReservationReleaseException;
 import com.arquiweb.payment.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
@@ -91,4 +92,19 @@ public class PaymentTransactionService {
         pt.setProcessedAt(processedAt);
         return paymentRepository.save(pt);
     }
+
+    public void refundTransaction(UUID paymentId, Boolean simulateFail) {
+        PaymentTransaction transaction = paymentRepository.getPaymentTransactionById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + paymentId));
+        boolean gatewaySuccess = paymentGateway.refund(transaction.getExternalGateweyTransactionId(), transaction.getAmount(), simulateFail);
+        if (gatewaySuccess) {
+            transaction.setStatus(TransactionStatus.REFUNDED);
+            paymentRepository.save(transaction);
+            this.releaseReservation(transaction.getReservationId());
+        }else{
+            throw new PaymentGatewayException("the payment gateway refund failed");
+        }
+    }
+
+
 }

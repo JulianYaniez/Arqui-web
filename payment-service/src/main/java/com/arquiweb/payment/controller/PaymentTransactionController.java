@@ -106,6 +106,11 @@ public class PaymentTransactionController {
 
         return ResponseEntity.ok(response);
     }
-
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> refundTransaction(@PathVariable UUID id,
+                                                  @RequestHeader(value = "X-Simulate-Fail", required = false) boolean simulateFail) {
+        pts.refundTransaction(id, simulateFail);
+        return ResponseEntity.noContent().build();
+    }
 
 }

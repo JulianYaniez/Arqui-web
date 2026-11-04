@@ -26,6 +26,11 @@ public class MockPaymentGateway implements PaymentGateway{
         return gr;
     }
 
+    @Override
+    public boolean refund(String transactionId, BigDecimal amount, boolean gatewaySuccess) {
+        return !gatewaySuccess;
+    }
+
     private GatewayResponse createGatewayResponse(String transactionId, TransactionStatus status, String message){
         return new GatewayResponse(status, transactionId, message);
     }
