@@ -22,7 +22,7 @@ services:
     ports: 
       - "5433:5432"
     volumes:
-      - ticketing_data:/var/lib/postgresql/data
+      - management_data:/var/lib/postgresql/data
 
   # * Identity *
   postgres-identity:
@@ -34,7 +34,7 @@ services:
     ports: 
       - "5434:5432"
     volumes:
-      - ticketing_data:/var/lib/postgresql/data
+      - identity_data:/var/lib/postgresql/data
 
   # * Payment *
   postgres-payment:
@@ -46,7 +46,7 @@ services:
     ports: 
       - "5435:5432"
     volumes:
-      - ticketing_data:/var/lib/postgresql/data
+      - payment_data:/var/lib/postgresql/data
 
   # * Catalog *
   mongo-catalog:
@@ -100,6 +100,7 @@ services:
   # * Payment *
   payment-service:
     build: ./payment-service
+
     ports: 
       - "8084:8080"
     environment:
