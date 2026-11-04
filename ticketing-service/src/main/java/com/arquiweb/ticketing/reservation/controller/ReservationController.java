@@ -1,5 +1,6 @@
 package com.arquiweb.ticketing.reservation.controller;
 
+import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -188,6 +190,43 @@ class ReservationController {
         reservationService.acceptRefund(reservationId);
 
         return  ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get reservations state by event ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fetched successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid reservation status."
+            )
+    })
+    @GetMapping
+    public ResponseEntity<List<ReservationStateResponse>> getReservationsByEvent(
+            @RequestParam("eventId") String eventId,
+            @RequestParam(value = "status", required = false) String status
+    ) {
+        List<ReservationStateResponse> response = reservationService.getSoldReservationsByEvent(eventId, (status != null ? status : ReservationStatus.PAID.toString()));
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Cancel multiple reservations.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Reservations canceled without issue."
+            )
+    })
+    @PostMapping("/bulk-cancel")
+    public ResponseEntity<Void> bulkReservationCancel(
+            @RequestBody List<UUID> request
+    ) {
+        reservationService.cancelReservations(request);
+
+        return ResponseEntity.noContent().build();
     }
 
 

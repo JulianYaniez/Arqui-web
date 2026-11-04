@@ -50,4 +50,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
             @Param("now") LocalDateTime now,
             @Param("status") ReservationStatus status
     );
+
+    List<Reservation> findByEventIdAndStatus(String eventId, ReservationStatus status);
 }

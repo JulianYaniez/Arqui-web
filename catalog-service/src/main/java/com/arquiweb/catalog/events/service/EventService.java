@@ -111,6 +111,15 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
     }
 
+    public void cancelEvent(String eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
+
+        event.cancel();
+    }
+
+
+
     private Event getEventValidated(String eventId) {
         if (eventId == null) throw new InvalidInputException("Event ID cannot be null.", null);
         if (!ObjectId.isValid(eventId)) throw new InvalidInputException("Event ID format is not valid.", null);

@@ -111,4 +111,29 @@ public class RefundingController {
 
         return  ResponseEntity.noContent().build();
     }
+
+
+    @Operation(summary = "Cancel event and execute refunds.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Event successfully canceled."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No event found with given ID"
+            ),
+            @ApiResponse(
+                    responseCode = "503",
+                    description = "Catalog, Ticketing or Payment services are down or could not respond properly."
+            )
+    })
+    @PostMapping("/cancel-event")
+    public ResponseEntity<Void> cancelEvent(
+            @RequestParam("eventId") String eventId
+    ) {
+        refundingService.cancelEvent(eventId);
+
+        return ResponseEntity.noContent().build();
+    }
 }

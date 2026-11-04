@@ -144,20 +144,32 @@ public class ReservationService {
 
 
 
-    public void cancelReservations(List<UUID> toExpire) {
-        if (toExpire.isEmpty()) return;
+    public void cancelReservations(List<UUID> toCancel) {
+        if (toCancel.isEmpty()) return;
 
-        inventoryService.releaseNumberedTickets(toExpire);
+        inventoryService.releaseNumberedTickets(toCancel);
 
-        List<CapacityRefundDto> refunds = inventoryService.countCapacities(toExpire);
+        List<CapacityRefundDto> refunds = inventoryService.countCapacities(toCancel);
 
         for (CapacityRefundDto refund : refunds) {
             inventoryService.refundCapacity(refund);
         }
 
-        inventoryService.deleteUnnumberedTickets(toExpire);
+        inventoryService.deleteUnnumberedTickets(toCancel);
 
-        expire(toExpire);
+        expire(toCancel);
+    }
+
+    public List<ReservationStateResponse> getSoldReservationsByEvent(String eventId, String statusString) {
+        ReservationStatus status;
+        try {
+            status = ReservationStatus.valueOf(statusString);
+        } catch (Exception e) {
+            throw new InvalidInputException("Given status is not valid", null);
+        }
+
+        List<Reservation> reservations = reservationRepository.findByEventIdAndStatus(eventId, status);
+        return reservations.stream().map(ReservationStateResponse::fromDomain).toList();
     }
 
     public void expire(List<UUID> expired) {

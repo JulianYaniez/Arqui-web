@@ -170,4 +170,28 @@ class EventController {
 
         return ResponseEntity.ok(page);
     }
+
+
+    @Operation(summary = "Cancel event.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Cancelled successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Event not found."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Invalid event state."
+            )
+    })
+    @PostMapping("/{eventId}/cancel")
+    public ResponseEntity<Void> cancelEvent(
+            @PathVariable("eventId") String eventId
+    ) {
+        eventService.cancelEvent(eventId);
+        return ResponseEntity.noContent().build();
+    }
 }

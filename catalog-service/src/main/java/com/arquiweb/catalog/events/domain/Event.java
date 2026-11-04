@@ -94,10 +94,16 @@ public class Event {
 
 
     public void publish() {
-        if (this.status != EventStatus.DRAFT) throw new IllegalEventStateException("Only DRAFT events can be published.");
+        if (!this.status.equals(EventStatus.DRAFT)) throw new IllegalEventStateException("Only DRAFT events can be published.");
 
         if (this.sectors.isEmpty()) throw new IllegalEventStateException("Events cannot be published without assigned sector/s.");
 
         this.status = EventStatus.PUBLISHED;
+    }
+
+    public void cancel() {
+        if (!this.status.equals(EventStatus.PUBLISHED)) throw new IllegalEventStateException("Only PUBLISHED events can be cancelled.");
+
+        this.status = EventStatus.CANCELLED;
     }
 }

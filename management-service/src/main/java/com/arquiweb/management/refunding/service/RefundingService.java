@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -122,6 +124,45 @@ public class RefundingService {
 
         refundRequestRepository.save(refundRequest);
     }
+
+    @Transactional
+    public void cancelEvent(String eventId) {
+        try {
+            catalogClient.cancelEvent(eventId);
+        } catch (FeignException.NotFound e) {
+            throw new ResourceNotFoundException("Event does not exist.");
+        } catch (Exception e) {
+            throw new ServiceUnavailableException("Something went wrong with Catalog service.");
+        }
+
+        List<ReservationStateResponse> reservations;
+        try {
+            reservations = ticketingClient.getReservationsByEventId(eventId, "PAID");
+        } catch (Exception e) {
+            throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
+        }
+
+        List<PaymentRefundRequest> payments = new ArrayList<>();
+        List<UUID> reservationIds = new ArrayList<>();
+
+        for (ReservationStateResponse reservation : reservations) {
+            payments.add(PaymentRefundRequest.fromReservation(reservation));
+            reservationIds.add(reservation.reservationId());
+        }
+
+        try { // Should go Async
+            paymentClient.bulkRefund(payments);
+        } catch (Exception e) {
+            throw new ServiceUnavailableException("Something went wrong with Payment service.");
+        }
+
+        try {
+            ticketingClient.bulkCancelReservations(reservationIds);
+        } catch (Exception e) {
+            throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
+        }
+    }
+
 
     private RefundRequest validateRefundRequest(UUID refundRequestId) {
         return refundRequestRepository.findById(refundRequestId)
