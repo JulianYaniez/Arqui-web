@@ -48,11 +48,11 @@ class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             ServiceUnavailableException.class
     })
-    public ResponseEntity<ErrorResponse> handle500(
+    public ResponseEntity<ErrorResponse> handle503(
             RuntimeException ex,
             HttpServletRequest request
     ) {
-        return buildBasicErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
+        return buildBasicErrorResponse(HttpStatus.BAD_GATEWAY, ex, request);
     }
 
     @ExceptionHandler(value = {

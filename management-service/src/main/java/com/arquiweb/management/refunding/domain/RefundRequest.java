@@ -2,6 +2,7 @@ package com.arquiweb.management.refunding.domain;
 
 import com.arquiweb.management.infrastructure.exception.InvalidInputException;
 import com.arquiweb.management.refunding.domain.enums.RefundStatus;
+import com.arquiweb.management.refunding.domain.exceptions.InvalidRefundStatusException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -63,5 +64,24 @@ public class RefundRequest {
         this.reason = reason;
         this.status = RefundStatus.PENDING;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void accept(UUID adminId) {
+        resolve(RefundStatus.ACCEPTED, adminId);
+
+    }
+
+    public void reject(UUID adminId) {
+        resolve(RefundStatus.REJECTED, adminId);
+    }
+
+    private void resolve(RefundStatus status, UUID adminId) {
+        if (!this.status.equals(RefundStatus.PENDING)) throw new InvalidRefundStatusException("Only pending refund requests can be accepted or rejected.");
+
+        if (adminId == null) throw new InvalidInputException("Given admin ID is not valid.", null);
+
+        this.resolvedAt = LocalDateTime.now();
+        this.resolvedBy = adminId;
+        this.status = status;
     }
 }

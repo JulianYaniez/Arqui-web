@@ -1,13 +1,11 @@
 package com.arquiweb.ticketing.reservation.controller;
 
-import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationStateResponse;
 import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
-import feign.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -168,14 +166,56 @@ class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{reservationId}/refund")
+    @Operation(summary = "Accept refund and release capacity/tickets.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Refunded successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Reservation not found with given ID."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Given reservation's state is not correct for this action."
+            )
+    })
+    @PostMapping("/{reservationId}/accept-refund")
     public ResponseEntity<Void> refundReservation(
             @PathVariable("reservationId") UUID reservationId
     ) {
-        reservationService.refund(reservationId);
+        reservationService.acceptRefund(reservationId);
 
         return  ResponseEntity.noContent().build();
     }
+
+
+    @Operation(summary = "Reject refund request.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Rejected successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Reservation not found with given ID."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Given reservation's state is not correct for this action."
+            )
+    })
+    @PostMapping("/{reservationId}/reject-refund")
+    public ResponseEntity<Void> rejectRefund(
+            @PathVariable("reservationId") UUID reservationId
+    ) {
+        reservationService.rejectRefund(reservationId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
 
     @Operation(summary = "Get Ticket QR code.")
     @ApiResponses(value = {

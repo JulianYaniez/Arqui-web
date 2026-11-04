@@ -123,7 +123,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void refund(UUID reservationId) {
+    public void acceptRefund(UUID reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
 
@@ -133,6 +133,16 @@ public class ReservationService {
 
         for (CapacityRefundDto capacity : capacities) inventoryService.refundCapacity(capacity);
     }
+
+    @Transactional
+    public void rejectRefund(UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        reservation.rejectRefund();
+    }
+
+
 
     public void cancelReservations(List<UUID> toExpire) {
         if (toExpire.isEmpty()) return;

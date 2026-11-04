@@ -4,7 +4,6 @@ import java.util.UUID;
 
 public record CreateRefundRequest(
         UUID reservationId,
-        UUID clientId,
         String reason
 ) {
 }

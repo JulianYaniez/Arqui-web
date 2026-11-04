@@ -15,3 +15,5 @@ app:
       url: http://catalog-service:8080
     ticketing:
       url: http://ticketing-service:8080
+    payment:
+      url: http://payment-service:8080

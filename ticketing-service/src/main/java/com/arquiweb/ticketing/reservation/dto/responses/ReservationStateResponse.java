@@ -9,6 +9,7 @@ public record ReservationStateResponse(
         UUID reservationId,
         UUID clientId,
         String eventId,
+        UUID paymentId,
         BigDecimal totalPrice,
         String status
 ){
@@ -17,7 +18,8 @@ public record ReservationStateResponse(
         return new ReservationStateResponse(
                 reservation.getId(),
                 reservation.getClientId(),
-                reservation.getEventId(), 
+                reservation.getEventId(),
+                reservation.getPaymentId(),
                 reservation.getTotalAmount(),
                 reservation.getStatus().toString()
         );

@@ -96,4 +96,10 @@ public class Reservation {
 
         this.status = ReservationStatus.REFUNDED;
     }
+
+    public void rejectRefund() {
+        if (!this.getStatus().equals(ReservationStatus.REFUND_REQUEST)) throw new IllegalReservationStateChangeException("Only reservations pending refunds can be rejected.");
+
+        this.status = ReservationStatus.PAID;
+    }
 }
