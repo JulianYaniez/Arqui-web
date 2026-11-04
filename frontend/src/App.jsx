@@ -34,8 +34,8 @@ function App() {
         <Route path="/" element={<Home />} />
 
         {/* Eventos */}
-        <Route path="/venue" element={<Events />} />
-        <Route path="/venue/:id" element={<EventDetails />} />
+        <Route path="/event" element={<Events />} />
+        <Route path="/event/:id" element={<EventDetails />} />
 
         {/* Autenticación */}
         <Route path="/login" element={<Login />} />
@@ -50,7 +50,7 @@ function App() {
         {/* Administración */}
         <Route path="/managment" element={<Managment />} />
 
-        <Route path="/venue/:id/buy" element={<Checkout />} ></Route>
+        <Route path="/event/:id/buy" element={<Checkout />} ></Route>
 
         {/* Página no encontrada */}
         <Route path="*" element={<h2>404 - Página no encontrada</h2>} />
