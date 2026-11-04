@@ -34,7 +34,7 @@ public class InventoryServiceTest {
     private InventoryService service;
     private AutoCloseable closeable;
 
-    private static final String EVENT_ID = "64b1f2c3d4e5f6a7b8c9d0e1";
+    private static final String EVENT_ID = UUID.randomUUID().toString();
     private static final String SECTOR_ID = "sector-1";
     private static final UUID TICKET_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID RESERVATION_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
@@ -284,12 +284,13 @@ public class InventoryServiceTest {
     public void testUseTicket_Successful() {
 
         // Arrange
+        String qrToken = "qr-token";
         Ticket ticket = mock(Ticket.class);
         when(ticket.getStatus()).thenReturn(TicketStatus.SOLD);
-        when(ticketRepo.findById(TICKET_ID)).thenReturn(Optional.of(ticket));
+        when(ticketRepo.findByQrToken(qrToken)).thenReturn(Optional.of(ticket));
 
         // Act
-        service.useTicket(TICKET_ID);
+        service.useTicket(qrToken);
 
         // Assert
         verify(ticket, times(1)).setStatus(TicketStatus.USED);
@@ -302,18 +303,19 @@ public class InventoryServiceTest {
         when(ticketRepo.findById(TICKET_ID)).thenReturn(Optional.empty());
 
         // Act
-        service.useTicket(TICKET_ID);
+        service.useTicket(String.valueOf(TICKET_ID));
     }
 
     @Test(expectedExceptions = IllegalTicketStateChangeException.class)
     public void testUseTicket_NotSold() {
 
         // Arrange
+        String qrToken = "qr-token";
         Ticket ticket = mock(Ticket.class);
         when(ticket.getStatus()).thenReturn(TicketStatus.AVAILABLE);
-        when(ticketRepo.findById(TICKET_ID)).thenReturn(Optional.of(ticket));
+        when(ticketRepo.findByQrToken(qrToken)).thenReturn(Optional.of(ticket));
 
         // Act
-        service.useTicket(TICKET_ID);
+        service.useTicket(qrToken);
     }
 }

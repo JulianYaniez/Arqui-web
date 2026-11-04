@@ -5,6 +5,7 @@ import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotExceptio
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -14,6 +15,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,8 +35,8 @@ public class ReservationConcurrencyTest {
     private ReservationService reservationService;
     private AutoCloseable closeable;
 
-    private static final String EVENT_ID = "event-123";
-    private static final String SECTOR_ID = "sector-general";
+    private static final String EVENT_ID = UUID.randomUUID().toString();
+    private static final String SECTOR_ID = UUID.randomUUID().toString();
 
     @BeforeMethod
     public void setUp() {
@@ -81,21 +83,23 @@ public class ReservationConcurrencyTest {
             return null;
         }).when(sector).reduceCapacity(anyInt());
 
-        when(inventoryService.getSectorCapacity(EVENT_ID, SECTOR_ID)).thenReturn(sector);
-        when(reservationRepository.countTicketsByClientIdAndEventId(anyString(), anyString())).thenReturn(0);
+        when(inventoryService.getSectorCapacity(anyString(), anyString())).thenReturn(sector);
+        when(reservationRepository.countTicketsByClientIdAndEventId(any(), any())).thenReturn(0);
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         AtomicInteger successCounter = new AtomicInteger(0);
         AtomicInteger failureCounter = new AtomicInteger(0);
 
         for (int i = 0; i < threadsCount; i++) {
-            final String clientId = "client-" + i;
+            final String clientId = UUID.randomUUID().toString();
             executor.submit(() -> {
                 try {
                     startLatch.await();
                     ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, 1);
-                    reservationService.reserveUnnumbered(request, clientId);
+                    reservationService.reserveUnnumbered(request, UUID.fromString(clientId));
                     successCounter.incrementAndGet();
                 } catch (Exception e) {
+                    e.printStackTrace(); // temporally
                     failureCounter.incrementAndGet();
                 } finally {
                     finishLatch.countDown();
@@ -110,9 +114,9 @@ public class ReservationConcurrencyTest {
         executor.shutdown();
 
         // Assert
-        Assert.assertTrue(finishedInTime, "La prueba de concurrencia tardó demasiado");
-        Assert.assertEquals(successCounter.get(), 1, "Exactamente una reserva debió ser exitosa");
-        Assert.assertEquals(failureCounter.get(), threadsCount - 1, "Los demás hilos debieron ser rechazados");
+        Assert.assertTrue(finishedInTime, "The concurrency test took too long");
+        Assert.assertEquals(successCounter.get(), 1, "Exactly one reservation must have been successful.");
+        Assert.assertEquals(failureCounter.get(), threadsCount - 1, "The other threads must have been rejected.");
 
         verify(reservationRepository, times(1)).save(any(Reservation.class));
     }

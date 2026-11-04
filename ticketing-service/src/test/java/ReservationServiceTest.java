@@ -33,8 +33,8 @@ public class ReservationServiceTest {
     private static final int MAX_TICKETS = 4;
     private static final int TTL_MINUTES = 900;
     private static final String APP_URL = "http://localhost:8080";
-    private static final String EVENT_ID = "64b1f2c3d4e5f6a7b8c9d0e1";
-    private static final String CLIENT_ID = "client-user-123";
+    private static final String EVENT_ID = UUID.randomUUID().toString();
+    private static final String CLIENT_ID = UUID.randomUUID().toString();
     private static final String SECTOR_ID = "sector-general";
     private static final UUID RESERVATION_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID PAYMENT_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
@@ -74,7 +74,7 @@ public class ReservationServiceTest {
         int quantity = 2;
         ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, quantity);
 
-        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+        when(reservationRepository.countTicketsByClientIdAndEventId(UUID.fromString(CLIENT_ID), EVENT_ID)).thenReturn(0);
 
         SectorCapacity sector = mock(SectorCapacity.class);
         when(sector.getEventId()).thenReturn(EVENT_ID);
@@ -84,7 +84,7 @@ public class ReservationServiceTest {
         when(inventoryService.getSectorCapacity(EVENT_ID, SECTOR_ID)).thenReturn(sector);
 
         // Act
-        ReservationResponse response = reservationService.reserveUnnumbered(request, CLIENT_ID);
+        ReservationResponse response = reservationService.reserveUnnumbered(request, UUID.fromString(CLIENT_ID));
 
         // Assert
         Assert.assertNotNull(response);
@@ -100,7 +100,7 @@ public class ReservationServiceTest {
         ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, MAX_TICKETS + 1);
 
         // Act
-        reservationService.reserveUnnumbered(request, CLIENT_ID);
+        reservationService.reserveUnnumbered(request, UUID.fromString(CLIENT_ID));
     }
 
     @Test(expectedExceptions = InvalidInputException.class)
@@ -108,10 +108,10 @@ public class ReservationServiceTest {
 
         // Arrange
         ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, 2);
-        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(3);
+        when(reservationRepository.countTicketsByClientIdAndEventId(UUID.fromString(CLIENT_ID), EVENT_ID)).thenReturn(3);
 
         // Act
-        reservationService.reserveUnnumbered(request, CLIENT_ID);
+        reservationService.reserveUnnumbered(request, UUID.fromString(CLIENT_ID));
     }
 
     @Test
@@ -121,7 +121,7 @@ public class ReservationServiceTest {
         List<UUID> ticketIds = List.of(TICKET_ID);
         ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
 
-        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+        when(reservationRepository.countTicketsByClientIdAndEventId(UUID.fromString(CLIENT_ID), EVENT_ID)).thenReturn(0);
 
         Ticket mockTicket = mock(Ticket.class);
         when(mockTicket.getStatus()).thenReturn(TicketStatus.AVAILABLE);
@@ -131,7 +131,7 @@ public class ReservationServiceTest {
         when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(mockTicket));
 
         // Act
-        ReservationResponse response = reservationService.reserveNumbered(request, CLIENT_ID);
+        ReservationResponse response = reservationService.reserveNumbered(request, UUID.fromString(CLIENT_ID));
 
         // Assert
         Assert.assertNotNull(response);
@@ -146,11 +146,11 @@ public class ReservationServiceTest {
         List<UUID> ticketIds = List.of(TICKET_ID, UUID.randomUUID());
         ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
 
-        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+        when(reservationRepository.countTicketsByClientIdAndEventId(UUID.fromString(CLIENT_ID), EVENT_ID)).thenReturn(0);
         when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(mock(Ticket.class)));
 
         // Act
-        reservationService.reserveNumbered(request, CLIENT_ID);
+        reservationService.reserveNumbered(request, UUID.fromString(CLIENT_ID));
     }
 
     @Test(expectedExceptions = OccupiedSpotException.class)
@@ -160,7 +160,7 @@ public class ReservationServiceTest {
         List<UUID> ticketIds = List.of(TICKET_ID);
         ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
 
-        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+        when(reservationRepository.countTicketsByClientIdAndEventId(UUID.fromString(CLIENT_ID), EVENT_ID)).thenReturn(0);
 
         Ticket occupiedTicket = mock(Ticket.class);
         when(occupiedTicket.getStatus()).thenReturn(TicketStatus.LOCKED_TEMPORARY);
@@ -169,7 +169,7 @@ public class ReservationServiceTest {
         when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(occupiedTicket));
 
         // Act
-        reservationService.reserveNumbered(request, CLIENT_ID);
+        reservationService.reserveNumbered(request, UUID.fromString(CLIENT_ID));
     }
 
     @Test(expectedExceptions = OccupiedSpotException.class)
@@ -179,7 +179,7 @@ public class ReservationServiceTest {
         List<UUID> ticketIds = List.of(TICKET_ID);
         ReserveNumberedRequest request = new ReserveNumberedRequest(EVENT_ID, ticketIds);
 
-        when(reservationRepository.countTicketsByClientIdAndEventId(CLIENT_ID, EVENT_ID)).thenReturn(0);
+        when(reservationRepository.countTicketsByClientIdAndEventId(UUID.fromString(CLIENT_ID), EVENT_ID)).thenReturn(0);
 
         Ticket wrongEventTicket = mock(Ticket.class);
         when(wrongEventTicket.getStatus()).thenReturn(TicketStatus.AVAILABLE);
@@ -188,7 +188,7 @@ public class ReservationServiceTest {
         when(inventoryService.findTicketWithIdIn(ticketIds)).thenReturn(List.of(wrongEventTicket));
 
         // Act
-        reservationService.reserveNumbered(request, CLIENT_ID);
+        reservationService.reserveNumbered(request, UUID.fromString(CLIENT_ID));
     }
 
     @Test
@@ -308,10 +308,10 @@ public class ReservationServiceTest {
     public void testSpendTicket_DelegatesToInventoryService() {
 
         // Act
-        reservationService.spendTicket(TICKET_ID);
+        reservationService.spendTicket(String.valueOf(TICKET_ID));
 
         // Assert
-        verify(inventoryService, times(1)).useTicket(TICKET_ID);
+        verify(inventoryService, times(1)).useTicket(String.valueOf(TICKET_ID));
     }
 
     @Test
