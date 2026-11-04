@@ -4,6 +4,7 @@ import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.bson.types.ObjectId;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class Sector {
 
     String id;
