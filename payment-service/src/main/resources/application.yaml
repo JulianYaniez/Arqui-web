@@ -9,3 +9,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+app:
+  feign:
+    ticketing:
+      url: http://ticketing-service:8080
