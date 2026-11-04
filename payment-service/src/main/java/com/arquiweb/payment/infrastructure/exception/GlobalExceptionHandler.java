@@ -52,4 +52,18 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
     }
 
+    @ExceptionHandler(PaymentGatewayException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentGatewayException(
+            PaymentGatewayException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST; // O HttpStatus.UNPROCESSABLE_ENTITY
+        ErrorResponse response = new ErrorResponse(
+                httpStatus,
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
 }
