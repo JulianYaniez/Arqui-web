@@ -6,11 +6,13 @@ import com.arquiweb.payment.entity.PaymentTransaction;
 import com.arquiweb.payment.enums.TransactionStatus;
 import com.arquiweb.payment.infrastructure.client.TicketingClient;
 import com.arquiweb.payment.infrastructure.exception.InvalidInputException;
+import com.arquiweb.payment.infrastructure.exception.ReservationReleaseException;
 import com.arquiweb.payment.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
 import com.arquiweb.payment.repositori.interfaces.PaymentRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentTransactionService {
 
     private final PaymentRepository paymentRepository;
@@ -29,7 +32,6 @@ public class PaymentTransactionService {
     private final TicketingClient ticketingClient;
 
     public PaymentTransaction processPayment(SavePaymentDTO request) {
-
         if (paymentRepository.isPaymentProcessedAndStatus(request.reservationId(), TransactionStatus.APPROVED)){
             throw new InvalidInputException("Payment already processed",
                     Map.of("reservationId", "Reservation " +
@@ -40,6 +42,14 @@ public class PaymentTransactionService {
         GatewayResponse gr;
         try {
             gr = paymentGateway.processPayment(request.cardToken(), request.amount());
+            if (gr == null) {
+                throw new InvalidInputException("Invalid gateway response",
+                        Map.of("gateway", "The payment gateway did not return a valid response."));
+            }
+            if (gr.ts() == null){
+                throw new InvalidInputException("Invalid gateway response",
+                        Map.of("gateway", "The payment gateway did not return a transaction status."));
+            }
         }catch (TimeoutException e) {
             pt = fillAndSave(TransactionStatus.REJECTED, null,LocalDateTime.now(), pt);
             releaseReservation(request.reservationId());
@@ -49,7 +59,7 @@ public class PaymentTransactionService {
         if (gr.ts() == TransactionStatus.REJECTED) {
             releaseReservation(request.reservationId());
         }
-
+        log.info("Payment transaction processed successfully, id={}, reservationId={}, staus={}", pt.getId(), pt.getReservationId(), pt.getStatus());
         return pt;
 
     }
@@ -58,12 +68,11 @@ public class PaymentTransactionService {
         try {
             ticketingClient.releaseReservations(reservationId);
         } catch (FeignException e){
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "The release of the reservation could not be confirmed" + reservationId,
+            log.error("Error communicating with the ticketing service to release the reservation id={}: {}", reservationId, e.getMessage());
+            throw new ReservationReleaseException(
+                    "The release of the reservation could not be confirmed: " + reservationId,
                     e
             );
-
         }}
 
 
