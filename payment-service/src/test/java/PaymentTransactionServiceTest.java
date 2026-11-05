@@ -2,13 +2,14 @@ import com.arquiweb.payment.dtos.GatewayResponse;
 import com.arquiweb.payment.dtos.SavePaymentDTO;
 import com.arquiweb.payment.entity.PaymentTransaction;
 import com.arquiweb.payment.enums.TransactionStatus;
+import com.arquiweb.payment.infrastructure.client.TicketingClient;
 import com.arquiweb.payment.infrastructure.exception.InvalidInputException;
 import com.arquiweb.payment.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
 import com.arquiweb.payment.repositori.interfaces.PaymentRepository;
 import com.arquiweb.payment.service.PaymentTransactionService;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -18,6 +19,7 @@ import org.testng.annotations.Test;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import static org.mockito.Mockito.*;
 
@@ -34,12 +36,16 @@ public class PaymentTransactionServiceTest {
     @Mock
     private PaymentGateway paymentGateway;
 
+    @Mock
+    private TicketingClient ticketingClient;
+
     private AutoCloseable closeable;
 
     @BeforeMethod
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        paymentTransactionService = new PaymentTransactionService(paymentRepository, paymentGateway);
+        Mockito.reset(paymentRepository, paymentGateway, ticketingClient);
+        paymentTransactionService = new PaymentTransactionService(paymentRepository, paymentGateway, ticketingClient);
     }
 
     @AfterMethod
@@ -50,7 +56,7 @@ public class PaymentTransactionServiceTest {
     }
 
     @Test
-    public void testProcessPayment_Successful() {
+    public void testProcessPayment_Successful() throws TimeoutException {
         // Arrange
         String cardToken = "token-xyz-123";
         BigDecimal amount = BigDecimal.valueOf(5000);
@@ -88,7 +94,7 @@ public class PaymentTransactionServiceTest {
     }
 
     @Test(expectedExceptions = InvalidInputException.class)
-    public void testProcessPayment_AlreadyPaid_ThrowsInvalidInputException() {
+    public void testProcessPayment_AlreadyPaid_ThrowsInvalidInputException() throws TimeoutException {
         // Arrange
         SavePaymentDTO request = mock(SavePaymentDTO.class);
         when(request.reservationId()).thenReturn(VALID_RESERVATION_ID);
@@ -155,5 +161,68 @@ public class PaymentTransactionServiceTest {
         // Act
         paymentTransactionService.getById(VALID_TRANSACTION_ID);
 
+    }
+
+    @Test
+    public void testProcessPayment_GatewayRejection() throws TimeoutException {
+
+        // Arrange
+        String cardToken = "token-xyz-123";
+        BigDecimal amount = BigDecimal.valueOf(5000);
+
+        SavePaymentDTO request = mock(SavePaymentDTO.class);
+        when(request.reservationId()).thenReturn(VALID_RESERVATION_ID);
+        when(request.cardToken()).thenReturn(cardToken);
+        when(request.amount()).thenReturn(amount);
+
+        PaymentTransaction mockPt = mock(PaymentTransaction.class);
+        when(request.toDomain()).thenReturn(mockPt);
+
+        when(paymentRepository.isPaymentProcessedAndStatus(any(UUID.class), eq(TransactionStatus.APPROVED)))
+                .thenReturn(false);
+
+        GatewayResponse gatewayResponse = mock(GatewayResponse.class);
+        when(gatewayResponse.ts()).thenReturn(TransactionStatus.REJECTED);
+        when(gatewayResponse.externalTransactionId()).thenReturn("ext-rejected-123");
+        when(paymentGateway.processPayment(eq(cardToken), eq(amount))).thenReturn(gatewayResponse);
+
+        when(paymentRepository.save(any(PaymentTransaction.class))).thenReturn(mockPt);
+
+        // Act
+        paymentTransactionService.processPayment(request);
+
+        // Assert
+        verify(ticketingClient, times(1)).releaseReservations(VALID_RESERVATION_ID);
+    }
+
+    @Test
+    public void testProcessPayment_GatewayTimeout() throws TimeoutException {
+
+        // Arrange
+        String cardToken = "token-xyz-123";
+        BigDecimal amount = BigDecimal.valueOf(5000);
+
+        SavePaymentDTO request = mock(SavePaymentDTO.class);
+        when(request.reservationId()).thenReturn(VALID_RESERVATION_ID);
+        when(request.cardToken()).thenReturn(cardToken);
+        when(request.amount()).thenReturn(amount);
+
+        PaymentTransaction mockPt = mock(PaymentTransaction.class);
+        when(request.toDomain()).thenReturn(mockPt);
+
+        when(paymentRepository.isPaymentProcessedAndStatus(any(UUID.class), eq(TransactionStatus.APPROVED)))
+                .thenReturn(false);
+
+        when(paymentGateway.processPayment(eq(cardToken), eq(amount)))
+                .thenThrow(new TimeoutException("Gateway connection timed out"));
+
+        // Act
+        try {
+            paymentTransactionService.processPayment(request);
+        } catch (Exception ignored) {
+        }
+
+        // Assert
+        verify(ticketingClient, times(1)).releaseReservations(VALID_RESERVATION_ID);
     }
 }
