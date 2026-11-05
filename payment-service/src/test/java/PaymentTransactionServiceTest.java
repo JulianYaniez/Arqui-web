@@ -4,6 +4,7 @@ import com.arquiweb.payment.entity.PaymentTransaction;
 import com.arquiweb.payment.enums.TransactionStatus;
 import com.arquiweb.payment.infrastructure.client.TicketingClient;
 import com.arquiweb.payment.infrastructure.exception.InvalidInputException;
+import com.arquiweb.payment.infrastructure.exception.PaymentGatewayException;
 import com.arquiweb.payment.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
 import com.arquiweb.payment.repositori.interfaces.PaymentRepository;
@@ -224,5 +225,77 @@ public class PaymentTransactionServiceTest {
 
         // Assert
         verify(ticketingClient, times(1)).releaseReservations(VALID_RESERVATION_ID);
+    }
+
+    @Test
+    public void testRefundTransaction_Successful() {
+
+        // Arrange
+        String externalTxId = "ext-gateway-999";
+        BigDecimal amount = BigDecimal.valueOf(5000);
+        boolean simulateFail = false;
+
+        PaymentTransaction mockPt = mock(PaymentTransaction.class);
+        when(mockPt.getExternalGateweyTransactionId()).thenReturn(externalTxId);
+        when(mockPt.getAmount()).thenReturn(amount);
+        when(mockPt.getReservationId()).thenReturn(VALID_RESERVATION_ID);
+
+        when(paymentRepository.getPaymentTransactionById(VALID_TRANSACTION_ID))
+                .thenReturn(Optional.of(mockPt));
+        when(paymentGateway.refund(externalTxId, amount, simulateFail))
+                .thenReturn(true);
+        when(paymentRepository.save(mockPt)).thenReturn(mockPt);
+
+        // Act
+        paymentTransactionService.refundTransaction(VALID_TRANSACTION_ID, simulateFail);
+
+        // Assert
+        verify(paymentRepository, times(1)).getPaymentTransactionById(VALID_TRANSACTION_ID);
+        verify(paymentGateway, times(1)).refund(externalTxId, amount, simulateFail);
+        verify(mockPt, times(1)).setStatus(TransactionStatus.REFUNDED);
+        verify(paymentRepository, times(1)).save(mockPt);
+        verify(ticketingClient, times(1)).releaseReservations(VALID_RESERVATION_ID);
+    }
+
+    @Test(expectedExceptions = PaymentGatewayException.class)
+    public void testRefundTransaction_GatewayFails_() {
+
+        // Arrange
+        String externalTxId = "ext-gateway-999";
+        BigDecimal amount = BigDecimal.valueOf(5000);
+        Boolean simulateFail = true;
+
+        PaymentTransaction mockPt = mock(PaymentTransaction.class);
+        when(mockPt.getExternalGateweyTransactionId()).thenReturn(externalTxId);
+        when(mockPt.getAmount()).thenReturn(amount);
+
+        when(paymentRepository.getPaymentTransactionById(VALID_TRANSACTION_ID))
+                .thenReturn(Optional.of(mockPt));
+        when(paymentGateway.refund(externalTxId, amount, simulateFail))
+                .thenReturn(false);
+
+        // Act
+        try {
+            paymentTransactionService.refundTransaction(VALID_TRANSACTION_ID, simulateFail);
+        } finally {
+            // Assert: It should not remain in the REFUNDED state, nor should the reservation be released, if the gateway failed.
+            verify(mockPt, never()).setStatus(TransactionStatus.REFUNDED);
+            verify(paymentRepository, never()).save(any());
+            verify(ticketingClient, never()).releaseReservations(any());
+        }
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testRefundTransaction_NotFound() {
+        // Arrange
+        when(paymentRepository.getPaymentTransactionById(VALID_TRANSACTION_ID))
+                .thenReturn(Optional.empty());
+
+        // Act
+        paymentTransactionService.refundTransaction(VALID_TRANSACTION_ID, false);
+
+        // Assert
+        verify(paymentGateway, never()).refund(any(), any(), any());
+        verify(ticketingClient, never()).releaseReservations(any());
     }
 }
