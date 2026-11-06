@@ -45,7 +45,7 @@ public class InventoryService {
             sectorCapacityRepository.saveAll(capacities);
         }
 
-        if (!capacities.isEmpty()) {
+        if (!seats.isEmpty()) {
             ticketRepository.saveAll(seats);
         }
     }

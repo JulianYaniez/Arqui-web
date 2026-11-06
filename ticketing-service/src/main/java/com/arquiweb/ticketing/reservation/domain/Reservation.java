@@ -73,7 +73,7 @@ public class Reservation {
         this.status = ReservationStatus.PENDING;
         this.totalAmount = totalAmount;
         this.createdAt = LocalDateTime.now();
-        this.expiresAt = LocalDateTime.now().plusMinutes(10);
+        this.expiresAt = LocalDateTime.now().plusMinutes(ttl);
 
         for (Ticket ticket : tickets) {
             ticket.setReservation(this);
