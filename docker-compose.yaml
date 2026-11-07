@@ -11,6 +11,12 @@ services:
       - "5432:5432"
     volumes:
       - ticketing_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d ticketing"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Management *
   postgres-management:
@@ -23,6 +29,12 @@ services:
       - "5433:5432"
     volumes:
       - management_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d management"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Identity *
   postgres-identity:
@@ -35,6 +47,12 @@ services:
       - "5434:5432"
     volumes:
       - identity_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d identity"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Payment *
   postgres-payment:
@@ -47,6 +65,12 @@ services:
       - "5435:5432"
     volumes:
       - payment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d payment"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Catalog *
   mongo-catalog:
@@ -71,7 +95,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-ticketing
+      postgres-ticketing:
+        condition: service_healthy
+
 
   # * Management *
   management-service:
@@ -83,7 +109,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-management
+      postgres-management:
+        condition: service_healthy
 
   # * Identity *
   identity-service:
@@ -95,7 +122,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-identity
+      postgres-identity:
+        condition: service_healthy
 
   # * Payment *
   payment-service:
@@ -108,7 +136,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-payment
+      postgres-payment:
+        condition: service_healthy
 
   # * Catalog *
   catalog-service:
