@@ -282,7 +282,7 @@ public class RefundingServiceTest {
 
         verify(catalogClient, times(1)).cancelEvent(EVENT_ID);
         verify(paymentClient, times(1)).bulkRefund(anyList());
-        verify(ticketingClient, times(1)).bulkCancelReservations(List.of(RESERVATION_ID));
+        verify(ticketingClient, times(1)).bulkCancelReservations(EVENT_ID);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
@@ -302,5 +302,84 @@ public class RefundingServiceTest {
         doThrow(new RuntimeException("Payment bulk refund error")).when(paymentClient).bulkRefund(anyList());
 
         service.cancelEvent(EVENT_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testAcceptRefund_ReservationNotFound_ThrowsResourceNotFoundException() {
+        RefundRequest mockRefund = mock(RefundRequest.class);
+        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
+        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+
+        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(buildFeignNotFound());
+
+        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
+    }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testAcceptRefund_TicketingGenericError_ThrowsServiceUnavailableException() {
+        RefundRequest mockRefund = mock(RefundRequest.class);
+        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
+        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+
+        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(new RuntimeException("Ticketing service down"));
+
+        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testRejectRefund_ReservationNotFound_ThrowsResourceNotFoundException() {
+        RefundRequest mockRefund = mock(RefundRequest.class);
+        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
+        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+
+        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(buildFeignNotFound());
+
+        service.rejectRefund(REFUND_REQUEST_ID, ADMIN_ID);
+    }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testRejectRefund_TicketingGenericError_ThrowsServiceUnavailableException() {
+        RefundRequest mockRefund = mock(RefundRequest.class);
+        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
+        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+
+        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(new RuntimeException("Ticketing service down"));
+
+        service.rejectRefund(REFUND_REQUEST_ID, ADMIN_ID);
+    }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testCancelEvent_CatalogGenericError_ThrowsServiceUnavailableException() {
+        doThrow(new RuntimeException("Catalog error")).when(catalogClient).cancelEvent(EVENT_ID);
+
+        service.cancelEvent(EVENT_ID);
+    }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testCancelEvent_TicketingGetReservationsFails_ThrowsServiceUnavailableException() {
+        when(ticketingClient.getReservationsByEventId(EVENT_ID, "PAID"))
+                .thenThrow(new RuntimeException("Ticketing error"));
+
+        service.cancelEvent(EVENT_ID);
+    }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testCancelEvent_TicketingBulkCancelFails_ThrowsServiceUnavailableException() {
+        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
+        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
+
+        when(ticketingClient.getReservationsByEventId(EVENT_ID, "PAID"))
+                .thenReturn(List.of(mockReservation));
+        doThrow(new RuntimeException("Ticketing bulk cancel error"))
+                .when(ticketingClient).bulkCancelReservations(EVENT_ID);
+
+        service.cancelEvent(EVENT_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testAcceptRefund_RefundRequestNotFound_ThrowsResourceNotFoundException() {
+        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.empty());
+
+        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
     }
 }
