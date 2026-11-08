@@ -1,10 +1,12 @@
 import com.arquiweb.catalog.events.domain.Event;
 import com.arquiweb.catalog.events.domain.EventSector;
+import com.arquiweb.catalog.events.domain.enums.EventType;
 import com.arquiweb.catalog.events.domain.exceptions.IllegalEventStateException;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
 import com.arquiweb.catalog.events.dto.response.EventResponse;
+import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
 import com.arquiweb.catalog.events.service.EventService;
@@ -415,5 +417,71 @@ public class EventServiceTest {
         Assert.assertTrue(result.isEmpty());
         verify(eventCustomRepository, times(1))
                 .findEventsWithDynamicFilters(eq(criteria), eq(pageable));
+    }
+
+    @Test
+    public void testGetById_Successful() {
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getId()).thenReturn(VALID_EVENT_ID);
+
+        EventType mockEventType = mock(EventType.class);
+        when(mockEventType.toString()).thenReturn("CONCERT");
+        when(mockEvent.getType()).thenReturn(mockEventType);
+
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
+
+        EventStateResponse response = eventService.getById(VALID_EVENT_ID);
+
+        Assert.assertNotNull(response);
+        verify(eventRepository, times(1)).findById(VALID_EVENT_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testGetById_NotFound_ThrowsResourceNotFoundException() {
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.empty());
+
+        eventService.getById(VALID_EVENT_ID);
+    }
+
+    @Test
+    public void testCancelEvent_Successful() {
+        Event mockEvent = mock(Event.class);
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
+
+        eventService.cancelEvent(VALID_EVENT_ID);
+
+        verify(eventRepository, times(1)).findById(VALID_EVENT_ID);
+        verify(mockEvent, times(1)).cancel();
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testCancelEvent_NotFound_ThrowsResourceNotFoundException() {
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.empty());
+
+        eventService.cancelEvent(VALID_EVENT_ID);
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testAddSector_NullEventId_ThrowsInvalidInputException() {
+        CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
+
+        eventService.addSector(null, request);
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testAddSector_InvalidObjectIdFormat_ThrowsInvalidInputException() {
+        CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
+
+        eventService.addSector("formato-no-valido-123", request);
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testPublishEvent_NullEventId_ThrowsInvalidInputException() {
+        eventService.publishEvent(null);
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testPublishEvent_InvalidObjectIdFormat_ThrowsInvalidInputException() {
+        eventService.publishEvent("formato-no-valido-123");
     }
 }
