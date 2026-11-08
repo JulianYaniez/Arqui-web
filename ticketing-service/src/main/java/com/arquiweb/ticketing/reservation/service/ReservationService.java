@@ -1,5 +1,6 @@
 package com.arquiweb.ticketing.reservation.service;
 
+import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
@@ -34,18 +35,21 @@ import java.util.stream.Stream;
 @Service
 public class ReservationService {
 
+    private final EventService eventService;
+
     public ReservationService(
            @Value("${app.config.reservation.max-tickets}") int maxTickets,
            @Value("${app.config.reservation.max-ttl}") int ttl,
            @Value("${app.url}") String appUrl,
            ReservationRepository reservationRepository,
-           InventoryService inventoryService
-    ) {
+           InventoryService inventoryService,
+           EventService eventService) {
         this.maxTickets = maxTickets;
         this.ttl = ttl;
         this.appUrl = appUrl;
         this.reservationRepository = reservationRepository;
         this.inventoryService = inventoryService;
+        this.eventService = eventService;
     }
 
     private final int ttl;
@@ -57,6 +61,8 @@ public class ReservationService {
     @Transactional
     @Retryable(maxRetries = 3, includes = OptimisticLockingFailureException.class)
     public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, UUID clientId) {
+        eventService.validateEvent(request.eventId());
+
         this.checkMaxTickets(request.eventId(), clientId, request.ticketQuantity());
 
         SectorCapacity sector = inventoryService.getSectorCapacity(request.eventId(), request.sectorId());
@@ -82,13 +88,10 @@ public class ReservationService {
         return ReservationResponse.fromDomain(reservation);
     }
 
-    public ReservationStateResponse getReservationStatus(UUID reservationId) {
-        return reservationRepository.findById(reservationId).map(ReservationStateResponse::fromDomain)
-                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
-    }
-
 
     public ReservationResponse reserveNumbered(ReserveNumberedRequest request, UUID clientId) {
+        eventService.validateEvent(request.eventId());
+
         checkMaxTickets(request.eventId(), clientId, request.ticketIds().size());
 
         List<Ticket> tickets = inventoryService.findTicketWithIdIn(request.ticketIds());
@@ -107,6 +110,20 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         return ReservationResponse.fromDomain(reservation);
+    }
+
+
+    public ReservationStateResponse getReservationStatus(UUID reservationId) {
+        return reservationRepository.findById(reservationId).map(ReservationStateResponse::fromDomain)
+                .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+    }
+
+    public void cancelByEvent(String eventId) {
+        List<UUID> reservationIds = reservationRepository.findByEventIdAndStatus(eventId, ReservationStatus.PAID).stream()
+                .map(Reservation::getId)
+                .toList();
+
+        this.cancelReservations(reservationIds);
     }
 
     @Transactional

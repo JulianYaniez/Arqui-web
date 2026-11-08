@@ -24,8 +24,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         WHERE r.clientId = :clientId AND r.eventId = :eventId
     """)
     int countTicketsByClientIdAndEventId(
-            @Param("client_id") UUID clientId,
-            @Param("event_id") String eventId
+            @Param("clientId") UUID clientId,
+            @Param("eventId") String eventId
     );
 
     @Modifying
