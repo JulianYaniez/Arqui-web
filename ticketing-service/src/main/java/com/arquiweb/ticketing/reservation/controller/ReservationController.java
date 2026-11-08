@@ -42,6 +42,10 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Requested ticket is already reserved or sector has run out of capacity."
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Event has already happened or was cancelled."
             )
     })
     @PostMapping("/unnumbered")
@@ -51,26 +55,6 @@ class ReservationController {
         // Placeholder
         UUID userId = UUID.randomUUID();
         ReservationResponse response = reservationService.reserveUnnumbered(request, userId);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Get reservation state by ID.")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Fetched successfully."
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Reservation not found with given ID."
-            )
-    })
-    @GetMapping("/{reservationId}/state")
-    public ResponseEntity<ReservationStateResponse> getReservationState(
-            @PathVariable("reservationId") UUID reservationId
-    ) {
-        ReservationStateResponse response = reservationService.getReservationStatus(reservationId);
 
         return ResponseEntity.ok(response);
     }
@@ -93,6 +77,10 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Requested ticket is already reserved."
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Event has already happened or was cancelled."
             )
     })
     @PostMapping("/numbered")
@@ -105,6 +93,28 @@ class ReservationController {
 
         return  ResponseEntity.ok(response);
     }
+
+
+    @Operation(summary = "Get reservation state by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fetched successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Reservation not found with given ID."
+            )
+    })
+    @GetMapping("/{reservationId}/state")
+    public ResponseEntity<ReservationStateResponse> getReservationState(
+            @PathVariable("reservationId") UUID reservationId
+    ) {
+        ReservationStateResponse response = reservationService.getReservationStatus(reservationId);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @Operation(summary = "Cancel reservation pending confirmation.")
     @ApiResponses(value = {
@@ -228,7 +238,6 @@ class ReservationController {
 
         return ResponseEntity.noContent().build();
     }
-
 
     @Operation(summary = "Reject refund request.")
     @ApiResponses(value = {

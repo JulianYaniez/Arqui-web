@@ -143,11 +143,9 @@ public class RefundingService {
         }
 
         List<PaymentRefundRequest> payments = new ArrayList<>();
-        List<UUID> reservationIds = new ArrayList<>();
 
         for (ReservationStateResponse reservation : reservations) {
             payments.add(PaymentRefundRequest.fromReservation(reservation));
-            reservationIds.add(reservation.reservationId());
         }
 
         try { // Should go Async
@@ -157,7 +155,7 @@ public class RefundingService {
         }
 
         try {
-            ticketingClient.bulkCancelReservations(reservationIds);
+            ticketingClient.bulkCancelReservations(eventId);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
         }
