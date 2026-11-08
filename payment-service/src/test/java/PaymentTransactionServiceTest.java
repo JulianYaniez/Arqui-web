@@ -5,10 +5,13 @@ import com.arquiweb.payment.enums.TransactionStatus;
 import com.arquiweb.payment.infrastructure.client.TicketingClient;
 import com.arquiweb.payment.infrastructure.exception.InvalidInputException;
 import com.arquiweb.payment.infrastructure.exception.PaymentGatewayException;
+import com.arquiweb.payment.infrastructure.exception.ReservationReleaseException;
 import com.arquiweb.payment.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
 import com.arquiweb.payment.repositori.interfaces.PaymentRepository;
 import com.arquiweb.payment.service.PaymentTransactionService;
+import feign.FeignException;
+import feign.Request;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -18,6 +21,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -54,6 +59,15 @@ public class PaymentTransactionServiceTest {
         if (closeable != null) {
             closeable.close();
         }
+    }
+
+    private FeignException buildFeignInternalServerError() {
+        return new FeignException.InternalServerError(
+                "Internal Server Error",
+                Request.create(Request.HttpMethod.POST, "/release", Collections.emptyMap(), null, null, null),
+                null,
+                Collections.emptyMap()
+        );
     }
 
     @Test
@@ -297,5 +311,87 @@ public class PaymentTransactionServiceTest {
         // Assert
         verify(paymentGateway, never()).refund(any(), any(), any());
         verify(ticketingClient, never()).releaseReservations(any());
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testProcessPayment_GatewayReturnsNull_ThrowsInvalidInputException() throws TimeoutException {
+        SavePaymentDTO request = mock(SavePaymentDTO.class);
+        when(request.reservationId()).thenReturn(VALID_RESERVATION_ID);
+        when(request.cardToken()).thenReturn("token-123");
+        when(request.amount()).thenReturn(BigDecimal.valueOf(1000));
+        when(request.toDomain()).thenReturn(mock(PaymentTransaction.class));
+
+        when(paymentRepository.isPaymentProcessedAndStatus(VALID_RESERVATION_ID, TransactionStatus.APPROVED))
+                .thenReturn(false);
+        when(paymentGateway.processPayment(anyString(), any(BigDecimal.class)))
+                .thenReturn(null);
+
+        paymentTransactionService.processPayment(request);
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testProcessPayment_GatewayStatusNull_ThrowsInvalidInputException() throws TimeoutException {
+        SavePaymentDTO request = mock(SavePaymentDTO.class);
+        when(request.reservationId()).thenReturn(VALID_RESERVATION_ID);
+        when(request.cardToken()).thenReturn("token-123");
+        when(request.amount()).thenReturn(BigDecimal.valueOf(1000));
+        when(request.toDomain()).thenReturn(mock(PaymentTransaction.class));
+
+        when(paymentRepository.isPaymentProcessedAndStatus(VALID_RESERVATION_ID, TransactionStatus.APPROVED))
+                .thenReturn(false);
+
+        GatewayResponse gatewayResponse = mock(GatewayResponse.class);
+        when(gatewayResponse.ts()).thenReturn(null);
+        when(paymentGateway.processPayment(anyString(), any(BigDecimal.class)))
+                .thenReturn(gatewayResponse);
+
+        paymentTransactionService.processPayment(request);
+    }
+
+    @Test(expectedExceptions = ReservationReleaseException.class)
+    public void testProcessPayment_GatewayRejection_TicketingThrowsFeignException() throws TimeoutException {
+        SavePaymentDTO request = mock(SavePaymentDTO.class);
+        when(request.reservationId()).thenReturn(VALID_RESERVATION_ID);
+        when(request.cardToken()).thenReturn("token-123");
+        when(request.amount()).thenReturn(BigDecimal.valueOf(1000));
+
+        PaymentTransaction mockPt = mock(PaymentTransaction.class);
+        when(request.toDomain()).thenReturn(mockPt);
+
+        when(paymentRepository.isPaymentProcessedAndStatus(VALID_RESERVATION_ID, TransactionStatus.APPROVED))
+                .thenReturn(false);
+
+        GatewayResponse gatewayResponse = mock(GatewayResponse.class);
+        when(gatewayResponse.ts()).thenReturn(TransactionStatus.REJECTED);
+        when(gatewayResponse.externalTransactionId()).thenReturn("ext-123");
+        when(paymentGateway.processPayment(anyString(), any(BigDecimal.class)))
+                .thenReturn(gatewayResponse);
+        when(paymentRepository.save(any(PaymentTransaction.class))).thenReturn(mockPt);
+
+        doThrow(buildFeignInternalServerError()).when(ticketingClient).releaseReservations(VALID_RESERVATION_ID);
+
+        paymentTransactionService.processPayment(request);
+    }
+
+    @Test
+    public void testFillAndSave_Successful() {
+        PaymentTransaction pt = mock(PaymentTransaction.class);
+        LocalDateTime now = LocalDateTime.now();
+        String externalTxId = "ext-tx-123";
+
+        when(paymentRepository.save(pt)).thenReturn(pt);
+
+        PaymentTransaction result = paymentTransactionService.fillAndSave(
+                TransactionStatus.APPROVED,
+                externalTxId,
+                now,
+                pt
+        );
+
+        Assert.assertNotNull(result);
+        verify(pt, times(1)).setStatus(TransactionStatus.APPROVED);
+        verify(pt, times(1)).setExternalGateweyTransactionId(externalTxId);
+        verify(pt, times(1)).setProcessedAt(now);
+        verify(paymentRepository, times(1)).save(pt);
     }
 }
