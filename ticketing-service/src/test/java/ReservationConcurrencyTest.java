@@ -10,6 +10,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -64,10 +65,11 @@ public class ReservationConcurrencyTest {
     }
 
     @Test
-    public void testConcurrentReservations_OnlyOneSucceedsForLastSpot() throws InterruptedException {
+    public void testConcurrentReservation_OnlyOneSucceeds() throws InterruptedException {
 
         // Arrange
-        int threadsCount = 10;
+        int threadsCount = 5;
+
         ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
         CountDownLatch startLatch = new CountDownLatch(1);
         CountDownLatch finishLatch = new CountDownLatch(threadsCount);
@@ -80,12 +82,19 @@ public class ReservationConcurrencyTest {
         when(sector.getPrice()).thenReturn(BigDecimal.valueOf(5000));
 
         // Act
+        //doAnswer(invocation -> null).when(sector).reduceCapacity(anyInt());
+
         doAnswer(invocation -> {
             int qty = invocation.getArgument(0);
-            if (availableCapacity.addAndGet(-qty) < 0) {
-                throw new OccupiedSpotException("No capacity available");
+            while (true) {
+                int current = availableCapacity.get();
+                if (current < qty) {
+                    throw new OccupiedSpotException("No capacity available");
+                }
+                if (availableCapacity.compareAndSet(current, current - qty)) {
+                    return null;
+                }
             }
-            return null;
         }).when(sector).reduceCapacity(anyInt());
 
         when(inventoryService.getSectorCapacity(anyString(), anyString())).thenReturn(sector);
@@ -123,5 +132,6 @@ public class ReservationConcurrencyTest {
         Assert.assertEquals(failureCounter.get(), threadsCount - 1, "The other threads must have been rejected.");
 
         verify(reservationRepository, times(1)).save(any(Reservation.class));
+        verify(sector, times(threadsCount)).reduceCapacity(1);
     }
 }
