@@ -1,3 +1,4 @@
+import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
@@ -32,6 +33,9 @@ public class ReservationConcurrencyTest {
     @Mock
     private InventoryService inventoryService;
 
+    @Mock
+    private EventService eventService;
+
     private ReservationService reservationService;
     private AutoCloseable closeable;
 
@@ -47,7 +51,8 @@ public class ReservationConcurrencyTest {
                 15,
                 "http://localhost:8080",
                 reservationRepository,
-                inventoryService
+                inventoryService,
+                eventService
         );
     }
 

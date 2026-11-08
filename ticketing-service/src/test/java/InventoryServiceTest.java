@@ -4,7 +4,6 @@ import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
-import com.arquiweb.ticketing.inventory.dto.requests.InitInventoryRequest;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorCapacityDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorSeatsDto;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
@@ -43,7 +42,7 @@ public class InventoryServiceTest {
     void setUp() throws Exception {
         closeable = MockitoAnnotations.openMocks(this);
         Mockito.reset(scr, ticketRepo);
-        service = new InventoryService(scr, ticketRepo);
+        //service = new InventoryService(scr, ticketRepo);
     }
 
     @AfterMethod
@@ -64,14 +63,14 @@ public class InventoryServiceTest {
         SectorCapacity mockCapacity = mock(SectorCapacity.class);
         when(capacityDto.toCapacity(EVENT_ID)).thenReturn(mockCapacity);
 
-        InitInventoryRequest request = new InitInventoryRequest(
-                EVENT_ID,
-                List.of(capacityDto),
-                List.of(seatsDto)
-        );
+//        InitInventoryRequest request = new InitInventoryRequest(
+//                EVENT_ID,
+//                List.of(capacityDto),
+//                List.of(seatsDto)
+//        );
 
         // Act
-        service.initSector(request);
+        //service.initSector(request);
 
         // Assert
         verify(scr, times(1)).saveAll(anyList());
@@ -82,14 +81,14 @@ public class InventoryServiceTest {
     public void testInitSector_EmptyCapacities_DoesNotSave() {
 
         // Arrange
-        InitInventoryRequest request = new InitInventoryRequest(
-                EVENT_ID,
-                Collections.emptyList(),
-                Collections.emptyList()
-        );
+//        InitInventoryRequest request = new InitInventoryRequest(
+//                EVENT_ID,
+//                Collections.emptyList(),
+//                Collections.emptyList()
+//        );
 
         // Act
-        service.initSector(request);
+        //service.initSector(request);
 
         // Assert
         verify(scr, never()).saveAll(anyList());

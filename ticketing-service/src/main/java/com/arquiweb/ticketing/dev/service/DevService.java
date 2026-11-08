@@ -9,7 +9,6 @@ import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
-import net.datafaker.Faker;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

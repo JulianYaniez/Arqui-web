@@ -1,3 +1,4 @@
+import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
@@ -9,9 +10,11 @@ import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
+import com.arquiweb.ticketing.reservation.domain.exceptions.QrGenerationException;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
+import com.arquiweb.ticketing.reservation.dto.responses.ReservationStateResponse;
 import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
@@ -46,6 +49,9 @@ public class ReservationServiceTest {
     @Mock
     private InventoryService inventoryService;
 
+    @Mock
+    private EventService eventService;
+
     private ReservationService reservationService;
     private AutoCloseable closeable;
 
@@ -58,7 +64,8 @@ public class ReservationServiceTest {
                                     TTL_MINUTES,
                                     APP_URL,
                                     reservationRepository,
-                                    inventoryService
+                                    inventoryService,
+                                    eventService
                                 );
     }
     @AfterMethod
@@ -368,6 +375,142 @@ public class ReservationServiceTest {
         when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
 
         // Act
+        reservationService.getTicketQr(RESERVATION_ID, TICKET_ID);
+    }
+
+    @Test
+    public void testGetReservationStatus_Successful() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getId()).thenReturn(RESERVATION_ID);
+        when(reservation.getClientId()).thenReturn(UUID.fromString(CLIENT_ID));
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PAID);
+        when(reservation.getTotalAmount()).thenReturn(BigDecimal.valueOf(10000));
+        when(reservation.getEventId()).thenReturn(EVENT_ID);
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        ReservationStateResponse response = reservationService.getReservationStatus(RESERVATION_ID);
+
+        Assert.assertNotNull(response);
+        verify(reservationRepository, times(1)).findById(RESERVATION_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testGetReservationStatus_NotFound() {
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.empty());
+
+        reservationService.getReservationStatus(RESERVATION_ID);
+    }
+
+    @Test
+    public void testCancelByEvent_Successful() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getId()).thenReturn(RESERVATION_ID);
+
+        when(reservationRepository.findByEventIdAndStatus(EVENT_ID, ReservationStatus.PAID))
+                .thenReturn(List.of(reservation));
+        when(inventoryService.countCapacities(List.of(RESERVATION_ID)))
+                .thenReturn(Collections.emptyList());
+
+        reservationService.cancelByEvent(EVENT_ID);
+
+        verify(inventoryService, times(1)).releaseNumberedTickets(List.of(RESERVATION_ID));
+        verify(reservationRepository, times(1)).expire(List.of(RESERVATION_ID), ReservationStatus.EXPIRED);
+    }
+
+    @Test
+    public void testSetPendingRefund_Successful() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        reservationService.setPendingRefund(RESERVATION_ID);
+
+        verify(reservation, times(1)).requestRefund();
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testSetPendingRefund_NotFound() {
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.empty());
+
+        reservationService.setPendingRefund(RESERVATION_ID);
+    }
+
+    @Test
+    public void testAcceptRefund_Successful() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getId()).thenReturn(RESERVATION_ID);
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        CapacityRefundDto capacityRefundDto = mock(CapacityRefundDto.class);
+        when(inventoryService.countCapacities(List.of(RESERVATION_ID)))
+                .thenReturn(List.of(capacityRefundDto));
+
+        reservationService.acceptRefund(RESERVATION_ID);
+
+        verify(reservation, times(1)).refund();
+        verify(inventoryService, times(1)).refundCapacity(capacityRefundDto);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testAcceptRefund_NotFound() {
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.empty());
+
+        reservationService.acceptRefund(RESERVATION_ID);
+    }
+
+    @Test
+    public void testRejectRefund_Successful() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
+        reservationService.rejectRefund(RESERVATION_ID);
+
+        verify(reservation, times(1)).rejectRefund();
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testRejectRefund_NotFound() {
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.empty());
+
+        reservationService.rejectRefund(RESERVATION_ID);
+    }
+
+    @Test
+    public void testGetSoldReservationsByEvent_Successful() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getId()).thenReturn(RESERVATION_ID);
+        when(reservation.getClientId()).thenReturn(UUID.fromString(CLIENT_ID));
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PAID);
+        when(reservation.getTotalAmount()).thenReturn(BigDecimal.valueOf(5000));
+        when(reservation.getEventId()).thenReturn(EVENT_ID);
+
+        when(reservationRepository.findByEventIdAndStatus(EVENT_ID, ReservationStatus.PAID))
+                .thenReturn(List.of(reservation));
+
+        List<ReservationStateResponse> responses = reservationService.getSoldReservationsByEvent(EVENT_ID, "PAID");
+
+        Assert.assertNotNull(responses);
+        Assert.assertEquals(responses.size(), 1);
+        verify(reservationRepository, times(1)).findByEventIdAndStatus(EVENT_ID, ReservationStatus.PAID);
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testGetSoldReservationsByEvent_InvalidStatus_ThrowsInvalidInputException() {
+        reservationService.getSoldReservationsByEvent(EVENT_ID, "STATUS_INVENTADO");
+    }
+
+    @Test(expectedExceptions = QrGenerationException.class)
+    public void testGetTicketQr_QrGenerationError_ThrowsQrGenerationException() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PAID);
+
+        Ticket ticket = mock(Ticket.class);
+        when(ticket.getId()).thenReturn(TICKET_ID);
+        // Si el token es null, generateQrBase64 arroja IllegalArgumentException o NPE atrapada por el catch
+        when(ticket.getQrToken()).thenReturn(null);
+
+        when(reservation.getTickets()).thenReturn(Set.of(ticket));
+        when(reservationRepository.findById(RESERVATION_ID)).thenReturn(Optional.of(reservation));
+
         reservationService.getTicketQr(RESERVATION_ID, TICKET_ID);
     }
 }
