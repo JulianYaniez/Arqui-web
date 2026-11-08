@@ -1,3 +1,4 @@
+import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
@@ -30,6 +31,9 @@ public class InventoryServiceTest {
     @Mock
     private TicketRepository ticketRepo;
 
+    @Mock
+    private EventService eventService;
+
     private InventoryService service;
     private AutoCloseable closeable;
 
@@ -42,7 +46,7 @@ public class InventoryServiceTest {
     void setUp() throws Exception {
         closeable = MockitoAnnotations.openMocks(this);
         Mockito.reset(scr, ticketRepo);
-        //service = new InventoryService(scr, ticketRepo);
+        service = new InventoryService(scr, ticketRepo, eventService);
     }
 
     @AfterMethod
@@ -63,14 +67,10 @@ public class InventoryServiceTest {
         SectorCapacity mockCapacity = mock(SectorCapacity.class);
         when(capacityDto.toCapacity(EVENT_ID)).thenReturn(mockCapacity);
 
-//        InitInventoryRequest request = new InitInventoryRequest(
-//                EVENT_ID,
-//                List.of(capacityDto),
-//                List.of(seatsDto)
-//        );
-
         // Act
-        //service.initSector(request);
+        service.initSector(EVENT_ID,
+                List.of(capacityDto),
+                List.of(seatsDto));
 
         // Assert
         verify(scr, times(1)).saveAll(anyList());
@@ -80,15 +80,12 @@ public class InventoryServiceTest {
     @Test
     public void testInitSector_EmptyCapacities_DoesNotSave() {
 
-        // Arrange
-//        InitInventoryRequest request = new InitInventoryRequest(
-//                EVENT_ID,
-//                Collections.emptyList(),
-//                Collections.emptyList()
-//        );
-
         // Act
-        //service.initSector(request);
+        service.initSector(
+                EVENT_ID,
+                Collections.emptyList(),
+                Collections.emptyList()
+        );
 
         // Assert
         verify(scr, never()).saveAll(anyList());
@@ -299,10 +296,11 @@ public class InventoryServiceTest {
     public void testUseTicket_NotFound() {
 
         // Arrange
-        when(ticketRepo.findById(TICKET_ID)).thenReturn(Optional.empty());
+        String qrToken = "qr-inexistente";
+        when(ticketRepo.findByQrToken(qrToken)).thenReturn(Optional.empty());
 
         // Act
-        service.useTicket(String.valueOf(TICKET_ID));
+        service.useTicket(qrToken);
     }
 
     @Test(expectedExceptions = IllegalTicketStateChangeException.class)
@@ -316,5 +314,40 @@ public class InventoryServiceTest {
 
         // Act
         service.useTicket(qrToken);
+    }
+
+    @Test
+    public void testInitSector_OnlyCapacities_SavesOnlyCapacities() {
+        SectorCapacityDto capacityDto = mock(SectorCapacityDto.class);
+        SectorCapacity mockCapacity = mock(SectorCapacity.class);
+        when(capacityDto.toCapacity(EVENT_ID)).thenReturn(mockCapacity);
+
+        service.initSector(EVENT_ID, List.of(capacityDto), Collections.emptyList());
+
+        verify(scr, times(1)).saveAll(anyList());
+        verify(ticketRepo, never()).saveAll(anyList());
+    }
+
+    @Test
+    public void testInitSector_OnlySeats_SavesOnlySeats() {
+        SectorSeatsDto seatsDto = mock(SectorSeatsDto.class);
+        Ticket mockTicket = mock(Ticket.class);
+        when(seatsDto.toTickets(EVENT_ID)).thenReturn(List.of(mockTicket));
+
+        service.initSector(EVENT_ID, Collections.emptyList(), List.of(seatsDto));
+
+        verify(scr, never()).saveAll(anyList());
+        verify(ticketRepo, times(1)).saveAll(anyList());
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testFindSectorAvailability_EventValidationFails_ThrowsException() {
+        doThrow(new ResourceNotFoundException("Event not found"))
+                .when(eventService).validateEvent(EVENT_ID);
+
+        service.findSectorAvailability(EVENT_ID, SECTOR_ID);
+
+        verify(scr, never()).findByEventIdAndSectorId(anyString(), anyString());
+        verify(ticketRepo, never()).findByEventIdAndSectorId(anyString(), anyString());
     }
 }

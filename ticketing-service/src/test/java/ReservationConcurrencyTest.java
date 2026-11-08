@@ -104,7 +104,6 @@ public class ReservationConcurrencyTest {
                     reservationService.reserveUnnumbered(request, UUID.fromString(clientId));
                     successCounter.incrementAndGet();
                 } catch (Exception e) {
-                    e.printStackTrace(); // temporally
                     failureCounter.incrementAndGet();
                 } finally {
                     finishLatch.countDown();
