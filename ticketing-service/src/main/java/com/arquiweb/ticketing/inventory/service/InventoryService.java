@@ -68,8 +68,6 @@ public class InventoryService {
         throw new ResourceNotFoundException("Given sector or event does not exist or is not available.");
     }
 
-
-
     public SectorCapacity getSectorCapacity(String eventId, String sectorId) {
         SectorCapacity sector = sectorCapacityRepository.findByEventIdAndSectorId(eventId, sectorId)
                 .orElseThrow(() -> new ResourceNotFoundException("No sector exists with given event and sector IDs."));
