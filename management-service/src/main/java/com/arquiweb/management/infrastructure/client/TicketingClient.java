@@ -19,8 +19,8 @@ public interface TicketingClient {
             @RequestParam("status") String status
     );
 
-    @PostMapping("/reservation/bulk-cancel")
-    void bulkCancelReservations(@RequestBody List<UUID> reservationIds);
+    @PostMapping("/event/{eventId}/cancel")
+    void bulkCancelReservations(@PathVariable("eventId") String eventId);
 
     @PostMapping("/reservation/{reservationId}/request-refund")
     void setRequestRefund(@PathVariable("reservationId") UUID reservationId);

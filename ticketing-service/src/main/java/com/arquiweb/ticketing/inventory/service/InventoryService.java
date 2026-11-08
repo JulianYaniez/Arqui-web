@@ -1,12 +1,14 @@
 package com.arquiweb.ticketing.inventory.service;
 
+import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
-import com.arquiweb.ticketing.inventory.dto.requests.InitInventoryRequest;
+import com.arquiweb.ticketing.inventory.dto.requests.SectorCapacityDto;
+import com.arquiweb.ticketing.inventory.dto.requests.SectorSeatsDto;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
 import com.arquiweb.ticketing.inventory.repository.SectorCapacityRepository;
 import com.arquiweb.ticketing.inventory.repository.TicketRepository;
@@ -24,33 +26,41 @@ public class InventoryService {
 
     private final SectorCapacityRepository sectorCapacityRepository;
     private final TicketRepository ticketRepository;
+    private final EventService eventService;
 
     @Transactional
-    public void initSector(InitInventoryRequest request) {
+    public void initSector(
+            String eventId,
+            List<SectorCapacityDto> capacities,
+            List<SectorSeatsDto> seats
+    ) {
 
-        List<Ticket> seats = request.seats().stream()
+        List<Ticket> seatTickets = seats.stream()
                 .map( sectorSeats -> {
-                    return sectorSeats.toTickets(request.eventId());
+                    return sectorSeats.toTickets(eventId);
                 })
                 .flatMap(List::stream)
                 .toList();
 
-        List<SectorCapacity> capacities = request.capacities().stream()
+        List<SectorCapacity> sectorCapacities = capacities.stream()
                 .map(sector -> {
-                    return sector.toCapacity(request.eventId());
+                    return sector.toCapacity(eventId);
                 })
                 .toList();
 
-        if (!capacities.isEmpty()) {
-            sectorCapacityRepository.saveAll(capacities);
+        if (!sectorCapacities.isEmpty()) {
+            sectorCapacityRepository.saveAll(sectorCapacities);
         }
 
-        if (!capacities.isEmpty()) {
-            ticketRepository.saveAll(seats);
+        if (!seatTickets.isEmpty()) {
+            ticketRepository.saveAll(seatTickets);
         }
     }
 
     public SectorAvailabilityResponse findSectorAvailability(String eventId, String sectorId) {
+
+        eventService.validateEvent(eventId);
+
         SectorCapacity sectorCapacity = sectorCapacityRepository.findByEventIdAndSectorId(eventId, sectorId)
                 .orElse(null);
 
@@ -69,11 +79,8 @@ public class InventoryService {
     }
 
     public SectorCapacity getSectorCapacity(String eventId, String sectorId) {
-        SectorCapacity sector = sectorCapacityRepository.findByEventIdAndSectorId(eventId, sectorId)
+        return sectorCapacityRepository.findByEventIdAndSectorId(eventId, sectorId)
                 .orElseThrow(() -> new ResourceNotFoundException("No sector exists with given event and sector IDs."));
-
-
-        return sector;
     }
 
     public void saveSectorCapacity(SectorCapacity sectorCapacity) {

@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.infrastructure.exception;
 
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
+import com.arquiweb.ticketing.event.domain.exceptions.InvalidEventException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
 import com.arquiweb.ticketing.reservation.domain.exceptions.QrGenerationException;
@@ -46,12 +47,23 @@ class GlobalExceptionHandler {
             IllegalTicketStateChangeException.class,
             IllegalReservationStateChangeException.class
     })
-    public ResponseEntity<ErrorResponse> handleOptimisticLockingFailureException(
+    public ResponseEntity<ErrorResponse> handle409(
             RuntimeException ex,
             HttpServletRequest request
     ) {
         return buildBasicErrorResponse(HttpStatus.CONFLICT, ex, request);
     }
+
+    @ExceptionHandler({ // 422
+            InvalidEventException.class
+    })
+    public ResponseEntity<ErrorResponse> handle422(
+            RuntimeException ex,
+            HttpServletRequest request
+    ){
+        return buildBasicErrorResponse(HttpStatus.UNPROCESSABLE_CONTENT, ex, request);
+    }
+
 
 
     @ExceptionHandler({ // 500

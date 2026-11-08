@@ -114,7 +114,7 @@ public class EventService {
     public void cancelEvent(String eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
-
+        
         event.cancel();
     }
 

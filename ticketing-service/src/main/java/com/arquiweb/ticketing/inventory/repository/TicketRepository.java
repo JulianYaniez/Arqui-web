@@ -56,4 +56,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     void deleteExpiredUnnumbered(@Param("reservations") List<UUID> reservations);
 
     Optional<Ticket> findByQrToken(String qrToken);
+
+    List<Ticket> findByIsNumbered(boolean isNumbered);
 }
