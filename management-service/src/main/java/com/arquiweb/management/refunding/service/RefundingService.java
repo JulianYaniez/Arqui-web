@@ -92,7 +92,7 @@ public class RefundingService {
 
         try {
             ticketingClient.acceptRefund(reservation.reservationId());
-            paymentClient.refundPayment(paymentRefundRequest);
+            paymentClient.refundPayment(reservation.paymentId());
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Payment or Ticketing services.");
         }
