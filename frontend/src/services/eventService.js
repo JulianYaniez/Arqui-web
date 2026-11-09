@@ -21,20 +21,22 @@ const eventStatuses = {
 }
 
 // Adaptar evento para el frontend
+
 function adaptEvent(event) {
   return {
-    id: event.id,
-    name: event.name,
-    description: event.description,
+    ...event,
+
     category: eventTypes[event.type] ?? event.type,
-    date: event.dateTime,
-    location: event.city,
-    status: eventStatuses[event.status] ?? event.status,
-    sectors: event.sectors ?? [],
+
+    statusLabel: eventStatuses[event.status] ?? event.status,
+
     price: event.sectors?.length
-      ? Math.min(...event.sectors.map(sector => Number(sector.price)))
+      ? Math.min(
+          ...event.sectors.map(sector => Number(sector.price))
+        )
       : 0,
-    image: null
+
+    image: event.image ?? null
   }
 }
 
@@ -47,6 +49,11 @@ export async function getEvents(params = {}) {
     ...data,
     content: data.content.map(adaptEvent)
   }
+}
+
+export async function getEventById(id) {
+  const event = await apiFetch(`${API_URL}/event/${id}`)
+  return adaptEvent(event)
 }
 
 // Crear evento

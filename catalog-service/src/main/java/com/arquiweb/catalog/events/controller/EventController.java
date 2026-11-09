@@ -55,19 +55,22 @@ class EventController {
     })
     @PostMapping
     public ResponseEntity<Void> createEvent(
-            @RequestBody CreateEventRequest request
-    ) {
+        @RequestBody CreateEventRequest request
+        ) {
+        // Crear evento
         String id = eventService.createEvent(request);
 
+        // Publicar automáticamente
+        eventService.publishEvent(id);
+
         URI uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(id)
-                .toUri();
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(id)
+            .toUri();
 
         return ResponseEntity.created(uri).build();
-    }
-
+   }   
 
     @Operation(summary = "Get event state by ID.")
     @ApiResponses(value = {
@@ -194,4 +197,14 @@ class EventController {
         eventService.cancelEvent(eventId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponse> getEventById(
+        @PathVariable String id
+    ) {
+        EventResponse response = eventService.getEventById(id);
+
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -1,67 +1,76 @@
 
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { getEventById } from '../services/eventService'
 import '../styles/eventDetails.css'
 
 function EventDetails() {
   const { id } = useParams()
 
-  const storedUser = localStorage.getItem('user')
-  const user = storedUser ? JSON.parse(storedUser) : null
+  const [event, setEvent] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  if (user) {
-    console.log('Hay una sesión guardada')
-    console.log(user.email)
-    console.log(user.role)
-  } else {
-    console.log('No hay sesión')
-  }
+  useEffect(() => {
+    async function loadEvent() {
+      try {
+        setLoading(true)
+        setError('')
 
-  // Datos temporales hasta conectar el catalog-service
-  const event = {
-    id,
-    name: 'Festival de Música',
-    description:
-      'Una noche increíble con música en vivo, artistas invitados y una experiencia única para disfrutar con amigos.',
-    category: 'Música',
-    organizer: 'Producciones XYZ',
-    date: '15 de noviembre de 2026',
-    time: '20:00 hs',
-    location: 'Estadio Municipal',
-    address: 'Av. Principal 123, Tandil',
-    status: 'PUBLICADO',
-    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200'
-  }
-
-  const sectors = [
-    {
-      id: 1,
-      name: 'Campo',
-      price: 25000,
-      available: 150
-    },
-    {
-      id: 2,
-      name: 'Platea',
-      price: 35000,
-      available: 80
-    },
-    {
-      id: 3,
-      name: 'VIP',
-      price: 50000,
-      available: 20
+        const data = await getEventById(id)
+        setEvent(data)
+      } catch (err) {
+        console.error('Error al obtener el evento:', err)
+        setError('No se pudo cargar el evento.')
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    loadEvent()
+  }, [id])
+
+  const formatDate = (dateTime) => {
+    if (!dateTime) return 'Fecha a confirmar'
+
+    return new Date(dateTime).toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+
+  const formatTime = (dateTime) => {
+    if (!dateTime) return 'Horario a confirmar'
+
+    return new Date(dateTime).toLocaleTimeString('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    }) + ' hs'
+  }
+
+  if (loading) {
+    return <main className="event-details">Cargando evento...</main>
+  }
+
+  if (error || !event) {
+    return (
+      <main className="event-details">
+        <p>{error || 'Evento no encontrado.'}</p>
+        <Link to="/eventos">Volver a eventos</Link>
+      </main>
+    )
+  }
 
   return (
     <main className="event-details">
-      <Link to="/event" className="event-details__back">
+      <Link to="/eventos" className="event-details__back">
         ← Volver a eventos
       </Link>
 
       <section className="event-details__hero">
         <img
-          src={event.image}
+          src={event.image || 'https://placehold.co/1200x500?text=Evento'}
           alt={event.name}
           className="event-details__image"
         />
@@ -76,12 +85,12 @@ function EventDetails() {
           <h1>{event.name}</h1>
 
           <p className="event-details__description">
-            {event.description}
+            {event.description || 'Sin descripción disponible.'}
           </p>
 
           <div className="event-details__organizer">
             <span>Organizado por</span>
-            <strong>{event.organizer}</strong>
+            <strong>{event.organizerId || 'Organizador'}</strong>
           </div>
 
           <div className="event-details__separator" />
@@ -91,22 +100,22 @@ function EventDetails() {
           <div className="event-details__data">
             <div>
               <span>Fecha</span>
-              <strong>{event.date}</strong>
+              <strong>{formatDate(event.dateTime)}</strong>
             </div>
 
             <div>
               <span>Horario</span>
-              <strong>{event.time}</strong>
+              <strong>{formatTime(event.dateTime)}</strong>
             </div>
 
             <div>
               <span>Lugar</span>
-              <strong>{event.location}</strong>
+              <strong>{event.city || 'Ubicación a confirmar'}</strong>
             </div>
 
             <div>
-              <span>Dirección</span>
-              <strong>{event.address}</strong>
+              <span>Estado</span>
+              <strong>{event.statusLabel || event.status}</strong>
             </div>
           </div>
         </section>
@@ -116,18 +125,27 @@ function EventDetails() {
           <p>Elegí el sector que más te guste.</p>
 
           <div className="event-details__sectors">
-            {sectors.map(sector => (
-              <div className="event-details__sector" key={sector.id}>
-                <div>
-                  <strong>{sector.name}</strong>
-                  <span>{sector.available} disponibles</span>
-                </div>
+            {event.sectors?.length > 0 ? (
+              event.sectors.map(sector => (
+                <div
+                  className="event-details__sector"
+                  key={sector.sectorId}
+                >
+                  <div>
+                    <strong>{sector.name}</strong>
+                    <span>
+                      Capacidad: {sector.capacity}
+                    </span>
+                  </div>
 
-                <strong>
-                  ${sector.price.toLocaleString('es-AR')}
-                </strong>
-              </div>
-            ))}
+                  <strong>
+                    ${Number(sector.price).toLocaleString('es-AR')}
+                  </strong>
+                </div>
+              ))
+            ) : (
+              <p>No hay sectores disponibles.</p>
+            )}
           </div>
 
           <Link

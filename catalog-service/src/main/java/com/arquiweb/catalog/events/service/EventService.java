@@ -106,6 +106,12 @@ public class EventService {
         return eventsPage.map(EventResponse::fromDomain);
     }
 
+    public EventResponse getEventById(String eventId) {
+        Event event = this.getEventValidated(eventId);
+
+        return EventResponse.fromDomain(event);
+    }
+
     public EventStateResponse getById(String eventId) {
         return eventRepository.findById(eventId).map(EventStateResponse::fromDomain)
                 .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
