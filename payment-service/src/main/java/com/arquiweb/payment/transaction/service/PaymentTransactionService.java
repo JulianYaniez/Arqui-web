@@ -3,6 +3,7 @@ package com.arquiweb.payment.transaction.service;
 import com.arquiweb.payment.infrastructure.exception.*;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
 
+import com.arquiweb.payment.transaction.domain.Exception.InvalidCardPrefixException;
 import com.arquiweb.payment.transaction.dtos.request.PaymentRefundRequest;
 import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
@@ -49,14 +50,14 @@ public class PaymentTransactionService {
             if(!validCardToken(request.cardToken())) throw new InvalidCardPrefixException("Invalid credit card provider or prefix");
 
         PaymentTransaction pt = request.toDomain();
-        GatewayResponse gr;
+        GatewayResponse gatewayResponse;
         try {
-            gr = paymentGateway.processPayment(request.cardToken(), request.amount());
-            if (gr == null) {
+            gatewayResponse = paymentGateway.processPayment(request.cardToken(), request.amount());
+            if (gatewayResponse == null) {
                 throw new InvalidInputException("Invalid gateway response",
                         Map.of("gateway", "The payment gateway did not return a valid response."));
             }
-            if (gr.ts() == null){
+            if (gatewayResponse.ts() == null){
                 throw new InvalidInputException("Invalid gateway response",
                         Map.of("gateway", "The payment gateway did not return a transaction status."));
             }
@@ -65,8 +66,8 @@ public class PaymentTransactionService {
             releaseReservation(request.reservationId());
             return pt;
         }
-        pt = fillAndSave(gr.ts(), gr.externalTransactionId(),LocalDateTime.now(), pt);
-        if (gr.ts() == TransactionStatus.REJECTED) {
+        pt = fillAndSave(gatewayResponse.ts(), gatewayResponse.externalTransactionId(),LocalDateTime.now(), pt);
+        if (gatewayResponse.ts() == TransactionStatus.REJECTED) {
             releaseReservation(request.reservationId());
         }
         log.info("Payment transaction processed successfully, id={}, reservationId={}, staus={}", pt.getId(), pt.getReservationId(), pt.getStatus());

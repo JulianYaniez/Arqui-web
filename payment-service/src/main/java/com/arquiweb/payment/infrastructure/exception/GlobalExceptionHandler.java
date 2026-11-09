@@ -1,5 +1,6 @@
 package com.arquiweb.payment.infrastructure.exception;
 
+import com.arquiweb.payment.transaction.domain.Exception.InvalidCardPrefixException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.HttpStatus;
