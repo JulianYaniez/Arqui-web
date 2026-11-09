@@ -431,10 +431,9 @@ function Managment() {
             </div>
 
             {/* DESCRIPCIÓN */}
-            <div className="management__form-field">
-
+            <div className="management__form-field management__form-field--full">
               <label htmlFor="description">
-                Descripción
+                Descripción del evento
               </label>
 
               <textarea
@@ -442,10 +441,15 @@ function Managment() {
                 name="description"
                 value={form.description}
                 onChange={handleChange}
-                placeholder="Descripción del evento"
+                placeholder="Contá de qué se trata el evento, qué van a encontrar los asistentes..."
+                rows={5}
+                maxLength={1000}
                 required
               />
 
+              <small className="management__field-hint">
+                Máximo 1000 caracteres.
+              </small>
             </div>
 
             {/* TIPO */}
