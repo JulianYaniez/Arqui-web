@@ -77,4 +77,8 @@ public class PaymentTransaction {
         this.processedAt = processedAt;
 
     }
+
+    public boolean isRefunded() {
+        return this.status == TransactionStatus.REFUNDED;
+    }
 }

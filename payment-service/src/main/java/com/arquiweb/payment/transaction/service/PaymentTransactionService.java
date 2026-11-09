@@ -2,7 +2,8 @@ package com.arquiweb.payment.transaction.service;
 
 import com.arquiweb.payment.infrastructure.exception.*;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
-import com.arquiweb.payment.transaction.domain.enums.PaymentMethod;
+
+import com.arquiweb.payment.transaction.dtos.request.PaymentRefundRequest;
 import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
 import com.arquiweb.payment.transaction.domain.enums.TransactionStatus;
@@ -13,6 +14,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -121,5 +123,27 @@ public class PaymentTransactionService {
         return validPrefixes.contains(Prefix);
     }
 
+    @Transactional
+    public void processBulkRefund(List<PaymentRefundRequest> refundRequests) {
+        for (PaymentRefundRequest request: refundRequests){
+            PaymentTransaction transaction = paymentRepository.getPaymentTransactionById(request.paymentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Transaction not found for reservation: " + request.reservationId()));
+            if(transaction.isRefunded()){
+                continue;
+            }
 
+            boolean gatewaySuccess = paymentGateway.refund(
+                    transaction.getExternalGatewayTransactionId(),
+                    request.totalAmound(),
+                    false
+            );
+            if (!gatewaySuccess) {
+                throw new PaymentGatewayException("Payment gateway refund failed for reservation: " + request.reservationId());
+            }
+            transaction.setStatus(TransactionStatus.REFUNDED);
+            paymentRepository.save(transaction);
+            this.releaseReservation(transaction.getReservationId());
+        }
+
+    }
 }

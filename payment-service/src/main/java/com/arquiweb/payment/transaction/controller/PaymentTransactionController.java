@@ -1,5 +1,6 @@
 package com.arquiweb.payment.transaction.controller;
 
+import com.arquiweb.payment.transaction.dtos.request.PaymentRefundRequest;
 import com.arquiweb.payment.transaction.dtos.response.PaymentResponseDTO;
 import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -106,6 +108,31 @@ public class PaymentTransactionController {
     public ResponseEntity<Void> refundTransaction(@PathVariable UUID id,
                                                   @RequestHeader(value = "X-Simulate-Fail", required = false) boolean simulateFail) {
         pts.refundTransaction(id, simulateFail);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Process bulk refunds for multiple payments."
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Bulk refund processed successfully."
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Request data was faulty or invalid."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Transaction or reservation not found."
+                    )
+            }
+    )
+    @PostMapping("/bulk-refund")
+    public ResponseEntity<Void> bulkRefund(@Valid @RequestBody List<PaymentRefundRequest> refundRequests) {
+        pts.processBulkRefund(refundRequests);
         return ResponseEntity.noContent().build();
     }
 
