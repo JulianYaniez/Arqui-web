@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 
 import VenueForm from '../components/VenueForm'
 import '../styles/managment.css'
@@ -8,32 +8,18 @@ import '../styles/managment.css'
 import {
   getEvents,
   createEvent,
-  publishEvent,
   cancelEvent
 } from '../services/eventService'
 import { getVenues } from '../services/venueService'
 
 function Managment() {
 
-  const user = {
-    id: 'USER_TEST_001',
-    email: 'admin@ticketya.com',
-    role: 'ADMIN'
-  }
+  // Recuperar usuario de localStorage
+  const storedUser = localStorage.getItem('user')
+  const user = storedUser ? JSON.parse(storedUser) : null
 
-  const TEMP_USER_ID = 'USER_TEST_001'
-
-  // Usuario guardado en localStorage
-  // const storedUser = localStorage.getItem('user')
-  // const user = storedUser ? JSON.parse(storedUser) : null
-
-  if (user) {
-    console.log('Hay una sesión guardada')
-    console.log(user.email)
-    console.log(user.role)
-  } else {
-    console.log('No hay sesión')
-  }
+  // Verificar permisos
+  const isAdmin = user?.role === 'ADMIN'
 
   const [showVenueForm, setShowVenueForm] = useState(false)
 
@@ -90,7 +76,11 @@ function Managment() {
 
       const data = await getEvents()
 
-      setEvents(data.content)
+      setEvents(
+        Array.isArray(data)
+          ? data
+          : data.content || []
+      )
 
     } catch (error) {
       console.error('Error cargando eventos:', error)
@@ -102,21 +92,23 @@ function Managment() {
 
   // Cargar eventos al entrar
   useEffect(() => {
+    if (!isAdmin) return
+
     loadEvents()
     loadVenues()
-  }, [])
+  }, [isAdmin])
 
   // Estadísticas
   const publishedEvents = events.filter(
-    event => event.status === 'PUBLICADO'
+    event => event.status === 'PUBLISHED'
   ).length
 
   const draftEvents = events.filter(
-    event => event.status === 'BORRADOR'
+    event => event.status === 'DRAFT'
   ).length
 
   const cancelledEvents = events.filter(
-    event => event.status === 'CANCELADO'
+    event => event.status === 'CANCELLED'
   ).length
 
   // Formatear fecha
@@ -233,7 +225,7 @@ function Managment() {
         type: form.type,
         dateTime: form.dateTime,
         organizerId: user.id,
-        participants: [TEMP_USER_ID],
+        participants: [user.id],
         venueId: venue.id,
         sectors: selectedSectors.map(sector => ({
           sectorId: sector.sectorId,
@@ -267,22 +259,6 @@ function Managment() {
     }
   }
 
-  // Publicar evento
-  const handlePublish = async (id) => {
-
-    try {
-      setError('')
-
-      await publishEvent(id)
-
-      await loadEvents()
-
-    } catch (error) {
-      console.error('Error publicando evento:', error)
-      setError(error.message || 'No se pudo publicar el evento.')
-    }
-  }
-
   // Cancelar evento
   const handleCancel = async (id) => {
 
@@ -303,6 +279,14 @@ function Managment() {
       console.error('Error cancelando evento:', error)
       setError(error.message || 'No se pudo cancelar el evento.')
     }
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />
   }
 
   return (
@@ -709,25 +693,22 @@ function Managment() {
                 events.map(event => (
 
                   <tr key={event.id}>
-
                     <td>{event.name}</td>
 
-                    <td>{event.location || '-'}</td>
+                    <td>{event.city || event.location || '-'}</td>
 
-                    <td>{formatDate(event.date)}</td>
+                    <td>{formatDate(event.dateTime || event.date)}</td>
 
                     <td>
                       <span
                         className={`management__status management__status--${event.status.toLowerCase()}`}
                       >
-                        {event.status}
+                        {event.statusLabel || event.status}
                       </span>
                     </td>
 
                     <td>
-
                       <div className="management__row-actions">
-
                         <Link
                           to={`/event/${event.id}`}
                           className="management__view"
@@ -735,35 +716,18 @@ function Managment() {
                           Ver
                         </Link>
 
-                        {event.status === 'BORRADOR' && (
-
-                          <button
-                            type="button"
-                            className="management__publish"
-                            onClick={() => handlePublish(event.id)}
-                          >
-                            Publicar
-                          </button>
-
-                        )}
-
-                        {event.status !== 'CANCELADO' &&
-                          event.status !== 'FINALIZADO' && (
-
-                          <button
-                            type="button"
-                            className="management__delete"
-                            onClick={() => handleCancel(event.id)}
-                          >
-                            Dar de baja
-                          </button>
-
-                        )}
-
+                        {event.status !== 'CANCELLED' &&
+                          event.status !== 'FINISHED' && (
+                            <button
+                              type="button"
+                              className="management__delete"
+                              onClick={() => handleCancel(event.id)}
+                            >
+                              Dar de baja
+                            </button>
+                          )}
                       </div>
-
                     </td>
-
                   </tr>
 
                 ))

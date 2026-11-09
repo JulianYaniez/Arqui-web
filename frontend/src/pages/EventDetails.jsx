@@ -57,14 +57,14 @@ function EventDetails() {
     return (
       <main className="event-details">
         <p>{error || 'Evento no encontrado.'}</p>
-        <Link to="/eventos">Volver a eventos</Link>
+        <Link to="/event">Volver a eventos</Link>
       </main>
     )
   }
 
   return (
     <main className="event-details">
-      <Link to="/eventos" className="event-details__back">
+      <Link to="/event" className="event-details__back">
         ← Volver a eventos
       </Link>
 
