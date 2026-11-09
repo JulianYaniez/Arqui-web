@@ -13,6 +13,7 @@ import com.arquiweb.payment.transaction.repository.interfaces.PaymentRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,11 +87,6 @@ public class PaymentTransactionService {
         }}
 
 
-    public boolean isPaymentProcessedAndStatus(UUID reservationId, TransactionStatus status){
-        return paymentRepository.isPaymentProcessedAndStatus(reservationId, status);
-
-    }
-
     public PaymentTransaction getById(UUID id){
         return paymentRepository.getPaymentTransactionById(id).orElseThrow(() -> new ResourceNotFoundException("Payment transaction not found with id: " + id));
     }
@@ -102,8 +98,12 @@ public class PaymentTransactionService {
         return paymentRepository.save(pt);
     }
 
+    @Transactional
     public void refundTransaction(UUID paymentId, Boolean simulateFail) {
-        PaymentTransaction transaction = paymentRepository.getPaymentTransactionById(paymentId)
+        try {
+
+
+        PaymentTransaction transaction = paymentRepository.getPaymentTransactionByIdWithLock(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + paymentId));
         boolean gatewaySuccess = paymentGateway.refund(transaction.getExternalGatewayTransactionId(), transaction.getAmount(), simulateFail);
         if (gatewaySuccess) {
@@ -112,6 +112,8 @@ public class PaymentTransactionService {
             this.releaseReservation(transaction.getReservationId());
         }else{
             throw new PaymentGatewayException("the payment gateway refund failed");
+        }}catch (PessimisticLockingFailureException e){
+            throw new ConflictException("The resource is currently being modified by another request.", Map.of("paymentId", paymentId.toString()));
         }
     }
 
@@ -126,7 +128,10 @@ public class PaymentTransactionService {
     @Transactional
     public void processBulkRefund(List<PaymentRefundRequest> refundRequests) {
         for (PaymentRefundRequest request: refundRequests){
-            PaymentTransaction transaction = paymentRepository.getPaymentTransactionById(request.paymentId())
+            try {
+
+
+            PaymentTransaction transaction = paymentRepository.getPaymentTransactionByIdWithLock(request.paymentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Transaction not found for reservation: " + request.reservationId()));
             if(transaction.isRefunded()){
                 continue;
@@ -144,6 +149,9 @@ public class PaymentTransactionService {
             paymentRepository.save(transaction);
             this.releaseReservation(transaction.getReservationId());
         }
+        catch(Exception e){
+            throw new ConflictException("The resource is currently being modified by another request.", Map.of("paymentId", request.paymentId().toString()));
+        }
 
-    }
+    }}
 }

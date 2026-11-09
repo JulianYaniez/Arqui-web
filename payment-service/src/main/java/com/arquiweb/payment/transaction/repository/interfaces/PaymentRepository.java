@@ -10,6 +10,7 @@ import java.util.UUID;
 public interface PaymentRepository{
 
     Optional<PaymentTransaction> getPaymentTransactionById(UUID id);
+    Optional<PaymentTransaction> getPaymentTransactionByIdWithLock(UUID id);
 
     PaymentTransaction save(PaymentTransaction paymentTransaction);
 

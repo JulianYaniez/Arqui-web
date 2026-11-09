@@ -27,6 +27,11 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
+    public Optional<PaymentTransaction> getPaymentTransactionByIdWithLock(UUID id) {
+        return paymentjpaRepository.findByIdWithPessimisticLock(id);
+    }
+
+    @Override
     public PaymentTransaction save(PaymentTransaction paymentTransaction) {
         return paymentjpaRepository.save(paymentTransaction);
     }
