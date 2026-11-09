@@ -50,11 +50,13 @@ class ReservationController {
     })
     @PostMapping("/unnumbered")
     public ResponseEntity<ReservationResponse> reserveUnnumbered(
-            @RequestBody ReserveUnnumberedRequest request
+            @RequestBody ReserveUnnumberedRequest request,
+            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId  // TODO
     ) {
         // Placeholder
-        UUID userId = UUID.randomUUID();
-        ReservationResponse response = reservationService.reserveUnnumbered(request, userId);
+        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
+
+        ReservationResponse response = reservationService.reserveUnnumbered(request, clientId);
 
         return ResponseEntity.ok(response);
     }
@@ -85,11 +87,12 @@ class ReservationController {
     })
     @PostMapping("/numbered")
     public ResponseEntity<ReservationResponse> reserveNumbered(
-            @RequestBody ReserveNumberedRequest request
+            @RequestBody ReserveNumberedRequest request,
+            @RequestHeader(value = "X-Client-Id", required = false ) UUID headerClientId
     ) {
         // Placeholder
-        UUID userId = UUID.randomUUID();
-        ReservationResponse response = reservationService.reserveNumbered(request, userId);
+        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
+        ReservationResponse response = reservationService.reserveNumbered(request, clientId);
 
         return  ResponseEntity.ok(response);
     }
