@@ -72,8 +72,8 @@ export function publishEvent(id) {
 }
 
 // Cancelar evento
-export function cancelEvent(id) {
-  return apiFetch(`${API_URL}/event/${id}/cancel`, {
+export const cancelEvent = async (id) => {
+  return apiFetch(`/api/catalog/event/${id}/cancel`, {
     method: 'POST'
   })
 }
