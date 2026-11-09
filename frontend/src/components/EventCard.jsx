@@ -13,6 +13,16 @@ function EventCard({ event }) {
     FESTIVAL: 'Música'
   }
 
+  const categoryIcons = {
+    RECITAL: '♫',
+    THEATER: '✦',
+    SPORTS: '⚽',
+    CONFERENCE: '✧',
+    WORKSHOP: '⌘',
+    SEMINAR: '✧',
+    FESTIVAL: '♫'
+  }
+
   const category = categoriesMap[event.type] || 'Otros'
 
   const price = event.sectors?.length
@@ -31,16 +41,42 @@ function EventCard({ event }) {
       to={`/event/${event.id}`}
       className="event-card"
     >
-      <div className="event-card__image-container">
-        <img
-          src={event.image || '/images/event-placeholder.jpg'}
-          alt={event.name}
-          className="event-card__image"
-        />
+      <div className={`event-card__image-container ${!event.image ? 'event-card__image-container--empty' : ''}`}>
+
+        {event.image ? (
+          <img
+            src={event.image}
+            alt={event.name}
+            className="event-card__image"
+          />
+        ) : (
+          <div className="event-card__placeholder">
+            <span className="event-card__placeholder-decoration">
+              {categoryIcons[event.type] || '✦'}
+            </span>
+
+            <div className="event-card__placeholder-content">
+              <span className="event-card__placeholder-brand">
+                TICKETYA
+              </span>
+
+              <span className="event-card__placeholder-icon">
+                {categoryIcons[event.type] || '✦'}
+              </span>
+
+              <span className="event-card__placeholder-category">
+                {category}
+              </span>
+            </div>
+
+            <span className="event-card__placeholder-circle"></span>
+          </div>
+        )}
 
         <span className="event-card__category">
           {category}
         </span>
+
       </div>
 
       <div className="event-card__content">
