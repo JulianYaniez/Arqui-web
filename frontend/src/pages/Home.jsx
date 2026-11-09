@@ -1,55 +1,45 @@
 
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import EventCard from '../components/EventCard'
+import { getEvents } from '../services/eventService'
 import '../styles/home.css'
 
 function Home() {
+  const [featuredEvents, setFeaturedEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const storedUser = localStorage.getItem('user')
-  const user = storedUser ? JSON.parse(storedUser) : null
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoading(true)
+        setError('')
 
-  if (user) {
-    console.log('Hay una sesión guardada')
-    console.log(user.email)
-    console.log(user.role)
-  } else {
-    console.log('No hay sesión')
-  }
+        const data = await getEvents()
 
-  // Eventos temporales para visualizar la sección
-  const featuredEvents = [
-    {
-      id: 1,
-      name: 'Festival de Música',
-      category: 'Música',
-      date: '15/11/2026',
-      location: 'Tandil',
-      price: 25000,
-      image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800',
-      status: 'PUBLICADO'
-    },
-    {
-      id: 2,
-      name: 'Tech Conference',
-      category: 'Tecnología',
-      date: '30/11/2026',
-      location: 'Centro de Convenciones',
-      price: 18000,
-      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
-      status: 'PUBLICADO'
-    },
-    {
-      id: 3,
-      name: 'Noche de Teatro',
-      category: 'Teatro',
-      date: '25/11/2026',
-      location: 'Teatro Central',
-      price: 12000,
-      image: 'https://images.unsplash.com/photo-1503095396549-807759245b35?w=800',
-      status: 'PUBLICADO'
+        // Adaptarse tanto a una lista como a una respuesta paginada
+        const events = Array.isArray(data)
+          ? data
+          : data.content || data.events || []
+
+        // Mostrar únicamente eventos publicados
+        const publishedEvents = events.filter(
+          event => event.status === 'PUBLISHED'
+        )
+
+        setFeaturedEvents(publishedEvents.slice(0, 3))
+      } catch (error) {
+        console.error('Error cargando eventos destacados:', error)
+        setError('No se pudieron cargar los eventos.')
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    loadEvents()
+  }, [])
 
   return (
     <main className="home">
@@ -91,13 +81,17 @@ function Home() {
         </div>
 
         <div className="home__events">
-          {/*
-            Cuando conectemos el backend, reemplazamos
-            los eventos temporales por los eventos recibidos.
-          */}
-          {featuredEvents.map(event => (
-            <EventCard key={event.id} event={event} />
-          ))}
+          {loading ? (
+            <p>Cargando eventos...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : featuredEvents.length > 0 ? (
+            featuredEvents.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))
+          ) : (
+            <p>Por el momento no hay eventos destacados.</p>
+          )}
         </div>
       </section>
 
