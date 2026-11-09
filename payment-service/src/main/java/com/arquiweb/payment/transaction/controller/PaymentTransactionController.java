@@ -1,7 +1,7 @@
 package com.arquiweb.payment.transaction.controller;
 
 import com.arquiweb.payment.transaction.dtos.response.PaymentResponseDTO;
-import com.arquiweb.payment.transaction.dtos.request.SavePaymentDTO;
+import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
 import com.arquiweb.payment.transaction.service.PaymentTransactionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(
         name = "Payment",
-        description = "Endpoints for  payment tranasction."
+        description = "Endpoints for  payment transaction."
 )
 
 public class PaymentTransactionController {
@@ -52,7 +52,7 @@ public class PaymentTransactionController {
             }
     )
     @PostMapping
-    public ResponseEntity<PaymentResponseDTO> prcessPayment(@Valid @RequestBody SavePaymentDTO request){
+    public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody RequestPaymentDTO request){
         PaymentTransaction transaction = pts.processPayment(request);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")

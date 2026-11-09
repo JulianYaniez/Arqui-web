@@ -10,8 +10,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static com.arquiweb.payment.transaction.domain.enums.PaymentMethod.CREDIT_CARD;
 
-    public record SavePaymentDTO(
+
+public record RequestPaymentDTO(
             @NotNull UUID reservationId,
             @NotNull @Positive BigDecimal amount,
             @NotNull PaymentMethod paymentMethod,

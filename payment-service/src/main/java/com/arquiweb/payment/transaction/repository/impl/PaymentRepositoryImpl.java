@@ -1,9 +1,9 @@
-package com.arquiweb.payment.transaction.repositori.impl;
+package com.arquiweb.payment.transaction.repository.impl;
 
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
 import com.arquiweb.payment.transaction.domain.enums.TransactionStatus;
-import com.arquiweb.payment.transaction.repositori.interfaces.PaymentRepository;
-import com.arquiweb.payment.transaction.repositori.jpa.PaymentjpaRepository;
+import com.arquiweb.payment.transaction.repository.interfaces.PaymentRepository;
+import com.arquiweb.payment.transaction.repository.jpa.PaymentjpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

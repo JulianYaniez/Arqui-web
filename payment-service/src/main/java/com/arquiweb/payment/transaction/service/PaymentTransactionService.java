@@ -1,25 +1,26 @@
 package com.arquiweb.payment.transaction.service;
 
+import com.arquiweb.payment.infrastructure.exception.*;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
-import com.arquiweb.payment.transaction.dtos.request.SavePaymentDTO;
+import com.arquiweb.payment.transaction.domain.enums.PaymentMethod;
+import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
 import com.arquiweb.payment.transaction.domain.enums.TransactionStatus;
 import com.arquiweb.payment.infrastructure.client.TicketingClient;
-import com.arquiweb.payment.infrastructure.exception.InvalidInputException;
-import com.arquiweb.payment.infrastructure.exception.PaymentGatewayException;
-import com.arquiweb.payment.infrastructure.exception.ReservationReleaseException;
-import com.arquiweb.payment.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
-import com.arquiweb.payment.transaction.repositori.interfaces.PaymentRepository;
+import com.arquiweb.payment.transaction.repository.interfaces.PaymentRepository;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+
+import static com.arquiweb.payment.transaction.domain.enums.PaymentMethod.CREDIT_CARD;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +31,20 @@ public class PaymentTransactionService {
     private final PaymentGateway paymentGateway;
     private final TicketingClient ticketingClient;
 
-    public PaymentTransaction processPayment(SavePaymentDTO request) {
+    private final List<String> validPrefixes = List.of("4111", "4242", "5555", "3782");
+
+    public PaymentTransaction processPayment(RequestPaymentDTO request) {
         if (paymentRepository.isPaymentProcessedAndStatus(request.reservationId(), TransactionStatus.APPROVED)){
             throw new InvalidInputException("Payment already processed",
                     Map.of("reservationId", "Reservation " +
                             request.reservationId() + " has already been paid." ));
 
         }
+
+
+        if(request.paymentMethod() == CREDIT_CARD)
+            if(!validCardToken(request.cardToken())) throw new InvalidCardPrefixException("Invalid credit card provider or prefix");
+
         PaymentTransaction pt = request.toDomain();
         GatewayResponse gr;
         try {
@@ -63,6 +71,7 @@ public class PaymentTransactionService {
 
     }
 
+
     private void releaseReservation(UUID reservationId) {
         try {
             ticketingClient.releaseReservations(reservationId);
@@ -86,7 +95,7 @@ public class PaymentTransactionService {
 
     public PaymentTransaction fillAndSave(TransactionStatus status, String externalTransactionId, LocalDateTime processedAt, PaymentTransaction pt){
         pt.setStatus(status);
-        pt.setExternalGateweyTransactionId(externalTransactionId);
+        pt.setExternalGatewayTransactionId(externalTransactionId);
         pt.setProcessedAt(processedAt);
         return paymentRepository.save(pt);
     }
@@ -94,7 +103,7 @@ public class PaymentTransactionService {
     public void refundTransaction(UUID paymentId, Boolean simulateFail) {
         PaymentTransaction transaction = paymentRepository.getPaymentTransactionById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + paymentId));
-        boolean gatewaySuccess = paymentGateway.refund(transaction.getExternalGateweyTransactionId(), transaction.getAmount(), simulateFail);
+        boolean gatewaySuccess = paymentGateway.refund(transaction.getExternalGatewayTransactionId(), transaction.getAmount(), simulateFail);
         if (gatewaySuccess) {
             transaction.setStatus(TransactionStatus.REFUNDED);
             paymentRepository.save(transaction);
@@ -102,6 +111,14 @@ public class PaymentTransactionService {
         }else{
             throw new PaymentGatewayException("the payment gateway refund failed");
         }
+    }
+
+    public boolean validCardToken(String cardToken){
+        String token = cardToken.trim();
+        if(token.length() != 16) return false;
+        String Prefix = token.substring(0, 4);
+
+        return validPrefixes.contains(Prefix);
     }
 
 

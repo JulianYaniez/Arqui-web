@@ -57,11 +57,27 @@ class GlobalExceptionHandler {
             PaymentGatewayException ex,
             HttpServletRequest request
     ) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST; // O HttpStatus.UNPROCESSABLE_ENTITY
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ErrorResponse response = new ErrorResponse(
                 httpStatus,
                 ex.getMessage(),
                 request.getRequestURI()
+        );
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
+
+    @ExceptionHandler(InvalidCardPrefixException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCardPrefixException(
+            InvalidCardPrefixException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus httpStatus = HttpStatus.UNPROCESSABLE_ENTITY;
+        ErrorResponse response = new ErrorResponse(
+                httpStatus,
+                ex.getMessage(),
+                request.getRequestURI(),
+                Map.of("cardToken", ex.getMessage())
         );
         return ResponseEntity.status(httpStatus).body(response);
     }

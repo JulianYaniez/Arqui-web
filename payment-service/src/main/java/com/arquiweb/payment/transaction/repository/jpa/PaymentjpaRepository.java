@@ -1,4 +1,4 @@
-package com.arquiweb.payment.transaction.repositori.jpa;
+package com.arquiweb.payment.transaction.repository.jpa;
 
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
 import com.arquiweb.payment.transaction.domain.enums.TransactionStatus;
