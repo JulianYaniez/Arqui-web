@@ -1,6 +1,6 @@
 package com.arquiweb.payment.infrastructure.gateway;
 
-import com.arquiweb.payment.dtos.GatewayResponse;
+import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
 
 import java.math.BigDecimal;
 import java.util.concurrent.TimeoutException;

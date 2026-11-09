@@ -1,7 +1,7 @@
 package com.arquiweb.payment.infrastructure.gateway;
 
-import com.arquiweb.payment.dtos.GatewayResponse;
-import com.arquiweb.payment.enums.TransactionStatus;
+import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
+import com.arquiweb.payment.transaction.domain.enums.TransactionStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
