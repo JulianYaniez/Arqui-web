@@ -1,44 +1,112 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+
+import VenueForm from '../components/VenueForm'
 import '../styles/managment.css'
 
-function Managment() {
-  // Datos temporales hasta conectar el backend
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      name: 'Festival de Música',
-      organizer: 'Producciones XYZ',
-      date: '2026-11-15',
-      status: 'PUBLICADO'
-    },
-    {
-      id: 2,
-      name: 'Noche de Teatro',
-      organizer: 'Teatro Central',
-      date: '2026-11-20',
-      status: 'BORRADOR'
-    },
-    {
-      id: 3,
-      name: 'Conferencia Tech',
-      organizer: 'Tech Events',
-      date: '2026-11-25',
-      status: 'CANCELADO'
-    }
-  ])
+import {
+  getEvents,
+  createEvent,
+  publishEvent,
+  cancelEvent
+} from '../services/eventService'
+import { getVenues } from '../services/venueService'
 
+function Managment() {
+
+  const user = {
+    id: 'USER_TEST_001',
+    email: 'admin@ticketya.com',
+    role: 'ADMIN'
+  }
+
+  const TEMP_USER_ID = 'USER_TEST_001'
+
+  // Usuario guardado en localStorage
+  // const storedUser = localStorage.getItem('user')
+  // const user = storedUser ? JSON.parse(storedUser) : null
+
+  if (user) {
+    console.log('Hay una sesión guardada')
+    console.log(user.email)
+    console.log(user.role)
+  } else {
+    console.log('No hay sesión')
+  }
+
+  const [showVenueForm, setShowVenueForm] = useState(false)
+
+  // Estados de eventos
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  // Estados del formulario
   const [showForm, setShowForm] = useState(false)
-  const [editingEvent, setEditingEvent] = useState(null)
 
   const [form, setForm] = useState({
     name: '',
-    organizer: '',
-    date: '',
-    status: 'BORRADOR'
+    description: '',
+    type: 'RECITAL',
+    dateTime: ''
   })
 
+  const getMinDateTime = () => {
+    const now = new Date()
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+
+    return now.toISOString().slice(0, 16)
+  }
+
+  // Estados de Venue
+  const [venues, setVenues] = useState([])
+  const [venue, setVenue] = useState(null)
+  const [loadingVenues, setLoadingVenues] = useState(false)
+
+  // Sectores seleccionados
+  const [selectedSectors, setSelectedSectors] = useState([])
+
+  const loadVenues = async () => {
+    try {
+      setLoadingVenues(true)
+
+      const data = await getVenues()
+
+      setVenues(data)
+    } catch (error) {
+      console.error('Error cargando lugares:', error)
+      setError('No se pudieron cargar los lugares disponibles.')
+    } finally {
+      setLoadingVenues(false)
+    }
+  }
+
+  // Obtener eventos del backend
+  const loadEvents = async () => {
+    try {
+      setLoading(true)
+
+      const data = await getEvents()
+
+      setEvents(data.content)
+
+    } catch (error) {
+      console.error('Error cargando eventos:', error)
+      setError('No se pudieron cargar los eventos.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Cargar eventos al entrar
+  useEffect(() => {
+    loadEvents()
+    loadVenues()
+  }, [])
+
+  // Estadísticas
   const publishedEvents = events.filter(
     event => event.status === 'PUBLICADO'
   ).length
@@ -51,103 +119,216 @@ function Managment() {
     event => event.status === 'CANCELADO'
   ).length
 
+  // Formatear fecha
   const formatDate = (date) => {
     if (!date) return '-'
-    return new Date(`${date}T00:00:00`).toLocaleDateString('es-AR')
+
+    return new Date(date).toLocaleString('es-AR', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    })
   }
 
+  // Abrir formulario
   const openCreateForm = () => {
-    setEditingEvent(null)
     setForm({
       name: '',
-      organizer: '',
-      date: '',
-      status: 'BORRADOR'
+      description: '',
+      type: 'RECITAL',
+      dateTime: ''
     })
+
+    setVenue(null)
+    setSelectedSectors([])
+    setError('')
     setShowForm(true)
   }
 
-  const openEditForm = (event) => {
-    setEditingEvent(event)
-    setForm({
-      name: event.name,
-      organizer: event.organizer,
-      date: event.date,
-      status: event.status
-    })
-    setShowForm(true)
-  }
-
+  // Cerrar formulario
   const closeForm = () => {
     setShowForm(false)
-    setEditingEvent(null)
+    setVenue(null)
+    setSelectedSectors([])
+    setError('')
   }
 
+  // Modificar campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target
 
-    setForm({
-      ...form,
+    setForm(prev => ({
+      ...prev,
       [name]: value
-    })
+    }))
   }
 
-  const handleSubmit = (e) => {
+  // Seleccionar o deseleccionar sector
+  const handleSectorChange = (sector, checked) => {
+
+    if (checked) {
+      setSelectedSectors(prev => [
+        ...prev,
+        {
+          sectorId: sector.id,
+          price: ''
+        }
+      ])
+
+    } else {
+      setSelectedSectors(prev =>
+        prev.filter(item => item.sectorId !== sector.id)
+      )
+    }
+  }
+
+  // Asignar precio a un sector
+  const handleSectorPriceChange = (sectorId, price) => {
+
+    setSelectedSectors(prev =>
+      prev.map(sector =>
+        sector.sectorId === sectorId
+          ? { ...sector, price }
+          : sector
+      )
+    )
+  }
+
+  // Crear evento
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (editingEvent) {
-      // Modificar evento existente
-      setEvents(events.map(event =>
-        event.id === editingEvent.id
-          ? { ...event, ...form }
-          : event
-      ))
-    } else {
-      // Crear nuevo evento
-      const newEvent = {
-        id: Date.now(),
-        ...form
+    try {
+      setError('')
+
+      if (!user?.id) {
+        setError('No se encontró el ID del usuario.')
+        return
       }
 
-      setEvents([...events, newEvent])
-    }
+      if (!venue) {
+        setError('Primero tenés que seleccionar un lugar.')
+        return
+      }
 
-    closeForm()
+      if (selectedSectors.length === 0) {
+        setError('Seleccioná al menos un sector.')
+        return
+      }
+
+      const invalidPrice = selectedSectors.some(
+        sector =>
+          sector.price === '' ||
+          !Number.isFinite(Number(sector.price)) ||
+          Number(sector.price) <= 0
+      )
+
+      if (invalidPrice) {
+        setError('Ingresá un precio válido para cada sector.')
+        return
+      }
+
+      const eventData = {
+        name: form.name,
+        description: form.description,
+        type: form.type,
+        dateTime: form.dateTime,
+        organizerId: user.id,
+        participants: [TEMP_USER_ID],
+        venueId: venue.id,
+        sectors: selectedSectors.map(sector => ({
+          sectorId: sector.sectorId,
+          price: Number(sector.price)
+        }))
+      }
+
+      console.log('Evento a enviar:', eventData)
+
+      setSubmitting(true)
+
+      console.log('Fecha enviada:', eventData.dateTime)
+      console.log('Hora actual navegador:', new Date().toString())
+      console.log('Hora actual Argentina:', 
+        new Date().toLocaleString('es-AR', {
+          timeZone: 'America/Argentina/Buenos_Aires'
+        })
+      )
+
+      await createEvent(eventData)
+
+      await loadEvents()
+
+      closeForm()
+
+    } catch (error) {
+      console.error('Error creando evento:', error)
+      setError(error.message || 'No se pudo crear el evento.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const handleCancel = (id) => {
+  // Publicar evento
+  const handlePublish = async (id) => {
+
+    try {
+      setError('')
+
+      await publishEvent(id)
+
+      await loadEvents()
+
+    } catch (error) {
+      console.error('Error publicando evento:', error)
+      setError(error.message || 'No se pudo publicar el evento.')
+    }
+  }
+
+  // Cancelar evento
+  const handleCancel = async (id) => {
+
     const confirmed = window.confirm(
       '¿Estás seguro de que querés dar de baja este evento?'
     )
 
     if (!confirmed) return
 
-    setEvents(events.map(event =>
-      event.id === id
-        ? { ...event, status: 'CANCELADO' }
-        : event
-    ))
-  }
+    try {
+      setError('')
 
-  const handlePublish = (id) => {
-    setEvents(events.map(event =>
-      event.id === id
-        ? { ...event, status: 'PUBLICADO' }
-        : event
-    ))
+      await cancelEvent(id)
+
+      await loadEvents()
+
+    } catch (error) {
+      console.error('Error cancelando evento:', error)
+      setError(error.message || 'No se pudo cancelar el evento.')
+    }
   }
 
   return (
     <main className="management">
+
+      {/* HEADER */}
       <section className="management__header">
+
         <div>
-          <span className="management__tag">PANEL ADMINISTRATIVO</span>
+          <span className="management__tag">
+            PANEL ADMINISTRATIVO
+          </span>
+
           <h1>Administración</h1>
-          <p>Gestioná los eventos y supervisá la actividad de TicketYa.</p>
+
+          <p>
+            Gestioná los eventos y supervisá la actividad de TicketYa.
+          </p>
         </div>
 
         <div className="management__header-actions">
-          <Link to="/event" className="management__button management__button--secondary">
+
+          <Link
+            to="/event"
+            className="management__button management__button--secondary"
+          >
             Ver eventos
           </Link>
 
@@ -158,10 +339,37 @@ function Managment() {
           >
             + Nuevo evento
           </button>
+
+          <button
+            type="button"
+            className="management__button management__button--secondary"
+            onClick={() => setShowVenueForm(true)}
+          >
+            + Nuevo lugar
+          </button>
+
         </div>
+
       </section>
 
+      {/* ERROR GENERAL */}
+      {error && !showForm && (
+        <p className="management__error">{error}</p>
+      )}
+
+      {/* FORMULARIO CREAR VENUE */}
+      {showVenueForm && (
+        <VenueForm
+          onClose={() => setShowVenueForm(false)}
+          onCreated={() => {
+            loadVenues()
+          }}
+        />
+      )}
+
+      {/* ESTADÍSTICAS */}
       <section className="management__stats">
+
         <article className="management__stat">
           <span>Total de eventos</span>
           <strong>{events.length}</strong>
@@ -185,17 +393,21 @@ function Managment() {
           <strong>{cancelledEvents}</strong>
           <small>Cancelaciones registradas</small>
         </article>
+
       </section>
 
+      {/* FORMULARIO */}
       {showForm && (
+
         <section className="management__form-container">
+
           <div className="management__form-header">
+
             <div>
-              <h2>{editingEvent ? 'Modificar evento' : 'Nuevo evento'}</h2>
+              <h2>Nuevo evento</h2>
+
               <p>
-                {editingEvent
-                  ? 'Actualizá la información del evento.'
-                  : 'Completá los datos para registrar un evento.'}
+                Completá los datos para registrar un evento.
               </p>
             </div>
 
@@ -207,11 +419,21 @@ function Managment() {
             >
               ×
             </button>
+
           </div>
 
-          <form className="management__form" onSubmit={handleSubmit}>
+          <form
+            className="management__form"
+            onSubmit={handleSubmit}
+          >
+
+            {/* NOMBRE */}
             <div className="management__form-field">
-              <label htmlFor="name">Nombre del evento</label>
+
+              <label htmlFor="name">
+                Nombre del evento
+              </label>
+
               <input
                 id="name"
                 name="name"
@@ -221,79 +443,251 @@ function Managment() {
                 placeholder="Ej: Festival de Música"
                 required
               />
+
             </div>
 
+            {/* DESCRIPCIÓN */}
             <div className="management__form-field">
-              <label htmlFor="organizer">Organizador</label>
-              <input
-                id="organizer"
-                name="organizer"
-                type="text"
-                value={form.organizer}
+
+              <label htmlFor="description">
+                Descripción
+              </label>
+
+              <textarea
+                id="description"
+                name="description"
+                value={form.description}
                 onChange={handleChange}
-                placeholder="Nombre del organizador"
+                placeholder="Descripción del evento"
                 required
               />
+
             </div>
 
+            {/* TIPO */}
             <div className="management__form-field">
-              <label htmlFor="date">Fecha</label>
-              <input
-                id="date"
-                name="date"
-                type="date"
-                value={form.date}
-                onChange={handleChange}
-                required
-              />
-            </div>
 
-            <div className="management__form-field">
-              <label htmlFor="status">Estado</label>
+              <label htmlFor="type">
+                Tipo de evento
+              </label>
+
               <select
-                id="status"
-                name="status"
-                value={form.status}
+                id="type"
+                name="type"
+                value={form.type}
                 onChange={handleChange}
+                required
               >
-                <option value="BORRADOR">Borrador</option>
-                <option value="PUBLICADO">Publicado</option>
+                <option value="RECITAL">Recital</option>
+                <option value="THEATER">Teatro</option>
+                <option value="SPORTS">Deportes</option>
+                <option value="CONFERENCE">Conferencia</option>
+                <option value="WORKSHOP">Workshop</option>
+                <option value="SEMINAR">Seminario</option>
+                <option value="FESTIVAL">Festival</option>
               </select>
+
             </div>
 
+            {/* FECHA */}
+            <div className="management__form-field">
+
+              <label htmlFor="dateTime">
+                Fecha y hora
+              </label>
+
+              <input
+                id="dateTime"
+                name="dateTime"
+                type="datetime-local"
+                value={form.dateTime}
+                min={getMinDateTime()}
+                onChange={handleChange}
+                required
+              />
+
+            </div>
+
+            {/* VENUE */}
+            {/* SELECCIONAR VENUE */}
+            <div className="management__form-field">
+            <label htmlFor="venue">Lugar del evento</label>
+
+            <select
+              id="venue"
+              value={venue?.id || ''}
+              onChange={(e) => {
+                const selectedVenue = venues.find(
+                  item => item.id === e.target.value
+                )
+
+                setVenue(selectedVenue || null)
+                setSelectedSectors([])
+                setError('')
+              }}
+              disabled={loadingVenues}
+              required
+            >
+              <option value="">
+                {loadingVenues
+                  ? 'Cargando lugares...'
+                  : 'Seleccioná un lugar'}
+              </option>
+
+              {venues.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.name} - {item.city}
+                </option>
+              ))}
+            </select>
+
+            {!loadingVenues && venues.length === 0 && (
+              <p>No hay lugares registrados. Primero creá un Venue.</p>
+            )}
+          </div>
+
+            {/* INFORMACIÓN DEL VENUE */}
+            {venue && (
+
+              <div className="management__form-field">
+
+                <h3>{venue.name}</h3>
+
+                <p>{venue.city}</p>
+
+                <h4>Sectores disponibles</h4>
+
+                {venue.sectors?.length > 0 ? (
+
+                  venue.sectors.map(sector => {
+
+                    const selected = selectedSectors.some(
+                      item => item.sectorId === sector.id
+                    )
+
+                    const selectedSector = selectedSectors.find(
+                      item => item.sectorId === sector.id
+                    )
+
+                    return (
+
+                      <div
+                        key={sector.id}
+                        className="management__sector"
+                      >
+
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={(e) =>
+                              handleSectorChange(
+                                sector,
+                                e.target.checked
+                              )
+                            }
+                          />
+
+                          {sector.name} - Capacidad: {sector.capacity}
+                        </label>
+
+                        {selected && (
+
+                          <input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="Precio del sector"
+                            value={selectedSector.price}
+                            onChange={(e) =>
+                              handleSectorPriceChange(
+                                sector.id,
+                                e.target.value
+                              )
+                            }
+                            required
+                          />
+
+                        )}
+
+                      </div>
+
+                    )
+
+                  })
+
+                ) : (
+
+                  <p>Este lugar no tiene sectores disponibles.</p>
+
+                )}
+
+              </div>
+
+            )}
+
+            {/* ERROR */}
+            {error && (
+              <p className="management__error">
+                {error}
+              </p>
+            )}
+
+            {/* ACCIONES */}
             <div className="management__form-actions">
+
               <button
                 type="button"
                 className="management__cancel"
                 onClick={closeForm}
+                disabled={submitting}
               >
                 Cancelar
               </button>
 
-              <button type="submit" className="management__button">
-                {editingEvent ? 'Guardar cambios' : 'Crear evento'}
+              <button
+                type="submit"
+                className="management__button"
+                disabled={submitting}
+              >
+                {submitting ? 'Creando...' : 'Crear evento'}
               </button>
+
             </div>
+
           </form>
+
         </section>
+
       )}
 
+      {/* TABLA DE EVENTOS */}
       <section className="management__content">
+
         <div className="management__section-header">
+
           <div>
             <h2>Gestión de eventos</h2>
-            <p>Consultá y administrá los eventos de la plataforma.</p>
+
+            <p>
+              Consultá y administrá los eventos de la plataforma.
+            </p>
           </div>
 
-          <Link to="/event">Ver catálogo</Link>
+          <Link to="/event">
+            Ver catálogo
+          </Link>
+
         </div>
 
         <div className="management__table-container">
+
           <table className="management__table">
+
             <thead>
               <tr>
                 <th>Evento</th>
-                <th>Organizador</th>
+                <th>Lugar</th>
                 <th>Fecha</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -301,76 +695,104 @@ function Managment() {
             </thead>
 
             <tbody>
-              {events.map(event => (
-                <tr key={event.id}>
-                  <td>{event.name}</td>
-                  <td>{event.organizer}</td>
-                  <td>{formatDate(event.date)}</td>
-                  <td>
-                    <span
-                      className={`management__status management__status--${event.status.toLowerCase()}`}
-                    >
-                      {event.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="management__row-actions">
-                      <Link
-                        to={`/event/${event.id}`}
-                        className="management__view"
-                      >
-                        Ver
-                      </Link>
 
-                      <button
-                        type="button"
-                        className="management__edit"
-                        onClick={() => openEditForm(event)}
-                        disabled={event.status === 'CANCELADO'}
-                      >
-                        Modificar
-                      </button>
+              {loading ? (
 
-                      {event.status === 'BORRADOR' && (
-                        <button
-                          type="button"
-                          className="management__publish"
-                          onClick={() => handlePublish(event.id)}
-                        >
-                          Publicar
-                        </button>
-                      )}
-
-                      {event.status !== 'CANCELADO' && (
-                        <button
-                          type="button"
-                          className="management__delete"
-                          onClick={() => handleCancel(event.id)}
-                        >
-                          Dar de baja
-                        </button>
-                      )}
-                    </div>
+                <tr>
+                  <td colSpan="5" className="management__empty">
+                    Cargando eventos...
                   </td>
                 </tr>
-              ))}
 
-              {events.length === 0 && (
+              ) : events.length > 0 ? (
+
+                events.map(event => (
+
+                  <tr key={event.id}>
+
+                    <td>{event.name}</td>
+
+                    <td>{event.location || '-'}</td>
+
+                    <td>{formatDate(event.date)}</td>
+
+                    <td>
+                      <span
+                        className={`management__status management__status--${event.status.toLowerCase()}`}
+                      >
+                        {event.status}
+                      </span>
+                    </td>
+
+                    <td>
+
+                      <div className="management__row-actions">
+
+                        <Link
+                          to={`/event/${event.id}`}
+                          className="management__view"
+                        >
+                          Ver
+                        </Link>
+
+                        {event.status === 'BORRADOR' && (
+
+                          <button
+                            type="button"
+                            className="management__publish"
+                            onClick={() => handlePublish(event.id)}
+                          >
+                            Publicar
+                          </button>
+
+                        )}
+
+                        {event.status !== 'CANCELADO' &&
+                          event.status !== 'FINALIZADO' && (
+
+                          <button
+                            type="button"
+                            className="management__delete"
+                            onClick={() => handleCancel(event.id)}
+                          >
+                            Dar de baja
+                          </button>
+
+                        )}
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))
+
+              ) : (
+
                 <tr>
                   <td colSpan="5" className="management__empty">
                     Todavía no hay eventos registrados.
                   </td>
                 </tr>
+
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
       </section>
 
+      {/* ACCESOS RÁPIDOS */}
       <section className="management__quick-actions">
+
         <h2>Accesos rápidos</h2>
 
         <div className="management__actions">
+
           <button
             type="button"
             className="management__action"
@@ -384,8 +806,11 @@ function Managment() {
             <span>Mi perfil</span>
             <small>Consultar información de cuenta</small>
           </Link>
+
         </div>
+
       </section>
+
     </main>
   )
 }

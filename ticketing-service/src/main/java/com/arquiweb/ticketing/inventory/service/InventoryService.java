@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.inventory.service;
 
-import com.arquiweb.ticketing.event.service.EventService;
+// import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
@@ -26,7 +27,8 @@ public class InventoryService {
 
     private final SectorCapacityRepository sectorCapacityRepository;
     private final TicketRepository ticketRepository;
-    private final EventService eventService;
+    // private final EventService eventService;
+    private final EventValidator eventValidator;
 
     @Transactional
     public void initSector(
@@ -59,7 +61,7 @@ public class InventoryService {
 
     public SectorAvailabilityResponse findSectorAvailability(String eventId, String sectorId) {
 
-        eventService.validateEvent(eventId);
+        eventValidator.validateEvent(eventId);
 
         SectorCapacity sectorCapacity = sectorCapacityRepository.findByEventIdAndSectorId(eventId, sectorId)
                 .orElse(null);

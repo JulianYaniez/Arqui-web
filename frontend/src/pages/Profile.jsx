@@ -1,14 +1,22 @@
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
 import '../styles/profile.css'
 
 function Profile() {
-  // Datos temporales hasta conectar el servicio de usuarios
-  const user = {
-    name: 'Nicolás Gómez',
-    email: 'nico@email.com',
-    phone: '11 1234-5678',
-    role: 'CLIENTE'
+  const navigate = useNavigate()
+
+  // Recuperar usuario de localStorage
+  const user = JSON.parse(localStorage.getItem('user'))
+
+  // Si no hay sesión, volver al login
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  // Cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    navigate('/login')
   }
 
   return (
@@ -25,11 +33,11 @@ function Profile() {
 
         <div className="profile__card profile__user">
           <div className="profile__avatar">
-            {user.name.charAt(0).toUpperCase()}
+            {(user.name || user.email).charAt(0).toUpperCase()}
           </div>
 
           <div className="profile__user-info">
-            <h2>{user.name}</h2>
+            <h2>{user.name || 'Usuario'}</h2>
             <p>{user.email}</p>
             <span className="profile__role">{user.role}</span>
           </div>
@@ -50,7 +58,7 @@ function Profile() {
           <div className="profile__details">
             <div className="profile__field">
               <span>Nombre completo</span>
-              <strong>{user.name}</strong>
+              <strong>{user.name || '-'}</strong>
             </div>
 
             <div className="profile__field">
@@ -60,7 +68,7 @@ function Profile() {
 
             <div className="profile__field">
               <span>Teléfono</span>
-              <strong>{user.phone}</strong>
+              <strong>{user.phone || '-'}</strong>
             </div>
           </div>
         </div>
@@ -89,7 +97,11 @@ function Profile() {
         </div>
 
         <div className="profile__logout">
-          <button type="button">
+          <button
+            id="btn__logout"
+            type="button"
+            onClick={handleLogout}
+          >
             Cerrar sesión
           </button>
         </div>

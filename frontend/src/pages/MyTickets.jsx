@@ -31,6 +31,17 @@ function MyTickets() {
     }
   ]
 
+  const storedUser = localStorage.getItem('user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+
+  if (user) {
+    console.log('Hay una sesión guardada')
+    console.log(user.email)
+    console.log(user.role)
+  } else {
+    console.log('No hay sesión')
+  }
+
   const [selectedTicket, setSelectedTicket] = useState(null)
 
   return (

@@ -26,12 +26,12 @@ public class EventService {
         ticketingEventRepository.save(event);
     }
 
-    public void validateEvent(String eventId) {
-        TicketingEvent event = ticketingEventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+    // public void validateEvent(String eventId) {
+    //     TicketingEvent event = ticketingEventRepository.findById(eventId)
+    //             .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        if (!event.getSalesEnabled()) throw new InvalidEventException("Given event has already happened or was canceled.");
-    }
+    //     if (!event.getSalesEnabled()) throw new InvalidEventException("Given event has already happened or was canceled.");
+    // }
 
     public void cancelEvent(String eventId) {
         TicketingEvent event = ticketingEventRepository.findById(eventId)

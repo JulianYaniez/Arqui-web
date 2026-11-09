@@ -5,6 +5,17 @@ import '../styles/eventDetails.css'
 function EventDetails() {
   const { id } = useParams()
 
+  const storedUser = localStorage.getItem('user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+
+  if (user) {
+    console.log('Hay una sesión guardada')
+    console.log(user.email)
+    console.log(user.role)
+  } else {
+    console.log('No hay sesión')
+  }
+
   // Datos temporales hasta conectar el catalog-service
   const event = {
     id,

@@ -5,6 +5,18 @@ import EventCard from '../components/EventCard'
 import '../styles/home.css'
 
 function Home() {
+
+  const storedUser = localStorage.getItem('user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+
+  if (user) {
+    console.log('Hay una sesión guardada')
+    console.log(user.email)
+    console.log(user.role)
+  } else {
+    console.log('No hay sesión')
+  }
+
   // Eventos temporales para visualizar la sección
   const featuredEvents = [
     {
