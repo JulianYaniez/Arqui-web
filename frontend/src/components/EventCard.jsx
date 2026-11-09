@@ -5,7 +5,7 @@ import '../styles/eventcard.css'
 function EventCard({ event }) {
   return (
     <Link
-      to={`/events/${event.id}`}
+      to={`/event/${event.id}`}
       className="event-card"
     >
       <div className="event-card__image-container">

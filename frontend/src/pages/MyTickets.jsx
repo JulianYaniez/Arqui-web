@@ -64,7 +64,7 @@ function MyTickets() {
             <p>Estas son las entradas asociadas a tu cuenta.</p>
           </div>
 
-          <Link to="/events">Explorar eventos</Link>
+          <Link to="/event">Explorar eventos</Link>
         </div>
 
         <div className="my-tickets__list">
@@ -126,7 +126,7 @@ function MyTickets() {
                 Cuando compres una entrada, aparecerá en esta sección.
               </p>
 
-              <Link to="/events">Explorar eventos</Link>
+              <Link to="/event">Explorar eventos</Link>
             </div>
           )}
         </div>

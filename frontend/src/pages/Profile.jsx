@@ -70,7 +70,7 @@ function Profile() {
           <p>Accedé rápidamente a tu actividad en TicketYa.</p>
 
           <div className="profile__links">
-            <Link to="/mis-entradas" className="profile__link">
+            <Link to="/my-tickets" className="profile__link">
               <div>
                 <strong>Mis entradas</strong>
                 <small>Consultá tus entradas y códigos QR.</small>
@@ -78,7 +78,7 @@ function Profile() {
               <span>→</span>
             </Link>
 
-            <Link to="/events" className="profile__link">
+            <Link to="/event" className="profile__link">
               <div>
                 <strong>Explorar eventos</strong>
                 <small>Encontrá tu próxima experiencia.</small>

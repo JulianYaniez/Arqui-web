@@ -73,7 +73,7 @@ function Checkout() {
             Enviaremos los detalles a {buyer.email}.
           </p>
 
-          <Link to="/mis-entradas" className="checkout__button">
+          <Link to="/my-tickets" className="checkout__button">
             Ver mis entradas
           </Link>
         </section>
@@ -84,7 +84,7 @@ function Checkout() {
   return (
     <main className="checkout">
       <Link
-        to={`/events/${id}`}
+        to={`/event/${id}`}
         className="checkout__back"
       >
         ← Volver al evento

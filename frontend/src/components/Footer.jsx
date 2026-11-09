@@ -11,7 +11,7 @@ function Footer() {
 
       <nav className="footer__links" aria-label="Enlaces del pie de página">
         <a href="/">Inicio</a>
-        <a href="/events">Eventos</a>
+        <a href="/event">Eventos</a>
         <a href="/contact">Contacto</a>
       </nav>
 

@@ -45,7 +45,7 @@ function Register() {
           </button>
         </form>
         <p className="register__login">
-          ¿Ya tenés cuenta?  <Link to="/inicio-sesion">Iniciá sesión.</Link>
+          ¿Ya tenés cuenta?  <Link to="/login">Iniciá sesión.</Link>
         </p>
       </section>
     </main>

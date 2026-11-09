@@ -44,7 +44,7 @@ function EventDetails() {
 
   return (
     <main className="event-details">
-      <Link to="/events" className="event-details__back">
+      <Link to="/event" className="event-details__back">
         ← Volver a eventos
       </Link>
 
@@ -120,7 +120,7 @@ function EventDetails() {
           </div>
 
           <Link
-            to={`/events/${event.id}/comprar`}
+            to={`/event/${event.id}/buy`}
             className="event-details__buy"
           >
             Comprar entradas

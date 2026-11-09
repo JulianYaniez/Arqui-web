@@ -147,7 +147,7 @@ function Managment() {
         </div>
 
         <div className="management__header-actions">
-          <Link to="/eventos" className="management__button management__button--secondary">
+          <Link to="/event" className="management__button management__button--secondary">
             Ver eventos
           </Link>
 
@@ -285,7 +285,7 @@ function Managment() {
             <p>Consultá y administrá los eventos de la plataforma.</p>
           </div>
 
-          <Link to="/eventos">Ver catálogo</Link>
+          <Link to="/event">Ver catálogo</Link>
         </div>
 
         <div className="management__table-container">
@@ -316,7 +316,7 @@ function Managment() {
                   <td>
                     <div className="management__row-actions">
                       <Link
-                        to={`/eventos/${event.id}`}
+                        to={`/event/${event.id}`}
                         className="management__view"
                       >
                         Ver
@@ -380,7 +380,7 @@ function Managment() {
             <small>Registrar un nuevo evento</small>
           </button>
 
-          <Link to="/perfil" className="management__action">
+          <Link to="/profile" className="management__action">
             <span>Mi perfil</span>
             <small>Consultar información de cuenta</small>
           </Link>

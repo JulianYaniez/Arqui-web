@@ -42,7 +42,7 @@ function Login() {
         </form>
 
         <p className="login__register">
-          ¿No tenés cuenta? <Link to="/registro">Creá una</Link>
+          ¿No tenés cuenta? <Link to="/register">Creá una</Link>
         </p>
       </section>
     </main>
