@@ -11,6 +11,12 @@ services:
       - "5432:5432"
     volumes:
       - ticketing_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d ticketing"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Management *
   postgres-management:
@@ -22,7 +28,13 @@ services:
     ports: 
       - "5433:5432"
     volumes:
-      - ticketing_data:/var/lib/postgresql/data
+      - management_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d management"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Identity *
   postgres-identity:
@@ -34,7 +46,13 @@ services:
     ports: 
       - "5434:5432"
     volumes:
-      - ticketing_data:/var/lib/postgresql/data
+      - identity_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d identity"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Payment *
   postgres-payment:
@@ -46,7 +64,13 @@ services:
     ports: 
       - "5435:5432"
     volumes:
-      - ticketing_data:/var/lib/postgresql/data
+      - payment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U group_7 -d payment"]
+      interval: 10s       
+      timeout: 5s         
+      retries: 5                
+      start_period: 10s  
 
   # * Catalog *
   mongo-catalog:
@@ -71,7 +95,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-ticketing
+      postgres-ticketing:
+        condition: service_healthy
+
 
   # * Management *
   management-service:
@@ -83,7 +109,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-management
+      postgres-management:
+        condition: service_healthy
 
   # * Identity *
   identity-service:
@@ -95,11 +122,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-identity
+      postgres-identity:
+        condition: service_healthy
 
   # * Payment *
   payment-service:
     build: ./payment-service
+
     ports: 
       - "8084:8080"
     environment:
@@ -107,7 +136,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      - postgres-payment
+      postgres-payment:
+        condition: service_healthy
 
   # * Catalog *
   catalog-service:
@@ -115,7 +145,7 @@ services:
     ports: 
       - "8085:8080"
     environment:
-      - SPRING_MONGODB_URI=mongodb://mongo-catalog:27017/catalog
+      - SPRING_MONGODB_URI=mongodb://group_7:root@mongo-catalog:27017/catalog?authSource=admin
     depends_on:
       - mongo-catalog
 

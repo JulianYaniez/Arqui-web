@@ -1,43 +1,45 @@
 
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import EventCard from '../components/EventCard'
+import { getEvents } from '../services/eventService'
 import '../styles/home.css'
 
 function Home() {
-  // Eventos temporales para visualizar la sección
-  const featuredEvents = [
-    {
-      id: 1,
-      name: 'Festival de Música',
-      category: 'Música',
-      date: '15/11/2026',
-      location: 'Tandil',
-      price: 25000,
-      image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800',
-      status: 'PUBLICADO'
-    },
-    {
-      id: 2,
-      name: 'Tech Conference',
-      category: 'Tecnología',
-      date: '30/11/2026',
-      location: 'Centro de Convenciones',
-      price: 18000,
-      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
-      status: 'PUBLICADO'
-    },
-    {
-      id: 3,
-      name: 'Noche de Teatro',
-      category: 'Teatro',
-      date: '25/11/2026',
-      location: 'Teatro Central',
-      price: 12000,
-      image: 'https://images.unsplash.com/photo-1503095396549-807759245b35?w=800',
-      status: 'PUBLICADO'
+  const [featuredEvents, setFeaturedEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoading(true)
+        setError('')
+
+        const data = await getEvents()
+
+        // Adaptarse tanto a una lista como a una respuesta paginada
+        const events = Array.isArray(data)
+          ? data
+          : data.content || data.events || []
+
+        // Mostrar únicamente eventos publicados
+        const publishedEvents = events.filter(
+          event => event.status === 'PUBLISHED'
+        )
+
+        setFeaturedEvents(publishedEvents.slice(0, 3))
+      } catch (error) {
+        console.error('Error cargando eventos destacados:', error)
+        setError('No se pudieron cargar los eventos.')
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    loadEvents()
+  }, [])
 
   return (
     <main className="home">
@@ -57,7 +59,7 @@ function Home() {
             y asegurá tu lugar.
           </p>
 
-          <Link to="/eventos" className="home__button">
+          <Link to="/event" className="home__button">
             Explorar eventos
           </Link>
         </div>
@@ -75,24 +77,28 @@ function Home() {
             <p>Descubrí los eventos que no te podés perder.</p>
           </div>
 
-          <Link to="/eventos">Ver todos</Link>
+          <Link to="/event">Ver todos</Link>
         </div>
 
         <div className="home__events">
-          {/*
-            Cuando conectemos el backend, reemplazamos
-            los eventos temporales por los eventos recibidos.
-          */}
-          {featuredEvents.map(event => (
-            <EventCard key={event.id} event={event} />
-          ))}
+          {loading ? (
+            <p>Cargando eventos...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : featuredEvents.length > 0 ? (
+            featuredEvents.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))
+          ) : (
+            <p>Por el momento no hay eventos destacados.</p>
+          )}
         </div>
       </section>
 
       <section className="home__cta">
         <h2>¿Listo para tu próximo evento?</h2>
         <p>Encontrá tu próxima experiencia en TicketYa.</p>
-        <Link to="/eventos">Ver eventos</Link>
+        <Link to="/event">Ver eventos</Link>
       </section>
     </main>
   )

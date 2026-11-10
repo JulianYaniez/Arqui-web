@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/venue")
@@ -77,4 +78,12 @@ class VenueController {
 
         return ResponseEntity.ok(venueQuery);
     }
+    @Operation(summary = "Find all venues.")
+    @GetMapping
+    public ResponseEntity<List<VenueResponse>> findAllVenues() {
+        List<VenueResponse> venues = venueService.findAllVenues();
+
+        return ResponseEntity.ok(venues);
+    }
+
 }

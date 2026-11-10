@@ -1,3 +1,56 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: TicketYa
+    name: API-Gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:5173"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+
+          routes:
+            - id: catalog-route
+              uri: http://catalog-service:8080
+              predicates:
+                - Path=/api/catalog/**
+              filters:
+                - StripPrefix=2
+
+            - id: ticketing-route
+              uri: http://ticketing-service:8080
+              predicates:
+                - Path=/api/ticketing/**
+              filters:
+                - StripPrefix=2
+
+            - id: management-route
+              uri: http://management-service:8080
+              predicates:
+                - Path=/api/management/**
+              filters:
+                - StripPrefix=2
+
+            - id: payment-route
+              uri: http://payment-service:8080
+              predicates:
+                - Path=/api/payment/**
+              filters:
+                - StripPrefix=2

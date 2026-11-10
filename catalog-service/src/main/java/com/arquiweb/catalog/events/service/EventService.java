@@ -6,6 +6,7 @@ import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
 import com.arquiweb.catalog.events.dto.response.EventResponse;
+import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
 import com.arquiweb.catalog.infrastructure.client.TicketingClient;
@@ -20,6 +21,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ public class EventService {
     private final VenueService venueService;
     private final TicketingClient ticketingClient;
 
+    @Transactional
     public String createEvent(CreateEventRequest request) {
         VenueResponse venue = venueService.findVenueById(request.venueId());
 
@@ -61,6 +64,7 @@ public class EventService {
     }
 
 
+    @Transactional
     public String addSector(String eventId, CreateEventSectorRequest request) {
         Event event = this.getEventValidated(eventId);
 
@@ -81,6 +85,7 @@ public class EventService {
         return eventSector.getSectorId();
     }
 
+    @Transactional
     public void publishEvent(String eventId) {
         Event event = this.getEventValidated(eventId);
 
@@ -100,6 +105,26 @@ public class EventService {
 
         return eventsPage.map(EventResponse::fromDomain);
     }
+
+    public EventResponse getEventById(String eventId) {
+        Event event = this.getEventValidated(eventId);
+
+        return EventResponse.fromDomain(event);
+    }
+
+    public EventStateResponse getById(String eventId) {
+        return eventRepository.findById(eventId).map(EventStateResponse::fromDomain)
+                .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
+    }
+
+    public void cancelEvent(String eventId) {
+        Event event = getEventValidated(eventId);
+
+        event.cancel();
+
+        eventRepository.save(event);
+    }
+
 
 
     private Event getEventValidated(String eventId) {

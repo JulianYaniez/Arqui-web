@@ -5,10 +5,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "ticketing-client", url = "${ticketing.service.url}")
+@FeignClient(name = "ticketing-client", url = "${app.feign.ticketing.url}")
 public interface TicketingClient {
 
-    @PostMapping("/capacities/init")
-    void initializeSectors(@RequestBody InitCapacityRequest request);
-
+  @PostMapping("/event/init")
+  void initializeSectors(@RequestBody InitCapacityRequest request);
 }

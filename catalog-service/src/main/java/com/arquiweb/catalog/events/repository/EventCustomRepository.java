@@ -28,7 +28,8 @@ public class EventCustomRepository {
         Query query = new Query();
 
         // Redo later with JWT role
-        if (criteria == null || !criteria.admin()) {
+        if (criteria == null || !Boolean.TRUE.equals(criteria.admin())) {
+        // if (criteria == null || !criteria.admin()) {
             query.addCriteria(Criteria.where("status").is(EventStatus.PUBLISHED));
         }
 

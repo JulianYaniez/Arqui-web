@@ -439,6 +439,129 @@
   color: var(--text);
 }
 
+/* FORMULARIO - CAMPOS */
+
+.management__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+
+.management__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.management__form-field--full {
+  grid-column: 1 / -1;
+}
+
+.management__form-field label {
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.management__form-field input,
+.management__form-field select,
+.management__form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.management__form-field textarea {
+  min-height: 130px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.management__form-field textarea::placeholder,
+.management__form-field input::placeholder {
+  color: var(--text);
+  opacity: 0.65;
+}
+
+.management__form-field input:focus,
+.management__form-field select:focus,
+.management__form-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.management__field-hint {
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.management__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.management__header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.management__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+  .management__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .management__header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 650px) {
+  .management__form {
+    grid-template-columns: 1fr;
+  }
+
+  .management__form-field--full {
+    grid-column: auto;
+  }
+
+  .management__form-container {
+    padding: 1.3rem;
+  }
+}
+
 @media (max-width: 650px) {
   .management__header-actions {
     flex-wrap: wrap;

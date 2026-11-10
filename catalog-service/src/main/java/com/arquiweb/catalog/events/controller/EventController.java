@@ -4,6 +4,7 @@ import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
 import com.arquiweb.catalog.events.dto.response.EventResponse;
+import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -54,17 +55,41 @@ class EventController {
     })
     @PostMapping
     public ResponseEntity<Void> createEvent(
-            @RequestBody CreateEventRequest request
-    ) {
+        @RequestBody CreateEventRequest request
+        ) {
+        // Crear evento
         String id = eventService.createEvent(request);
 
+        // Publicar automáticamente
+        eventService.publishEvent(id);
+
         URI uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(id)
-                .toUri();
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(id)
+            .toUri();
 
         return ResponseEntity.created(uri).build();
+   }   
+
+    @Operation(summary = "Get event state by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fetched successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No event found with given ID."
+            )
+    })
+    @GetMapping("/{eventId}/state")
+    public ResponseEntity<EventStateResponse> getEventStateById(
+            @PathVariable("eventId") String eventId
+    ) {
+        EventStateResponse response = eventService.getById(eventId);
+
+        return ResponseEntity.ok(response);
     }
 
 
@@ -148,4 +173,38 @@ class EventController {
 
         return ResponseEntity.ok(page);
     }
+
+
+    @Operation(summary = "Cancel event.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Cancelled successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Event not found."
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Invalid event state."
+            )
+    })
+    @PostMapping("/{eventId}/cancel")
+    public ResponseEntity<Void> cancelEvent(
+            @PathVariable("eventId") String eventId
+    ) {
+        eventService.cancelEvent(eventId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponse> getEventById(
+        @PathVariable String id
+    ) {
+        EventResponse response = eventService.getEventById(id);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
