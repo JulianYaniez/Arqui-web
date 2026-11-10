@@ -1,4 +1,5 @@
 import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
@@ -35,7 +36,7 @@ public class ReservationConcurrencyTest {
     private InventoryService inventoryService;
 
     @Mock
-    private EventService eventService;
+    private EventValidator eventValidator;
 
     private ReservationService reservationService;
     private AutoCloseable closeable;
@@ -46,14 +47,14 @@ public class ReservationConcurrencyTest {
     @BeforeMethod
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        Mockito.reset(inventoryService, reservationRepository);
+        Mockito.reset(inventoryService, reservationRepository, eventValidator);
         this.reservationService = new ReservationService(
                 4,
                 15,
                 "http://localhost:8080",
                 reservationRepository,
                 inventoryService,
-                eventService
+                eventValidator
         );
     }
 

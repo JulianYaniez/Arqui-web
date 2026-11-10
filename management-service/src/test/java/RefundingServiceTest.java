@@ -213,7 +213,7 @@ public class RefundingServiceTest {
 
         verify(mockRefund, times(1)).accept(ADMIN_ID);
         verify(ticketingClient, times(1)).acceptRefund(RESERVATION_ID);
-        verify(paymentClient, times(1)).refundPayment(any(PaymentRefundRequest.class));
+        verify(paymentClient, times(1)).refundPayment(any(UUID.class));
         verify(refundRequestRepository, times(1)).save(mockRefund);
     }
 

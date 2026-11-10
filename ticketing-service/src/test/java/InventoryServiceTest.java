@@ -1,4 +1,5 @@
 import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
@@ -33,7 +34,7 @@ public class InventoryServiceTest {
     private TicketRepository ticketRepo;
 
     @Mock
-    private EventService eventService;
+    private EventValidator eventValidator;
 
     private InventoryService service;
     private AutoCloseable closeable;
@@ -47,7 +48,7 @@ public class InventoryServiceTest {
     void setUp() throws Exception {
         closeable = MockitoAnnotations.openMocks(this);
         Mockito.reset(scr, ticketRepo);
-        service = new InventoryService(scr, ticketRepo, eventService);
+        service = new InventoryService(scr, ticketRepo, eventValidator);
     }
 
     @AfterMethod
@@ -344,7 +345,7 @@ public class InventoryServiceTest {
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void testFindSectorAvailability_EventValidationFails_ThrowsException() {
         doThrow(new ResourceNotFoundException("Event not found"))
-                .when(eventService).validateEvent(EVENT_ID);
+                .when(eventValidator).validateEvent(EVENT_ID);
 
         service.findSectorAvailability(EVENT_ID, SECTOR_ID);
 

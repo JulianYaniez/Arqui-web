@@ -1,4 +1,5 @@
 import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
@@ -51,7 +52,7 @@ public class ReservationServiceTest {
     private InventoryService inventoryService;
 
     @Mock
-    private EventService eventService;
+    private EventValidator eventValidator;
 
     private ReservationService reservationService;
     private AutoCloseable closeable;
@@ -66,7 +67,7 @@ public class ReservationServiceTest {
                                     APP_URL,
                                     reservationRepository,
                                     inventoryService,
-                                    eventService
+                                    eventValidator
                                 );
     }
     @AfterMethod
