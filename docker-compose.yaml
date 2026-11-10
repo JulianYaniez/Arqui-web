@@ -82,6 +82,12 @@ services:
       - "27017:27017"
     volumes:
       - catalog_data:/data/db
+    healthcheck: 
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 
   # --- Services ---
@@ -128,7 +134,6 @@ services:
   # * Payment *
   payment-service:
     build: ./payment-service
-
     ports: 
       - "8084:8080"
     environment:
@@ -145,9 +150,10 @@ services:
     ports: 
       - "8085:8080"
     environment:
-      - SPRING_MONGODB_URI=mongodb://group_7:root@mongo-catalog:27017/catalog?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb://group_7:root@mongo-catalog:27017/catalog?authSource=admin
     depends_on:
-      - mongo-catalog
+      mongo-catalog:
+        condition: service_healthy
 
   # --- Gateway ---
   api-gateway:

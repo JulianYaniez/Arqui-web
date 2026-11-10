@@ -60,7 +60,7 @@ class GlobalExceptionHandler {
             PaymentGatewayException ex,
             HttpServletRequest request
     ) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        HttpStatus httpStatus = HttpStatus.UNPROCESSABLE_CONTENT;
         ErrorResponse response = new ErrorResponse(
                 httpStatus,
                 ex.getMessage(),
@@ -75,7 +75,7 @@ class GlobalExceptionHandler {
             InvalidCardPrefixException ex,
             HttpServletRequest request
     ) {
-        HttpStatus httpStatus = HttpStatus.UNPROCESSABLE_ENTITY;
+        HttpStatus httpStatus = HttpStatus.UNPROCESSABLE_CONTENT;
         ErrorResponse response = new ErrorResponse(
                 httpStatus,
                 ex.getMessage(),

@@ -10,6 +10,7 @@ import com.arquiweb.ticketing.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/reservation")
 @RequiredArgsConstructor
+@Tag(name = "Reservation Management", description = "Operations pertaining reservation management.")
 class ReservationController {
 
     private final ReservationService reservationService;
