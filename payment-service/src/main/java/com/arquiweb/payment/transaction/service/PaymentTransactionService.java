@@ -47,12 +47,12 @@ public class PaymentTransactionService {
 
 
         if(request.paymentMethod() == CREDIT_CARD)
-            if(!validCardToken(request.cardToken())) throw new InvalidCardPrefixException("Invalid credit card provider or prefix");
+            if(!validCardToken(request.cardToken())){ throw new InvalidCardPrefixException("Invalid credit card provider or prefix");}
 
         PaymentTransaction pt = request.toDomain();
         GatewayResponse gatewayResponse;
         try {
-            gatewayResponse = paymentGateway.processPayment(request.cardToken(), request.amount());
+            gatewayResponse = paymentGateway.processPayment(request.cardToken(), request.amount(), request.paymentMethod());
             if (gatewayResponse == null) {
                 throw new InvalidInputException("Invalid gateway response",
                         Map.of("gateway", "The payment gateway did not return a valid response."));
