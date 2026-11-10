@@ -10,11 +10,6 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DatabaseLocalColorSettings">
-    <colors>
-      <entry key="88d7e612-8238-4e90-a204-42c8ab094db5" value="" />
-    </colors>
-  </component>
   <component name="EmbeddingIndexingInfo">
     <option name="cachedIndexableFilesCount" value="49" />
   </component>
@@ -44,61 +39,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.000000000049668" />
-      <entry key="MS500" value="1.0151763761611865" />
-      <entry key="S2" value="1.9361541095979213" />
-      <entry key="S5" value="3.4701170575575717" />
-      <entry key="S10" value="4.546184715334427" />
-      <entry key="S30" value="6.631583972980745" />
-      <entry key="S60" value="8.621681729552453" />
-      <entry key="M2" value="11.209544356709385" />
-      <entry key="M5" value="21.41500427680996" />
-      <entry key="M10" value="51.493741454641764" />
-      <entry key="M15" value="87.71432228092094" />
-      <entry key="M30" value="196.93123654269792" />
-      <entry key="H1" value="386.84340948578364" />
-      <entry key="H2" value="702.2949244198215" />
-      <entry key="H4" value="1201.1569316290104" />
-      <entry key="D1" value="2550.3288131525733" />
-      <entry key="W1" value="3022.221050932477" />
+      <entry key="MS100" value="1.0105722118388258" />
+      <entry key="MS500" value="2.5871728418364093" />
+      <entry key="S2" value="5.819567292730559" />
+      <entry key="S5" value="8.247010793041007" />
+      <entry key="S10" value="11.630434392256491" />
+      <entry key="S30" value="18.21728827828853" />
+      <entry key="S60" value="22.21898060951837" />
+      <entry key="M2" value="26.12854901400092" />
+      <entry key="M5" value="37.07968929165733" />
+      <entry key="M10" value="67.10835694745246" />
+      <entry key="M15" value="103.21467858750789" />
+      <entry key="M30" value="212.3119057613481" />
+      <entry key="H1" value="402.2772141617707" />
+      <entry key="H2" value="717.8834397310616" />
+      <entry key="H4" value="1216.9543326751402" />
+      <entry key="D1" value="2566.9044039825535" />
+      <entry key="W1" value="3039.1492288341715" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="4.9920779941272065E-5" />
-      <entry key="MS500" value="0.13819051845700922" />
-      <entry key="S2" value="0.7365571931324002" />
-      <entry key="S5" value="1.2586631436484086" />
-      <entry key="S10" value="1.5838068476810447" />
-      <entry key="S30" value="2.2444833549161234" />
-      <entry key="S60" value="2.912921153384953" />
-      <entry key="M2" value="3.9640739601880908" />
-      <entry key="M5" value="9.79333505826776" />
-      <entry key="M10" value="23.88742403853508" />
-      <entry key="M15" value="37.89657600276272" />
-      <entry key="M30" value="75.51229911041237" />
-      <entry key="H1" value="139.68395714573316" />
-      <entry key="H2" value="252.6236036334267" />
-      <entry key="H4" value="438.2424928307253" />
-      <entry key="D1" value="932.0796859128725" />
-      <entry key="W1" value="1100.7544479567805" />
+      <entry key="MS100" value="5.430104586319181E-42" />
+      <entry key="MS500" value="5.584257165048801E-9" />
+      <entry key="S2" value="0.009211405686487057" />
+      <entry key="S5" value="0.22103900753904795" />
+      <entry key="S10" value="0.764215459574271" />
+      <entry key="S30" value="2.1202028146578495" />
+      <entry key="S60" value="3.1472520828507013" />
+      <entry key="M2" value="4.441475029677961" />
+      <entry key="M5" value="10.305076593129584" />
+      <entry key="M10" value="24.307605168899652" />
+      <entry key="M15" value="38.28707614992718" />
+      <entry key="M30" value="75.9078789189987" />
+      <entry key="H1" value="140.1260536230763" />
+      <entry key="H2" value="253.1196737953156" />
+      <entry key="H4" value="438.80566023200777" />
+      <entry key="D1" value="932.9248987686362" />
+      <entry key="W1" value="1101.7283348914568" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="5.3155429653210025E-5" />
-      <entry key="MS500" value="0.18058149475444535" />
-      <entry key="S2" value="1.985157578575851" />
-      <entry key="S5" value="4.305942784494092" />
-      <entry key="S10" value="5.870959339828843" />
-      <entry key="S30" value="8.742648506681064" />
-      <entry key="S60" value="11.43680051283997" />
-      <entry key="M2" value="15.098732077467492" />
-      <entry key="M5" value="31.13652543650078" />
-      <entry key="M10" value="75.29170939480754" />
-      <entry key="M15" value="125.51235519902104" />
-      <entry key="M30" value="272.3360670142583" />
-      <entry key="H1" value="526.4215378452514" />
-      <entry key="H2" value="954.8221757300215" />
-      <entry key="H4" value="1639.317247865654" />
-      <entry key="D1" value="3482.3802043256273" />
-      <entry key="W1" value="4122.9707551082565" />
+      <entry key="MS100" value="0.0509869453685861" />
+      <entry key="MS500" value="2.084742230980578" />
+      <entry key="S2" value="5.655548369016952" />
+      <entry key="S5" value="8.35386696904558" />
+      <entry key="S10" value="12.272556138583033" />
+      <entry key="S30" value="20.227281111691525" />
+      <entry key="S60" value="25.274117816442047" />
+      <entry key="M2" value="30.495636722695515" />
+      <entry key="M5" value="47.31303112930185" />
+      <entry key="M10" value="91.32696529047298" />
+      <entry key="M15" value="141.4036632588084" />
+      <entry key="M30" value="288.1126138523515" />
+      <entry key="H1" value="542.2975817538771" />
+      <entry key="H2" value="970.9068138158319" />
+      <entry key="H4" value="1655.6778285282162" />
+      <entry key="D1" value="3499.801001107088" />
+      <entry key="W1" value="4140.8728183998865" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -113,37 +108,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Spring Boot.Tpe3Application.executor": "Run",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "tpe__final",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/kessy/Me/Coding/ArquiWeb/Arqui-web/src/main/java/org/arquiweb/services",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Tpe3Application.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;tpe__final&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/kessy/Me/Coding/ArquiWeb/Arqui-web/src/main/java/org/arquiweb/services&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java/org/arquiweb/services" />
