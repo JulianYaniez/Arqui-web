@@ -54,3 +54,19 @@ spring:
                 - Path=/api/payment/**
               filters:
                 - StripPrefix=2
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: 1. Catalog Service
+        url: /api/catalog/v3/api-docs
+      - name: 2. Ticketing Service
+        url: /api/ticketing/v3/api-docs
+      - name: 3. Management Service
+        url: /api/management/v3/api-docs
+      - name: 4. Payment Service
+        url: /api/payment/v3/api-docs

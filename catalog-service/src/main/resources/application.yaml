@@ -1,8 +1,8 @@
 spring:
   application:
-    name: TicketYa
+    name: ticketya
   mongodb:
-    uri: mongodb://group_7:root@localhost:27017/catalog?authSource=admin
+    uri: mongodb://group_7:root@mongo-catalog:27017/catalog?authsource=admin
 
 app:
   feign:

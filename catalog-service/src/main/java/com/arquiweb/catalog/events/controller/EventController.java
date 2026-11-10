@@ -198,6 +198,17 @@ class EventController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Get event detail by ID.")
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Event found."
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Event not found with given ID."
+        )
+    })
     @GetMapping("/{id}")
     public ResponseEntity<EventResponse> getEventById(
         @PathVariable String id

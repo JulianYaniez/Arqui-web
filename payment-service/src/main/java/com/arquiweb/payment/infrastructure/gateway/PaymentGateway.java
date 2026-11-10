@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.concurrent.TimeoutException;
 
 public interface PaymentGateway {
-    GatewayResponse processPayment(String cardToken, BigDecimal amount, PaymentMethod paymenentMethod) throws TimeoutException;
+    GatewayResponse processPayment(String cardToken, BigDecimal amount, PaymentMethod paymentMethod) throws TimeoutException;
     boolean refund(String transactionId, BigDecimal amount, boolean gatewaySuccess);
 
 }
