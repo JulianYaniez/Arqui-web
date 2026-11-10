@@ -9,9 +9,23 @@
     padding: 1rem 2rem;
 }
 
+/* Logo */
+.navbar__logo {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.navbar__logo h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+/* Links */
 .navbar__links {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 1.8rem;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -20,4 +34,49 @@
 .navbar__links a {
     color: var(--text);
     text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.navbar__links a:hover {
+    color: var(--primary);
+}
+
+/* Botón cerrar sesión */
+.navbar__logout {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.navbar__logout:hover {
+    color: var(--primary);
+}
+
+.login__error {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        width: 90%;
+        padding: 1rem 0;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .navbar__links {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
 }

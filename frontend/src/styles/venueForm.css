@@ -1,6 +1,7 @@
 
 .venue-form-container {
   width: 100%;
+  box-sizing: border-box;
   background: #fff;
   border: 1px solid #e8e5ed;
   border-radius: 16px;
@@ -93,6 +94,47 @@
   grid-column: 1 / -1;
 }
 
+/* UBICACIÓN AUTOMÁTICA */
+
+.venue-form-location-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  margin: 22px 0 28px;
+  border: 1px solid #e5daf5;
+  border-radius: 10px;
+  background: #f8f5fc;
+}
+
+.venue-form-location-info > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #eee5fa;
+  font-size: 18px;
+}
+
+.venue-form-location-info strong {
+  display: block;
+  color: #633b9e;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.venue-form-location-info p {
+  margin: 0;
+  color: #77717f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* SECTORES */
+
 .venue-form-sectors-header {
   margin: 32px 0 18px;
 }
@@ -110,6 +152,7 @@
   padding: 12px 18px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .venue-form-add:hover,
@@ -169,6 +212,8 @@
   margin: 0;
 }
 
+/* MENSAJES */
+
 .venue-form-error {
   color: #c03950;
   background: #fff1f2;
@@ -176,6 +221,8 @@
   padding: 12px;
   font-size: 13px;
 }
+
+/* BOTONES */
 
 .venue-form-actions {
   justify-content: flex-end;
@@ -195,10 +242,13 @@
 
 .venue-form-submit:disabled,
 .venue-form-cancel:disabled,
-.venue-form-close:disabled {
+.venue-form-close:disabled,
+.venue-form-add:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* RESPONSIVE */
 
 @media (max-width: 650px) {
   .venue-form-container {
@@ -224,5 +274,9 @@
 
   .venue-form-actions button {
     width: 100%;
+  }
+
+  .venue-form-location-info {
+    padding: 12px;
   }
 }

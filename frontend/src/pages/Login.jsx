@@ -1,26 +1,33 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import users from '../data/users.json'
 import '../styles/login.css'
 
 function Login() {
   const navigate = useNavigate()
 
-  const storedUser = localStorage.getItem('user')
-  const user = storedUser ? JSON.parse(storedUser) : null
-
-  if (user) {
-    console.log('Hay una sesión guardada')
-    console.log(user.email)
-    console.log(user.role)
-  } else {
-    console.log('No hay sesión')
-  }
-
   const [form, setForm] = useState({
     email: '',
     password: ''
   })
+
+  const [error, setError] = useState('')
+
+  // Verificar si ya existe una sesión
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+
+    if (storedUser) {
+      const user = JSON.parse(storedUser)
+
+      if (user.role === 'ADMIN') {
+        navigate('/managment', { replace: true })
+      } else {
+        navigate('/', { replace: true })
+      }
+    }
+  }, [navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -29,24 +36,38 @@ function Login() {
       ...form,
       [name]: value
     })
+
+    setError('')
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setError('')
 
-    // Simulamos los datos del usuario
-    const user = {
-      email: form.email,
-      role: 'USER'
+    // Buscar usuario en users.json
+    const foundUser = users.find(
+      user =>
+        user.email === form.email &&
+        user.password === form.password &&
+        user.isActive
+    )
+
+    if (!foundUser) {
+      setError('Correo o contraseña incorrectos.')
+      return
     }
 
-    // Guardamos los datos en localStorage
-    localStorage.setItem('user', JSON.stringify(user))
+    // Guardar usuario sin la contraseña
+    const { password, ...userData } = foundUser
 
-    console.log('Usuario guardado:', user)
+    localStorage.setItem('user', JSON.stringify(userData))
 
-    // Redirigimos al inicio
-    navigate('/')
+    // Redireccionar según el rol
+    if (userData.role === 'ADMIN') {
+      navigate('/managment')
+    } else {
+      navigate('/')
+    }
   }
 
   return (
@@ -63,6 +84,7 @@ function Login() {
           onSubmit={handleSubmit}
         >
           <label htmlFor="email">Correo electrónico</label>
+
           <input
             id="email"
             name="email"
@@ -75,6 +97,7 @@ function Login() {
           />
 
           <label htmlFor="password">Contraseña</label>
+
           <input
             id="password"
             name="password"
@@ -85,6 +108,12 @@ function Login() {
             onChange={handleChange}
             required
           />
+
+          {error && (
+            <p className="login__error">
+              {error}
+            </p>
+          )}
 
           <button type="submit" className="login__submit">
             Ingresar

@@ -6,12 +6,17 @@ function Profile() {
   const navigate = useNavigate()
 
   // Recuperar usuario de localStorage
-  const user = JSON.parse(localStorage.getItem('user'))
+  const storedUser = localStorage.getItem('user')
+  const user = storedUser ? JSON.parse(storedUser) : null
 
   // Si no hay sesión, volver al login
   if (!user) {
     return <Navigate to="/login" replace />
   }
+
+  // Datos del usuario
+  const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim()
+  const displayName = fullName || user.name || 'Usuario'
 
   // Cerrar sesión
   const handleLogout = () => {
@@ -21,6 +26,7 @@ function Profile() {
 
   return (
     <main className="profile">
+
       <section className="profile__header">
         <div>
           <span className="profile__tag">MI CUENTA</span>
@@ -31,53 +37,70 @@ function Profile() {
 
       <section className="profile__content">
 
+        {/* Tarjeta del usuario */}
         <div className="profile__card profile__user">
           <div className="profile__avatar">
-            {(user.name || user.email).charAt(0).toUpperCase()}
+            {displayName.charAt(0).toUpperCase()}
           </div>
 
           <div className="profile__user-info">
-            <h2>{user.name || 'Usuario'}</h2>
+            <h2>{displayName}</h2>
             <p>{user.email}</p>
             <span className="profile__role">{user.role}</span>
           </div>
         </div>
 
+        {/* Información personal */}
         <div className="profile__card">
           <div className="profile__section-header">
             <div>
               <h2>Información personal</h2>
               <p>Consultá tus datos registrados.</p>
             </div>
-
-            <button className="profile__edit">
-              Editar
-            </button>
           </div>
 
           <div className="profile__details">
+
             <div className="profile__field">
-              <span>Nombre completo</span>
-              <strong>{user.name || '-'}</strong>
+              <span>Nombre</span>
+              <strong>{user.firstName || '-'}</strong>
+            </div>
+
+            <div className="profile__field">
+              <span>Apellido</span>
+              <strong>{user.lastName || '-'}</strong>
             </div>
 
             <div className="profile__field">
               <span>Correo electrónico</span>
-              <strong>{user.email}</strong>
+              <strong>{user.email || '-'}</strong>
             </div>
 
             <div className="profile__field">
               <span>Teléfono</span>
               <strong>{user.phone || '-'}</strong>
             </div>
+
+            <div className="profile__field">
+              <span>Tipo de cuenta</span>
+              <strong>{user.role || '-'}</strong>
+            </div>
+
+            <div className="profile__field">
+              <span>Estado de cuenta</span>
+              <strong>{user.isActive ? 'Activa' : 'Inactiva'}</strong>
+            </div>
+
           </div>
         </div>
 
+        {/* Actividades */}
         <div className="profile__card">
           <h2>Mis actividades</h2>
           <p>Accedé rápidamente a tu actividad en TicketYa.</p>
 
           <div className="profile__links">
+
             <Link to="/my-tickets" className="profile__link">
               <div>
                 <strong>Mis entradas</strong>
@@ -93,9 +116,11 @@ function Profile() {
               </div>
               <span>→</span>
             </Link>
+
           </div>
         </div>
 
+        {/* Cerrar sesión */}
         <div className="profile__logout">
           <button
             id="btn__logout"

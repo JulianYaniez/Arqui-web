@@ -47,10 +47,10 @@ public class RefundingController {
     })
     @PostMapping
     public ResponseEntity<Void> requestRefund(
-            @RequestBody CreateRefundRequest request
+            @RequestBody CreateRefundRequest request,
+            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId // TODO
     ) {
-        // Later replace for JWT
-        UUID clientId = UUID.randomUUID();
+        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
 
         UUID id = refundingService.createRefundRequest(request, clientId);
 
@@ -77,12 +77,15 @@ public class RefundingController {
     })
     @PostMapping("/{requestId}/accept")
     public ResponseEntity<Void> acceptRefund(
-            @PathVariable("requestId") UUID requestId
+            @PathVariable("requestId") UUID requestId,
+            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId, // TODO
+            @RequestHeader(value = "X-Client-Role", defaultValue = "ADMIN", required = false) String headerClientRole
     ) {
-        // Later replace for JWT
-        UUID admin = UUID.randomUUID();
+        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
 
-        refundingService.acceptRefund(requestId, admin);
+        // TODO: Implement Role Checking.
+
+        refundingService.acceptRefund(requestId, clientId);
 
         return  ResponseEntity.noContent().build();
     }
@@ -102,12 +105,13 @@ public class RefundingController {
     })
     @PostMapping("/{requestId}/reject")
     public ResponseEntity<Void> rejectRefund(
-            @PathVariable("requestId") UUID requestId
+            @PathVariable("requestId") UUID requestId,
+            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId, // TODO
+            @RequestHeader(value = "X-Client-Role", defaultValue = "ADMIN", required = false) String headerClientRole
     ) {
-        // Later replace for JWT
-        UUID admin = UUID.randomUUID();
+        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
 
-        refundingService.rejectRefund(requestId, admin);
+        refundingService.rejectRefund(requestId, clientId);
 
         return  ResponseEntity.noContent().build();
     }
@@ -130,8 +134,11 @@ public class RefundingController {
     })
     @PostMapping("/cancel-event")
     public ResponseEntity<Void> cancelEvent(
-            @RequestParam("eventId") String eventId
+            @RequestParam("eventId") String eventId,
+            @RequestHeader(value = "X-Client-Role", defaultValue = "ADMIN", required = false) String headerClientRole
     ) {
+        // TODO: Implement Role Checking.
+
         refundingService.cancelEvent(eventId);
 
         return ResponseEntity.noContent().build();

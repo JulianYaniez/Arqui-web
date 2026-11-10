@@ -11,13 +11,53 @@ const emptySector = () => ({
   seatsPerRow: ''
 })
 
+// Obtiene las coordenadas a partir de la dirección y ciudad
+const geocodeAddress = async (address, city) => {
+  const params = new URLSearchParams({
+    q: `${address}, ${city}, Buenos Aires, Argentina`,
+    format: 'jsonv2',
+    limit: '1',
+    countrycodes: 'ar',
+    addressdetails: '1'
+  })
+
+  const url = `https://nominatim.openstreetmap.org/search?${params}`
+
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/json',
+      'Accept-Language': 'es'
+    }
+  })
+
+  if (!response.ok) {
+    const responseText = await response.text()
+    console.error('Error Nominatim:', response.status, responseText)
+
+    throw new Error(
+      `Error al buscar la ubicación (${response.status}). Intentá nuevamente.`
+    )
+  }
+
+  const results = await response.json()
+
+  if (!results.length) {
+    throw new Error(
+      'No encontramos esa dirección. Verificá la ciudad y la dirección.'
+    )
+  }
+
+  return {
+    latitude: Number(results[0].lat),
+    longitude: Number(results[0].lon)
+  }
+}
+
 function VenueForm({ onClose, onCreated }) {
   const [form, setForm] = useState({
     name: '',
     address: '',
-    city: '',
-    latitude: '',
-    longitude: ''
+    city: ''
   })
 
   const [sectors, setSectors] = useState([emptySector()])
@@ -55,27 +95,6 @@ function VenueForm({ onClose, onCreated }) {
     e.preventDefault()
     setError('')
 
-    const latitude = Number(form.latitude)
-    const longitude = Number(form.longitude)
-
-    if (
-      !Number.isFinite(latitude) ||
-      latitude < -90 ||
-      latitude > 90
-    ) {
-      setError('Ingresá una latitud válida entre -90 y 90.')
-      return
-    }
-
-    if (
-      !Number.isFinite(longitude) ||
-      longitude < -180 ||
-      longitude > 180
-    ) {
-      setError('Ingresá una longitud válida entre -180 y 180.')
-      return
-    }
-
     if (sectors.length === 0) {
       setError('El lugar debe tener al menos un sector.')
       return
@@ -86,6 +105,8 @@ function VenueForm({ onClose, onCreated }) {
 
       if (sector.isNumbered) {
         return (
+          !sector.rows ||
+          !sector.seatsPerRow ||
           Number(sector.rows) <= 0 ||
           Number(sector.seatsPerRow) <= 0
         )
@@ -102,32 +123,44 @@ function VenueForm({ onClose, onCreated }) {
       return
     }
 
-    const venueData = {
-      name: form.name.trim(),
-      address: form.address.trim(),
-      city: form.city.trim(),
-      location: {
-        latitude,
-        longitude
-      },
-      sectors: sectors.map(sector => ({
-        name: sector.name.trim(),
-        isNumbered: sector.isNumbered,
-        capacity: sector.isNumbered
-          ? null
-          : Number(sector.capacity),
-        rows: sector.isNumbered
-          ? Number(sector.rows)
-          : null,
-        seatsPerRow: sector.isNumbered
-          ? Number(sector.seatsPerRow)
-          : null
-      }))
-    }
-
     try {
       setLoading(true)
 
+      // 1. Obtener coordenadas automáticamente
+      const location = await geocodeAddress(
+        form.address.trim(),
+        form.city.trim()
+      )
+
+      // 2. Preparar información del lugar
+      const venueData = {
+        name: form.name.trim(),
+        address: form.address.trim(),
+        city: form.city.trim(),
+
+        location: {
+          latitude: location.latitude,
+          longitude: location.longitude
+        },
+
+        sectors: sectors.map(sector => ({
+          name: sector.name.trim(),
+          isNumbered: sector.isNumbered,
+          capacity: sector.isNumbered
+            ? null
+            : Number(sector.capacity),
+          rows: sector.isNumbered
+            ? Number(sector.rows)
+            : null,
+          seatsPerRow: sector.isNumbered
+            ? Number(sector.seatsPerRow)
+            : null
+        }))
+      }
+
+      console.log('Venue a enviar:', venueData)
+
+      // 3. Crear lugar en el backend
       await createVenue(venueData)
 
       onCreated?.()
@@ -149,7 +182,9 @@ function VenueForm({ onClose, onCreated }) {
           <span className="venue-form-tag">
             ADMINISTRACIÓN
           </span>
+
           <h2>Nuevo lugar</h2>
+
           <p>Registrá un establecimiento y sus sectores.</p>
         </div>
 
@@ -171,6 +206,7 @@ function VenueForm({ onClose, onCreated }) {
 
           <div className="venue-form-field">
             <label>Nombre del lugar</label>
+
             <input
               name="name"
               value={form.name}
@@ -182,6 +218,7 @@ function VenueForm({ onClose, onCreated }) {
 
           <div className="venue-form-field">
             <label>Ciudad</label>
+
             <input
               name="city"
               value={form.city}
@@ -193,6 +230,7 @@ function VenueForm({ onClose, onCreated }) {
 
           <div className="venue-form-field venue-form-full">
             <label>Dirección</label>
+
             <input
               name="address"
               value={form.address}
@@ -204,44 +242,17 @@ function VenueForm({ onClose, onCreated }) {
 
         </div>
 
-        <h3>Ubicación geográfica</h3>
+        <div className="venue-form-location-info">
+          <span>📍</span>
 
-        <p className="venue-form-description">
-          Ingresá las coordenadas geográficas del establecimiento.
-        </p>
-
-        <div className="venue-form-grid">
-
-          <div className="venue-form-field">
-            <label>Latitud</label>
-            <input
-              type="number"
-              name="latitude"
-              value={form.latitude}
-              onChange={handleChange}
-              step="any"
-              min="-90"
-              max="90"
-              placeholder="-37.3217"
-              required
-            />
+          <div>
+            <strong>Ubicación automática</strong>
+            <p>
+              Las coordenadas geográficas se calcularán
+              automáticamente utilizando la ciudad y dirección
+              ingresadas.
+            </p>
           </div>
-
-          <div className="venue-form-field">
-            <label>Longitud</label>
-            <input
-              type="number"
-              name="longitude"
-              value={form.longitude}
-              onChange={handleChange}
-              step="any"
-              min="-180"
-              max="180"
-              placeholder="-59.1332"
-              required
-            />
-          </div>
-
         </div>
 
         <div className="venue-form-sectors-header">
@@ -278,6 +289,7 @@ function VenueForm({ onClose, onCreated }) {
 
             <div className="venue-form-field">
               <label>Nombre del sector</label>
+
               <input
                 value={sector.name}
                 onChange={e =>
@@ -311,6 +323,7 @@ function VenueForm({ onClose, onCreated }) {
                     )
                   }}
                 />
+
                 Este sector tiene asientos numerados
               </label>
             </div>
@@ -321,6 +334,7 @@ function VenueForm({ onClose, onCreated }) {
 
                 <div className="venue-form-field">
                   <label>Cantidad de filas</label>
+
                   <input
                     type="number"
                     min="1"
@@ -334,12 +348,17 @@ function VenueForm({ onClose, onCreated }) {
 
                 <div className="venue-form-field">
                   <label>Asientos por fila</label>
+
                   <input
                     type="number"
                     min="1"
                     value={sector.seatsPerRow}
                     onChange={e =>
-                      handleSectorChange(index, 'seatsPerRow', e.target.value)
+                      handleSectorChange(
+                        index,
+                        'seatsPerRow',
+                        e.target.value
+                      )
                     }
                     required
                   />
@@ -358,6 +377,7 @@ function VenueForm({ onClose, onCreated }) {
 
               <div className="venue-form-field">
                 <label>Capacidad máxima</label>
+
                 <input
                   type="number"
                   min="1"
@@ -395,7 +415,7 @@ function VenueForm({ onClose, onCreated }) {
             className="venue-form-submit"
             disabled={loading}
           >
-            {loading ? 'Guardando...' : 'Crear lugar'}
+            {loading ? 'Buscando ubicación y guardando...' : 'Crear lugar'}
           </button>
 
         </div>
