@@ -28,10 +28,10 @@ Note: Database healthchecks (pg_isready for PostgreSQL and mongosh ping for Mong
 
 ### Data Seeding
 
-These must be done in order to work.
+Use these on terminal. Must be done in order to work.
 
-1. Seed Event Catalog: POST http://localhost:8080/api/catalog/dev/seed
-2. Seed Ticket Inventory: POST http://localhost:8080/api/ticketing/dev/seed
+1. Seed Event Catalog: `curl -X POST http://localhost:8080/api/catalog/dev/seed`
+2. Seed Ticket Inventory: `curl -X POST http://localhost:8080/api/ticketing/dev/seed`
 
 ## API Documentation
 
