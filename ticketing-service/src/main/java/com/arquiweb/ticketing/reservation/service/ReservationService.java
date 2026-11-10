@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.reservation.service;
 
-import com.arquiweb.ticketing.event.service.EventService;
+// import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
@@ -35,7 +36,8 @@ import java.util.stream.Stream;
 @Service
 public class ReservationService {
 
-    private final EventService eventService;
+    // private final EventService eventService;
+    private final EventValidator eventValidator;
 
     public ReservationService(
            @Value("${app.config.reservation.max-tickets}") int maxTickets,
@@ -43,13 +45,13 @@ public class ReservationService {
            @Value("${app.url}") String appUrl,
            ReservationRepository reservationRepository,
            InventoryService inventoryService,
-           EventService eventService) {
+           EventValidator eventValidator) {
         this.maxTickets = maxTickets;
         this.ttl = ttl;
         this.appUrl = appUrl;
         this.reservationRepository = reservationRepository;
         this.inventoryService = inventoryService;
-        this.eventService = eventService;
+        this.eventValidator = eventValidator;
     }
 
     private final int ttl;
@@ -61,7 +63,7 @@ public class ReservationService {
     @Transactional
     @Retryable(maxRetries = 3, includes = OptimisticLockingFailureException.class)
     public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, UUID clientId) {
-        eventService.validateEvent(request.eventId());
+        eventValidator.validateEvent(request.eventId());
 
         this.checkMaxTickets(request.eventId(), clientId, request.ticketQuantity());
 
@@ -90,7 +92,7 @@ public class ReservationService {
 
 
     public ReservationResponse reserveNumbered(ReserveNumberedRequest request, UUID clientId) {
-        eventService.validateEvent(request.eventId());
+        eventValidator.validateEvent(request.eventId());
 
         checkMaxTickets(request.eventId(), clientId, request.ticketIds().size());
 

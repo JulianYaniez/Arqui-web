@@ -31,6 +31,17 @@ function MyTickets() {
     }
   ]
 
+  const storedUser = localStorage.getItem('user')
+  const user = storedUser ? JSON.parse(storedUser) : null
+
+  if (user) {
+    console.log('Hay una sesión guardada')
+    console.log(user.email)
+    console.log(user.role)
+  } else {
+    console.log('No hay sesión')
+  }
+
   const [selectedTicket, setSelectedTicket] = useState(null)
 
   return (
@@ -64,7 +75,7 @@ function MyTickets() {
             <p>Estas son las entradas asociadas a tu cuenta.</p>
           </div>
 
-          <Link to="/events">Explorar eventos</Link>
+          <Link to="/event">Explorar eventos</Link>
         </div>
 
         <div className="my-tickets__list">
@@ -126,7 +137,7 @@ function MyTickets() {
                 Cuando compres una entrada, aparecerá en esta sección.
               </p>
 
-              <Link to="/events">Explorar eventos</Link>
+              <Link to="/event">Explorar eventos</Link>
             </div>
           )}
         </div>

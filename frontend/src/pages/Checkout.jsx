@@ -1,40 +1,61 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { getEventById } from '../services/eventService'
 import '../styles/checkout.css'
 
 function Checkout() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  // Datos temporales hasta conectar el catalog-service
-  const event = {
-    id,
-    name: 'Festival de Música',
-    date: '15 de noviembre de 2026',
-    time: '20:00 hs',
-    location: 'Estadio Municipal',
-    address: 'Av. Principal 123, Tandil',
-    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200'
-  }
-
-  const sectors = [
-    { id: 1, name: 'Campo', price: 25000, available: 150 },
-    { id: 2, name: 'Platea', price: 35000, available: 80 },
-    { id: 3, name: 'VIP', price: 50000, available: 20 }
-  ]
+  const [event, setEvent] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const [selectedSector, setSelectedSector] = useState('')
   const [quantity, setQuantity] = useState(1)
+
   const [buyer, setBuyer] = useState({
     name: '',
     surname: '',
     email: ''
   })
+
   const [purchaseCompleted, setPurchaseCompleted] = useState(false)
 
+  // Obtener el evento seleccionado
+  useEffect(() => {
+    const loadEvent = async () => {
+      try {
+        setLoading(true)
+        setError('')
+
+        const data = await getEventById(id)
+        setEvent(data)
+      } catch (error) {
+        console.error('Error obteniendo evento:', error)
+        setError('No se pudo cargar la información del evento.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadEvent()
+  }, [id])
+
+  // Obtener sectores del evento
+  const sectors = (event?.sectors || []).map(item => ({
+    id: item.id ?? item.sectorId ?? item.sector?.id,
+    name: item.name ?? item.sectorName ?? item.sector?.name ?? 'Sector',
+    price: Number(item.price),
+    available: Number(
+      item.available ?? item.remainingCapacity ??
+      item.capacity ?? item.sector?.capacity ?? 0
+    )
+  }))
+
   const sector = sectors.find(
-    item => item.id === Number(selectedSector)
+    item => String(item.id) === selectedSector
   )
 
   const total = sector ? sector.price * quantity : 0
@@ -56,9 +77,46 @@ function Checkout() {
 
     if (!sector) return
 
-    // Compra simulada hasta conectar el payment-service
+    // Compra simulada hasta conectar payment-service
     setPurchaseCompleted(true)
   }
+
+  if (loading) {
+    return (
+      <main className="checkout">
+        <p>Cargando información del evento...</p>
+      </main>
+    )
+  }
+
+  if (error || !event) {
+    return (
+      <main className="checkout">
+        <p>{error || 'Evento no encontrado.'}</p>
+        <Link to="/event">Volver a eventos</Link>
+      </main>
+    )
+  }
+
+  // Formatear fecha y hora
+  const eventDate = event.dateTime
+    ? new Date(event.dateTime)
+    : null
+
+  const formattedDate = eventDate
+    ? eventDate.toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      })
+    : 'Fecha no disponible'
+
+  const formattedTime = eventDate
+    ? eventDate.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + ' hs'
+    : ''
 
   if (purchaseCompleted) {
     return (
@@ -66,14 +124,17 @@ function Checkout() {
         <section className="checkout__success">
           <div className="checkout__success-icon">✓</div>
           <h1>¡Compra realizada!</h1>
+
           <p>
-            Tu compra de {quantity} entrada(s) para {event.name} se realizó correctamente.
+            Tu compra de {quantity} entrada(s) para {event.name}
+            se realizó correctamente.
           </p>
+
           <p className="checkout__success-email">
             Enviaremos los detalles a {buyer.email}.
           </p>
 
-          <Link to="/mis-entradas" className="checkout__button">
+          <Link to="/my-tickets" className="checkout__button">
             Ver mis entradas
           </Link>
         </section>
@@ -84,7 +145,7 @@ function Checkout() {
   return (
     <main className="checkout">
       <Link
-        to={`/events/${id}`}
+        to={`/event/${id}`}
         className="checkout__back"
       >
         ← Volver al evento
@@ -97,11 +158,13 @@ function Checkout() {
 
       <div className="checkout__layout">
         <form className="checkout__form" onSubmit={handleSubmit}>
+
           <section className="checkout__section">
             <h2>1. Seleccioná tus entradas</h2>
 
             <div className="checkout__field">
               <label htmlFor="sector">Sector</label>
+
               <select
                 id="sector"
                 value={selectedSector}
@@ -114,9 +177,10 @@ function Checkout() {
                   <option
                     key={item.id}
                     value={item.id}
-                    disabled={item.available === 0}
+                    disabled={item.available <= 0}
                   >
-                    {item.name} - ${item.price.toLocaleString('es-AR')}
+                    {item.name} - $
+                    {item.price.toLocaleString('es-AR')}
                     {' '}({item.available} disponibles)
                   </option>
                 ))}
@@ -124,7 +188,10 @@ function Checkout() {
             </div>
 
             <div className="checkout__field">
-              <label htmlFor="quantity">Cantidad de entradas</label>
+              <label htmlFor="quantity">
+                Cantidad de entradas
+              </label>
+
               <input
                 id="quantity"
                 type="number"
@@ -134,6 +201,7 @@ function Checkout() {
                 disabled={!sector}
                 onChange={(e) => {
                   const value = Number(e.target.value)
+
                   if (value >= 1 && value <= sector.available) {
                     setQuantity(value)
                   }
@@ -202,18 +270,21 @@ function Checkout() {
         <aside className="checkout__summary">
           <h2>Resumen de compra</h2>
 
-          <img
-            src={event.image}
-            alt={event.name}
-            className="checkout__image"
-          />
+          {event.image && (
+            <img
+              src={event.image}
+              alt={event.name}
+              className="checkout__image"
+            />
+          )}
 
           <h3>{event.name}</h3>
 
           <div className="checkout__event-info">
-            <span>📅 {event.date}</span>
-            <span>🕒 {event.time}</span>
-            <span>📍 {event.location}</span>
+            <span>📅 {formattedDate}</span>
+            {formattedTime && <span>🕒 {formattedTime}</span>}
+            {event.city && <span>📍 {event.city}</span>}
+            {event.venue?.name && <span>📍 {event.venue.name}</span>}
           </div>
 
           <div className="checkout__divider" />
@@ -222,7 +293,9 @@ function Checkout() {
             <>
               <div className="checkout__summary-row">
                 <span>{sector.name}</span>
-                <strong>${sector.price.toLocaleString('es-AR')}</strong>
+                <strong>
+                  ${sector.price.toLocaleString('es-AR')}
+                </strong>
               </div>
 
               <div className="checkout__summary-row">
@@ -234,7 +307,9 @@ function Checkout() {
 
               <div className="checkout__total">
                 <span>Total</span>
-                <strong>${total.toLocaleString('es-AR')}</strong>
+                <strong>
+                  ${total.toLocaleString('es-AR')}
+                </strong>
               </div>
             </>
           ) : (

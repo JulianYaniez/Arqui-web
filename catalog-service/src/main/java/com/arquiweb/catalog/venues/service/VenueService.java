@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,13 @@ public class VenueService {
 
 
         return VenueResponse.fromDomain(venue);
+    }
+
+    public List<VenueResponse> findAllVenues() {
+        return venueRepository.findAll()
+                .stream()
+                .map(VenueResponse::fromDomain)
+                .toList();
     }
 
 }

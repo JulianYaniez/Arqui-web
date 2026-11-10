@@ -14,8 +14,8 @@ import java.util.UUID;
 @FeignClient(name = "payment-client", url = "${app.feign.payment.url}")
 public interface PaymentClient {
 
-    @GetMapping("/payment/refunds")
-    EventStateResponse refundPayment(@RequestBody PaymentRefundRequest refundRequest);
+    @PostMapping("/{id}/refunds")
+    void  refundPayment(@PathVariable UUID id);
 
     @PostMapping("/payment/bulk-refund")
     void bulkRefund(@RequestBody List<PaymentRefundRequest> refundRequests);

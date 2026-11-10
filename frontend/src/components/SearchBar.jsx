@@ -22,7 +22,7 @@ function SearchBar() {
 
     if (!query) return
 
-    navigate(`/events?search=${encodeURIComponent(query)}`)
+    navigate(`/event?search=${encodeURIComponent(query)}`)
   }
 
   const handleClear = () => {

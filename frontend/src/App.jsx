@@ -12,7 +12,7 @@ import Login from './pages/Login.jsx'
 import Managment from './pages/Managment.jsx'
 import MyTickets from './pages/MyTickets.jsx'
 import Profile from './pages/Profile.jsx'
-
+import PageTitle from './components/PageTitle.jsx'
 
 
 
@@ -24,6 +24,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+        <PageTitle />
         <Navbar />
 
         <main className="app__main">

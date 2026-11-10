@@ -1,10 +1,13 @@
 package com.arquiweb.payment.infrastructure.exception;
 
+import com.arquiweb.payment.transaction.domain.Exception.InvalidCardPrefixException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.PessimisticLockingFailureException;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -57,10 +60,43 @@ class GlobalExceptionHandler {
             PaymentGatewayException ex,
             HttpServletRequest request
     ) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST; // O HttpStatus.UNPROCESSABLE_ENTITY
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ErrorResponse response = new ErrorResponse(
                 httpStatus,
                 ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
+
+    @ExceptionHandler(InvalidCardPrefixException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCardPrefixException(
+            InvalidCardPrefixException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus httpStatus = HttpStatus.UNPROCESSABLE_ENTITY;
+        ErrorResponse response = new ErrorResponse(
+                httpStatus,
+                ex.getMessage(),
+                request.getRequestURI(),
+                Map.of("cardToken", ex.getMessage())
+        );
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
+    @ExceptionHandler({
+            PessimisticLockingFailureException.class,
+            CannotAcquireLockException.class
+    })
+    public ResponseEntity<ErrorResponse> handleLockExceptions(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        ErrorResponse response = new ErrorResponse(
+                httpStatus,
+                "The resource is currently being modified by another concurrent request. Please try again later.",
                 request.getRequestURI()
         );
         return ResponseEntity.status(httpStatus).body(response);
