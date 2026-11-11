@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @OpenAPIDefinition(
 		servers = {
-				@Server(url = "/api/catalog", description = "API Gateway Route")
+				@Server(url = "/api/ticketing", description = "API Gateway Route")
 		}
 )
 public class TicketYaApplication {

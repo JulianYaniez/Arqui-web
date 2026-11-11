@@ -46,6 +46,8 @@ Available service definitions in the Gateway dropdown:
 - Management Service: /api/management/v3/api-docs
 - Payment Service: /api/payment/v3/api-docs
 
+**IMPORTANT**: Identity is not yet implemented, and Payment is mocked. For a transaction to be approved, the credit card number must have 16 digits and start with one of the following prefixes: 4111, 4242, 5555, 3782.
+
 ### Development Documentation & Project Management
 
 Detailed architectural models, domain diagrams, and project management tools used during development include:

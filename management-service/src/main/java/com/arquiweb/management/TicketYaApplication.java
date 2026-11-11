@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 @OpenAPIDefinition(
 		servers = {
-				@Server(url = "/api/catalog", description = "API Gateway Route")
+				@Server(url = "/api/management", description = "API Gateway Route")
 		}
 )
 public class TicketYaApplication {

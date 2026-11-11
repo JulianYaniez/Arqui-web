@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @OpenAPIDefinition(
 		servers = {
-				@Server(url = "/api/catalog", description = "API Gateway Route")
+				@Server(url = "/api/identity", description = "API Gateway Route")
 		}
 )
 public class TicketYaApplication {
