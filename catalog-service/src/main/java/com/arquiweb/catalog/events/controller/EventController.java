@@ -57,11 +57,7 @@ class EventController {
     public ResponseEntity<Void> createEvent(
         @RequestBody CreateEventRequest request
         ) {
-        // Crear evento
         String id = eventService.createEvent(request);
-
-        // Publicar automáticamente
-        eventService.publishEvent(id);
 
         URI uri = ServletUriComponentsBuilder
             .fromCurrentRequest()
@@ -166,7 +162,7 @@ class EventController {
     })
     @GetMapping
     public ResponseEntity<Page<EventResponse>> findAllEvents(
-            @ModelAttribute EventCriteriaQuery criteria,
+            @ModelAttribute("criteria") EventCriteriaQuery criteria,
             @PageableDefault(size = 20, sort = "dateTime", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         Page<EventResponse> page = eventService.getAll(criteria, pageable);
