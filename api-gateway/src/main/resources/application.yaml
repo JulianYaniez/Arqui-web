@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
 
 spring:
   application:
@@ -8,23 +9,22 @@ spring:
     gateway:
       server:
         webflux:
-
           globalcors:
             add-to-simple-url-handler-mapping: true
             cors-configurations:
               '[/**]':
-                allowedOrigins:
-                  - "http://localhost:5173"
-                allowedMethods:
+                allowed-origin-patterns:
+                  - "http://localhost:*"
+                allowed-methods:
                   - GET
                   - POST
                   - PUT
                   - DELETE
                   - PATCH
                   - OPTIONS
-                allowedHeaders:
+                allowed-headers:
                   - "*"
-                allowCredentials: true
+                allow-credentials: true
 
           routes:
             - id: catalog-route
