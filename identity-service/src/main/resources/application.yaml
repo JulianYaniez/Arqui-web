@@ -5,3 +5,7 @@ spring:
     url: jdbc:postgresql://localhost:5434/identity
     username: group_7
     password: root
+
+jwt:
+  secret: ${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
+  expiration: ${JWT_EXPIRATION:3600000} # 1hs
