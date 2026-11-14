@@ -127,6 +127,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-identity:5432/identity
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
+      - JWT_SECRET=${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
     depends_on:
       postgres-identity:
         condition: service_healthy
@@ -160,6 +161,8 @@ services:
     build: ./api-gateway
     ports:
       - "8080:8080"
+    environment: 
+      - JWT_SECRET=${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
 
 
 volumes:

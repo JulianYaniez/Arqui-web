@@ -8,4 +8,4 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
-  expiration: ${JWT_EXPIRATION:3600000} # 1hs
+  expiration: ${JWT_EXPIRATION:14400000} # 4hs | Could implement shorter periods with refresh tokens; kept simple for time's sake.
