@@ -1,5 +1,6 @@
 package com.arquiweb.identity.infrastructure.exception;
 
+import com.arquiweb.identity.auth.domain.exceptions.InvalidCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,26 @@ class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI(),
                 ex.getValidationErrors()
+        );
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
+    @ExceptionHandler(value = {
+            InvalidCredentialsException.class
+    })
+    public ResponseEntity<ErrorResponse> handle401(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return buildBasicErrorResponse(HttpStatus.UNAUTHORIZED, ex, request);
+    }
+
+
+    private ResponseEntity<ErrorResponse> buildBasicErrorResponse(HttpStatus httpStatus, RuntimeException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+                httpStatus,
+                ex.getMessage(),
+                request.getRequestURI()
         );
         return ResponseEntity.status(httpStatus).body(response);
     }

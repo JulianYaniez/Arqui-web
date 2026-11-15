@@ -55,6 +55,13 @@ spring:
               filters:
                 - StripPrefix=2
 
+            - id: identity-route
+              uri: http://identity-service:8080
+              predicates:
+                - Path=/api/identity/**
+              filters:
+                - StripPrefix=2
+
 springdoc:
   api-docs:
     enabled: true
@@ -70,3 +77,8 @@ springdoc:
         url: /api/management/v3/api-docs
       - name: 4. Payment Service
         url: /api/payment/v3/api-docs
+      - name: 5. Identity Service
+        url: /api/identity/v3/api-docs
+
+jwt:
+  secret: ${JWT_SECRET}
