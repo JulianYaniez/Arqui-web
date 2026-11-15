@@ -7,5 +7,5 @@ spring:
     password: root
 
 jwt:
-  secret: ${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:14400000} # 4hs | Could implement shorter periods with refresh tokens; kept simple for time's sake.
