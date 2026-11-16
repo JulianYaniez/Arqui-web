@@ -155,6 +155,7 @@ public class RefundingController {
             )
     })
     @PostMapping("/cancel-event")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> cancelEvent(
             @RequestParam("eventId") String eventId,
             @Parameter(hidden = true)
