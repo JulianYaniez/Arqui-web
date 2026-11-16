@@ -12,14 +12,13 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public record CreateEventRequest(
     String name,
     String description,
     EventType type,
     LocalDateTime dateTime,
-    // Remove later. Should be acquired through JWT
-    String organizerId,
     List<String> participants,
     String venueId,
     List<CreateEventSectorRequest> sectors
@@ -35,14 +34,13 @@ public record CreateEventRequest(
     }
 
     // Add organizerId later
-    public Event toDomain(VenueResponse venue, List<EventSector> sectors) {
+    public Event toDomain(UUID organizerId, VenueResponse venue, List<EventSector> sectors) {
         return new Event(
                 this.name,
                 this.description,
                 this.type,
                 this.dateTime,
-                // Replace for method param later
-                this.organizerId,
+                organizerId,
                 this.participants,
                 venue,
                 sectors

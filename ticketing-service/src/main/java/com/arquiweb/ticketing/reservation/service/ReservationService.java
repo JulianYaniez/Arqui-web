@@ -4,6 +4,7 @@ package com.arquiweb.ticketing.reservation.service;
 import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
+import com.arquiweb.ticketing.infrastructure.exception.UnauthorizedException;
 import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
@@ -199,9 +200,11 @@ public class ReservationService {
         return reservationRepository.findExpired(now, ReservationStatus.PENDING);
     }
 
-    public void confirmReservation(UUID reservationId, UUID paymentId) {
+    public void confirmReservation(UUID reservationId, UUID clientId, UUID paymentId) { // TEST BROKEN
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        if (!reservation.getClientId().equals(clientId)) throw new UnauthorizedException("Reservation does not belong to current user.");
 
         if (reservation.getStatus() != ReservationStatus.PENDING) throw new IllegalReservationStateChangeException("Given reservation is not valid.");
 

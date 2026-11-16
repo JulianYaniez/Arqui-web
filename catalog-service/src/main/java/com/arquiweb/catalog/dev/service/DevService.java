@@ -103,7 +103,7 @@ public class DevService {
                         Instant.now().plus(Duration.ofDays(100)),
                         Instant.now().plus(Duration.ofDays(600))),
                     ZoneId.systemDefault());
-            String organizerId = faker.internet().uuidv7();
+            UUID organizerId = UUID.fromString(faker.internet().uuidv7());
             VenueResponse venueResponse = VenueResponse.fromDomain(eventVenue);
 
             Set<String> participants = new HashSet<>();

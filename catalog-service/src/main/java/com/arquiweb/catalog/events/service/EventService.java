@@ -13,6 +13,7 @@ import com.arquiweb.catalog.infrastructure.client.TicketingClient;
 import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityRequest;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
+import com.arquiweb.catalog.infrastructure.exception.UnauthorizedException;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.service.VenueService;
@@ -35,8 +36,8 @@ public class EventService {
     private final VenueService venueService;
     private final TicketingClient ticketingClient;
 
-    @Transactional
-    public String createEvent(CreateEventRequest request) {
+    @Transactional  // TEST BROKEN
+    public String createEvent(UUID organizerId, CreateEventRequest request) {
         VenueResponse venue = venueService.findVenueById(request.venueId());
 
         Map<String, SectorResponse> venueSectors = venue.sectors().stream()
@@ -58,15 +59,17 @@ public class EventService {
             eventSectors.add(new EventSector(sector, esr.price()));
         }
 
-        Event event = request.toDomain(venue, eventSectors);
+        Event event = request.toDomain(organizerId, venue, eventSectors);
 
         return eventRepository.save(event).getId();
     }
 
 
-    @Transactional
-    public String addSector(String eventId, CreateEventSectorRequest request) {
+    @Transactional  // TEST BROKEN
+    public String addSector(UUID organizerId, String eventId, CreateEventSectorRequest request) {
         Event event = this.getEventValidated(eventId);
+
+        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
 
         VenueResponse venue = venueService.findVenueById(event.getVenueId());
 
@@ -85,9 +88,11 @@ public class EventService {
         return eventSector.getSectorId();
     }
 
-    @Transactional
-    public void publishEvent(String eventId) {
+    @Transactional  // TEST BROKEN
+    public void publishEvent(UUID organizerId, String eventId) {
         Event event = this.getEventValidated(eventId);
+
+        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
 
         event.publish();
 
@@ -117,8 +122,11 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
     }
 
-    public void cancelEvent(String eventId) {
+    @Transactional // TEST BROKEN
+    public void cancelEvent(UUID organizerId, String eventId) {
         Event event = getEventValidated(eventId);
+
+        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
 
         event.cancel();
 

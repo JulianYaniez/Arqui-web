@@ -32,7 +32,7 @@ public class Event {
     private EventType type;
     private EventStatus status;
     private LocalDateTime dateTime;
-    private String organizerId;
+    private UUID organizerId;
     private List<String> participants;
     private String venueId;
     private String city;
@@ -43,7 +43,7 @@ public class Event {
             String description,
             EventType type,
             LocalDateTime dateTime,
-            String organizerId,
+            UUID organizerId,
             List<String> participants,
             VenueResponse venue,
             List<EventSector> sectors
