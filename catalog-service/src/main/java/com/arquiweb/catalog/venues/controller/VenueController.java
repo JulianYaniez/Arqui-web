@@ -1,13 +1,16 @@
 package com.arquiweb.catalog.venues.controller;
 
+import com.arquiweb.catalog.infrastructure.util.AuthGuard;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.dto.request.CreateVenueRequest;
 import com.arquiweb.catalog.venues.service.VenueService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/venue")
@@ -38,12 +42,19 @@ class VenueController {
                             )
                     }
             ),
-            @ApiResponse(responseCode = "400", description = "Input is faulty.")
+            @ApiResponse(responseCode = "400", description = "Input is faulty."),
+            @ApiResponse(responseCode = "403", description = "Invalid permissions.")
     })
     @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> createVenue(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
             @RequestBody CreateVenueRequest request
     ) {
+        AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
         String id = venueService.createVenue(request);
 
         URI location = ServletUriComponentsBuilder

@@ -76,6 +76,29 @@ class GlobalExceptionHandler {
         return buildBasicErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
     }
 
+
+
+    @ExceptionHandler(value = {
+            UnauthorizedException.class
+    })
+    public  ResponseEntity<ErrorResponse> handle401(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return buildBasicErrorResponse(HttpStatus.UNAUTHORIZED, ex, request);
+    }
+
+    @ExceptionHandler(value = {
+            ForbiddenException.class
+    })
+    public  ResponseEntity<ErrorResponse> handle403(
+            RuntimeException ex,
+            HttpServletRequest request
+    ) {
+        return buildBasicErrorResponse(HttpStatus.FORBIDDEN, ex, request);
+    }
+
+
     private ResponseEntity<ErrorResponse> buildBasicErrorResponse(HttpStatus httpStatus, RuntimeException ex, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse(
                 httpStatus,

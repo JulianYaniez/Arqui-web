@@ -1,12 +1,15 @@
 package com.arquiweb.management.refunding.controller;
 
+import com.arquiweb.management.infrastructure.utils.AuthGuard;
 import com.arquiweb.management.refunding.dto.requests.CreateRefundRequest;
 import com.arquiweb.management.refunding.service.RefundingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +43,8 @@ public class RefundingController {
                             )
                     }
             ),
-            @ApiResponse(responseCode = "403", description = "The reservation does not belong to the requesting customer."),
+            @ApiResponse(responseCode = "401", description = "Invalid identity."),
+            @ApiResponse(responseCode = "403", description = "Invalid permissions."),
             @ApiResponse(responseCode = "404", description = "The reservation or associated event does not exist in the system."),
             @ApiResponse(responseCode = "409", description = "The reservation is not in PAID status."),
             @ApiResponse(responseCode = "422", description = "Less than 72 hours until the event, no refunds allowed."),
@@ -48,11 +52,16 @@ public class RefundingController {
 
     })
     @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> requestRefund(
             @RequestBody CreateRefundRequest request,
-            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId // TODO
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
     ) {
-        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
+        UUID clientId = AuthGuard.requireUserId(headerUserId);
+        AuthGuard.requireRole(headerUserRole, "CLIENT", "ORGANIZER", "ADMIN");
 
         UUID id = refundingService.createRefundRequest(request, clientId);
 
@@ -72,22 +81,26 @@ public class RefundingController {
                     responseCode = "204",
                     description = "Refund request accepted successfully."
             ),
+            @ApiResponse(responseCode = "401", description = "Invalid identity."),
+            @ApiResponse(responseCode = "403", description = "Invalid permissions."),
             @ApiResponse(responseCode = "404", description = "The reservation does not exist in the system."),
             @ApiResponse(responseCode = "409", description = "The request is already resolved."),
             @ApiResponse(responseCode = "503", description = "The Ticketing microservice is down or unresponsive.")
 
     })
     @PostMapping("/{requestId}/accept")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> acceptRefund(
             @PathVariable("requestId") UUID requestId,
-            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId, // TODO
-            @RequestHeader(value = "X-Client-Role", defaultValue = "ADMIN", required = false) String headerClientRole
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
     ) {
-        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+        UUID adminId = AuthGuard.requireUserId(headerUserId);
 
-        // TODO: Implement Role Checking.
-
-        refundingService.acceptRefund(requestId, clientId);
+        refundingService.acceptRefund(requestId, adminId);
 
         return  ResponseEntity.noContent().build();
     }
@@ -100,20 +113,26 @@ public class RefundingController {
                     responseCode = "204",
                     description = "Refund request rejected successfully."
             ),
+            @ApiResponse(responseCode = "401", description = "Invalid identity."),
+            @ApiResponse(responseCode = "403", description = "Invalid permissions."),
             @ApiResponse(responseCode = "404", description = "The reservation does not exist in the system."),
             @ApiResponse(responseCode = "409", description = "The request is already resolved."),
             @ApiResponse(responseCode = "503", description = "The Ticketing microservice is down or unresponsive.")
 
     })
     @PostMapping("/{requestId}/reject")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> rejectRefund(
             @PathVariable("requestId") UUID requestId,
-            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId, // TODO
-            @RequestHeader(value = "X-Client-Role", defaultValue = "ADMIN", required = false) String headerClientRole
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
     ) {
-        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+        UUID adminId = AuthGuard.requireUserId(headerUserId);
 
-        refundingService.rejectRefund(requestId, clientId);
+        refundingService.rejectRefund(requestId, adminId);
 
         return  ResponseEntity.noContent().build();
     }
@@ -125,6 +144,7 @@ public class RefundingController {
                     responseCode = "204",
                     description = "Event successfully canceled."
             ),
+            @ApiResponse(responseCode = "403", description = "Invalid permissions."),
             @ApiResponse(
                     responseCode = "404",
                     description = "No event found with given ID"
@@ -137,10 +157,10 @@ public class RefundingController {
     @PostMapping("/cancel-event")
     public ResponseEntity<Void> cancelEvent(
             @RequestParam("eventId") String eventId,
-            @RequestHeader(value = "X-Client-Role", defaultValue = "ADMIN", required = false) String headerClientRole
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
     ) {
-        // TODO: Implement Role Checking.
-
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
         refundingService.cancelEvent(eventId);
 
         return ResponseEntity.noContent().build();

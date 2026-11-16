@@ -6,11 +6,14 @@ import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
 import com.arquiweb.catalog.events.dto.response.EventResponse;
 import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.service.EventService;
+import com.arquiweb.catalog.infrastructure.util.AuthGuard;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/event")
@@ -51,13 +55,29 @@ class EventController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Data with some of the given IDs could not be found."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identifier."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> createEvent(
-        @RequestBody CreateEventRequest request
-        ) {
-        String id = eventService.createEvent(request);
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
+            @RequestBody CreateEventRequest request
+    ) {
+        UUID organizerId = AuthGuard.requireUserId(headerUserId);
+        AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
+
+        String id = eventService.createEvent(organizerId, request);
 
         URI uri = ServletUriComponentsBuilder
             .fromCurrentRequest()
@@ -110,14 +130,30 @@ class EventController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Cannot add sectors to an event unless it is still a DRAFT."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identifier."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/{id}/sectors")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> addEventSector(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
             @PathVariable String id,
             @RequestBody CreateEventSectorRequest request
     ) {
-        String sectorId = eventService.addSector(id, request);
+        UUID organizerId = AuthGuard.requireUserId(headerUserId);
+        AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
+
+        String sectorId = eventService.addSector(organizerId, id, request);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -142,13 +178,29 @@ class EventController {
             @ApiResponse(
                     responseCode = "500",
                     description = "Ticketing service could not respond properly."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identifier."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/{id}/publish")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> publishEvent(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
             @PathVariable String id
     ) {
-        eventService.publishEvent(id);
+        UUID organizerId = AuthGuard.requireUserId(headerUserId);
+        AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
+
+        eventService.publishEvent(organizerId, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -184,13 +236,29 @@ class EventController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Invalid event state."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identifier."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/{eventId}/cancel")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> cancelEvent(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
             @PathVariable("eventId") String eventId
     ) {
-        eventService.cancelEvent(eventId);
+        UUID organizerId = AuthGuard.requireUserId(headerUserId);
+        AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
+
+        eventService.cancelEvent(organizerId, eventId);
         return ResponseEntity.noContent().build();
     }
 

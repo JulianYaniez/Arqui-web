@@ -81,4 +81,4 @@ springdoc:
         url: /api/identity/v3/api-docs
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
