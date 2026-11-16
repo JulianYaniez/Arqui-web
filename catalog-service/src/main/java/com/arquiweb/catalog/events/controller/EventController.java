@@ -222,6 +222,30 @@ class EventController {
         return ResponseEntity.ok(page);
     }
 
+    @Operation(summary = "Get recommended events.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fetched successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identity."
+            )
+    })
+    @GetMapping("/recommend")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Page<EventResponse>> findRecommendedEvents(
+            @PageableDefault(size = 20, sort = "dateTime", direction = Sort.Direction.ASC) Pageable pageable,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId
+    ) {
+        UUID userId = AuthGuard.requireUserId(headerUserId);
+
+        Page<EventResponse> page = eventService.getRecommended(userId, pageable);
+
+        return ResponseEntity.ok(page);
+    }
 
     @Operation(summary = "Cancel event.")
     @ApiResponses(value = {
