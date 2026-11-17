@@ -122,8 +122,7 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     depends_on:
       postgres-ticketing:
-        condition: service_healthySPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-
+        condition: service_healthy
 
   # * Management *
   management-service:
@@ -147,7 +146,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-identity:5432/identity
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
-      - JWT_SECRET=${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
+      - JWT_SECRET=${JWT_SECRET:-FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
     depends_on:
       postgres-identity:
         condition: service_healthy
@@ -183,7 +182,7 @@ services:
     ports:
       - "8080:8080"
     environment: 
-      - JWT_SECRET=${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
+      - JWT_SECRET=${JWT_SECRET:-FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
 
 
 volumes:

@@ -3,13 +3,14 @@ package com.arquiweb.catalog.events.dto.response;
 import com.arquiweb.catalog.events.domain.Event;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record EventStateResponse(
     String eventId,
     String name,
     String type,
     LocalDateTime dateTime,
-    String organizerId,
+    UUID organizerId,
     String city
 ) {
 

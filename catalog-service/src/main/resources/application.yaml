@@ -3,7 +3,16 @@ spring:
     name: ticketya
   mongodb:
     uri: mongodb://group_7:root@mongo-catalog:27017/catalog?authsource=admin
-
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: catalog-recommendation-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.value.default.type: com.arquiweb.catalog.infrastructure.messaging.events.ReservationConfirmedEvent
+        spring.json.trusted.packages: "*"
 app:
   feign:
     ticketing:
