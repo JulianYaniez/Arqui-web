@@ -5,6 +5,7 @@ import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.infrastructure.exception.UnauthorizedException;
+import com.arquiweb.ticketing.infrastructure.messaging.ReservationEventListener;
 import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
@@ -39,20 +40,22 @@ public class ReservationService {
 
     // private final EventService eventService;
     private final EventValidator eventValidator;
+    private final ReservationEventListener reservationEventListener;
 
     public ReservationService(
-           @Value("${app.config.reservation.max-tickets}") int maxTickets,
-           @Value("${app.config.reservation.max-ttl}") int ttl,
-           @Value("${app.url}") String appUrl,
-           ReservationRepository reservationRepository,
-           InventoryService inventoryService,
-           EventValidator eventValidator) {
+            @Value("${app.config.reservation.max-tickets}") int maxTickets,
+            @Value("${app.config.reservation.max-ttl}") int ttl,
+            @Value("${app.url}") String appUrl,
+            ReservationRepository reservationRepository,
+            InventoryService inventoryService,
+            EventValidator eventValidator, ReservationEventListener reservationEventListener) {
         this.maxTickets = maxTickets;
         this.ttl = ttl;
         this.appUrl = appUrl;
         this.reservationRepository = reservationRepository;
         this.inventoryService = inventoryService;
         this.eventValidator = eventValidator;
+        this.reservationEventListener = reservationEventListener;
     }
 
     private final int ttl;
@@ -211,6 +214,10 @@ public class ReservationService {
         inventoryService.confirmTickets(reservation.getTickets());
         reservation.setStatus(ReservationStatus.PAID);
         reservation.setPaymentId(paymentId);
+
+        reservationRepository.save(reservation);
+        
+        reservationEventListener.publishReservationConfirmed(reservation.getClientId(), reservation.getEventId());
     }
 
     public TicketQrResponse getTicketQr(UUID reservationId, UUID ticketId) {

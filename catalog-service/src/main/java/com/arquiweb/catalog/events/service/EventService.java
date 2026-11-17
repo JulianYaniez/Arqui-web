@@ -2,6 +2,7 @@ package com.arquiweb.catalog.events.service;
 
 import com.arquiweb.catalog.events.domain.Event;
 import com.arquiweb.catalog.events.domain.EventSector;
+import com.arquiweb.catalog.events.domain.UserPreference;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
@@ -9,6 +10,7 @@ import com.arquiweb.catalog.events.dto.response.EventResponse;
 import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
+import com.arquiweb.catalog.events.repository.UserPreferenceRepository;
 import com.arquiweb.catalog.infrastructure.client.TicketingClient;
 import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityRequest;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
@@ -19,11 +21,16 @@ import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.service.VenueService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +42,7 @@ public class EventService {
     private final EventCustomRepository eventCustomRepository;
     private final VenueService venueService;
     private final TicketingClient ticketingClient;
+    private final UserPreferenceRepository userPreferenceRepository;
 
     @Transactional  // TEST BROKEN
     public String createEvent(UUID organizerId, CreateEventRequest request) {
@@ -107,6 +115,26 @@ public class EventService {
 
     public Page<EventResponse> getAll(EventCriteriaQuery criteria, Pageable pageable) {
         Page<Event> eventsPage = eventCustomRepository.findEventsWithDynamicFilters(criteria, pageable);
+
+        return eventsPage.map(EventResponse::fromDomain);
+    }
+
+    public Page<EventResponse> getRecommended(UUID userId, Pageable pageable) {
+        UserPreference preference = userPreferenceRepository.findById(userId)
+                .orElse(null);
+
+        Page<Event> eventsPage;
+
+        if (preference == null) {
+            Pageable byDate = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(Sort.Direction.ASC, "dateTime")
+            );
+            eventsPage = eventRepository.findByDateTimeGreaterThan(LocalDateTime.now(), byDate);
+        } else {
+            eventsPage = eventCustomRepository.findRecommended(preference, pageable);
+        }
 
         return eventsPage.map(EventResponse::fromDomain);
     }
