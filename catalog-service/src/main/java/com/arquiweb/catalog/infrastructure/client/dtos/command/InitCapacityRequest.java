@@ -8,6 +8,7 @@ import java.util.List;
 
 public record InitCapacityRequest(
         String eventId,
+        Boolean isHighDemand,
         List<SectorCapacityDto> capacities,
         List<SectorSeatsDto> seats
 ) {
@@ -26,6 +27,7 @@ public record InitCapacityRequest(
 
         return new InitCapacityRequest(
                 event.getId(),
+                event.isHighDemand(),
                 capacities,
                 seats
         );

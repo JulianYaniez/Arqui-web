@@ -24,4 +24,8 @@ app:
     reservation:
       max-tickets: 5
       max-ttl: 10
+    queue:
+      batch-size: ${QUEUE_BATCH_SIZE:2}
+      batch-interval-ms: ${QUEUE_INTERVAL_MS:15000}
+      admission-ttl-seconds: ${QUEUE_ADMISSION_TTL_SEC:600}
   url: http://ticketya.com/

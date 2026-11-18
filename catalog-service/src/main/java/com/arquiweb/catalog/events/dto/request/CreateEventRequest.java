@@ -19,6 +19,7 @@ public record CreateEventRequest(
     String description,
     EventType type,
     LocalDateTime dateTime,
+    boolean isHighDemand,
     List<String> participants,
     String venueId,
     List<CreateEventSectorRequest> sectors
@@ -40,6 +41,7 @@ public record CreateEventRequest(
                 this.description,
                 this.type,
                 this.dateTime,
+                this.isHighDemand,
                 organizerId,
                 this.participants,
                 venue,

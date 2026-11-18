@@ -1,6 +1,7 @@
 package com.arquiweb.ticketing.reservation.service;
 
 // import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.domain.TicketingEvent;
 import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
+import com.arquiweb.ticketing.queue.service.VirtualQueueService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
@@ -41,6 +43,7 @@ public class ReservationService {
     // private final EventService eventService;
     private final EventValidator eventValidator;
     private final ReservationEventListener reservationEventListener;
+    private final VirtualQueueService virtualQueueService;
 
     public ReservationService(
             @Value("${app.config.reservation.max-tickets}") int maxTickets,
@@ -48,7 +51,7 @@ public class ReservationService {
             @Value("${app.url}") String appUrl,
             ReservationRepository reservationRepository,
             InventoryService inventoryService,
-            EventValidator eventValidator, ReservationEventListener reservationEventListener) {
+            EventValidator eventValidator, ReservationEventListener reservationEventListener, VirtualQueueService virtualQueueService) {
         this.maxTickets = maxTickets;
         this.ttl = ttl;
         this.appUrl = appUrl;
@@ -56,6 +59,7 @@ public class ReservationService {
         this.inventoryService = inventoryService;
         this.eventValidator = eventValidator;
         this.reservationEventListener = reservationEventListener;
+        this.virtualQueueService = virtualQueueService;
     }
 
     private final int ttl;
@@ -67,7 +71,11 @@ public class ReservationService {
     @Transactional
     @Retryable(maxRetries = 3, includes = OptimisticLockingFailureException.class)
     public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, UUID clientId) {
-        eventValidator.validateEvent(request.eventId());
+        TicketingEvent event = eventValidator.validateEvent(request.eventId());
+
+        if (event.isHighDemand()) {
+            virtualQueueService.validateAndConsumeAdmission(request.eventId(), clientId);
+        }
 
         this.checkMaxTickets(request.eventId(), clientId, request.ticketQuantity());
 
@@ -96,7 +104,11 @@ public class ReservationService {
 
 
     public ReservationResponse reserveNumbered(ReserveNumberedRequest request, UUID clientId) {
-        eventValidator.validateEvent(request.eventId());
+        TicketingEvent event = eventValidator.validateEvent(request.eventId());
+
+        if (event.isHighDemand()) {
+            virtualQueueService.validateAndConsumeAdmission(request.eventId(), clientId);
+        }
 
         checkMaxTickets(request.eventId(), clientId, request.ticketIds().size());
 
