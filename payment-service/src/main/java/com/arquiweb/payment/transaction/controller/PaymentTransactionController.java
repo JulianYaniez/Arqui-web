@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(
         name = "Payment",
-        description = "Endpoints for  payment transaction."
+        description = "Operations pertaining payment transaction."
 )
 
 public class PaymentTransactionController {
@@ -77,17 +77,17 @@ public class PaymentTransactionController {
 
 
     @Operation(
-            summary = "get a PaymentTransaction"
+            summary = "Get a payment transaction by ID."
     )
     @ApiResponses(
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "payment was found successfully"
+                            description = "Payment found successfully."
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "no payment found with id given"
+                            description = "No payment found with ID given."
                     )
             }
     )
@@ -104,6 +104,23 @@ public class PaymentTransactionController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @Operation(summary = "Refund given payment.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Refund attempted successfully."
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Payment not found."
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Payment gateway failed."
+            )
+    })
     @PostMapping("/{id}/refunds")
     public ResponseEntity<Void> refundTransaction(@PathVariable UUID id,
                                                   @RequestHeader(value = "X-Simulate-Fail", required = false) boolean simulateFail) {

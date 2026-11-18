@@ -16,22 +16,20 @@ public class MockPaymentGateway implements PaymentGateway{
 
     private final List<String> validPrefixes = List.of("4111", "4242", "5555", "3782");
     @Override
-    public GatewayResponse processPayment(String cardToken, BigDecimal amount, PaymentMethod paymenentMethod) throws TimeoutException {
+    public GatewayResponse processPayment(String cardToken, BigDecimal amount, PaymentMethod paymentMethod) throws TimeoutException {
         GatewayResponse gr;
         String RUUID = UUID.randomUUID().toString();
-        if(paymenentMethod == PaymentMethod.CREDIT_CARD){
+        if(paymentMethod == PaymentMethod.CREDIT_CARD){
             String Prefix = cardToken.substring(0, 4);
             if(validPrefixes.contains(Prefix)) gr = createGatewayResponse(RUUID, TransactionStatus.APPROVED, "Payment Approved");
             else gr = createGatewayResponse(RUUID, TransactionStatus.REJECTED, "Invalid card token.");
         }else {
-            switch (cardToken){
-                case "APPROVED": gr = createGatewayResponse(RUUID, TransactionStatus.APPROVED, "Payment Approved");
-                    break;
-                case "DECLINED": gr = createGatewayResponse(RUUID, TransactionStatus.REJECTED, "Payment Declined");
-                    break;
-                case "TIMEOUT": throw new TimeoutException("Timeout de la pasarela");
-                default: gr = createGatewayResponse(RUUID, TransactionStatus.REJECTED, "Invalid card token.");
-            }
+            gr = switch (cardToken) {
+                case "APPROVED" -> createGatewayResponse(RUUID, TransactionStatus.APPROVED, "Payment Approved");
+                case "DECLINED" -> createGatewayResponse(RUUID, TransactionStatus.REJECTED, "Payment Declined");
+                case "TIMEOUT" -> throw new TimeoutException("Gateway Timeout");
+                default -> createGatewayResponse(RUUID, TransactionStatus.REJECTED, "Invalid card token.");
+            };
         }
 
         return gr;

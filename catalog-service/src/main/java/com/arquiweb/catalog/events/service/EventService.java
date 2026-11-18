@@ -2,6 +2,7 @@ package com.arquiweb.catalog.events.service;
 
 import com.arquiweb.catalog.events.domain.Event;
 import com.arquiweb.catalog.events.domain.EventSector;
+import com.arquiweb.catalog.events.domain.UserPreference;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
 import com.arquiweb.catalog.events.dto.request.CreateEventSectorRequest;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
@@ -9,20 +10,27 @@ import com.arquiweb.catalog.events.dto.response.EventResponse;
 import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
+import com.arquiweb.catalog.events.repository.UserPreferenceRepository;
 import com.arquiweb.catalog.infrastructure.client.TicketingClient;
 import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityRequest;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
+import com.arquiweb.catalog.infrastructure.exception.UnauthorizedException;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.service.VenueService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,9 +42,10 @@ public class EventService {
     private final EventCustomRepository eventCustomRepository;
     private final VenueService venueService;
     private final TicketingClient ticketingClient;
+    private final UserPreferenceRepository userPreferenceRepository;
 
-    @Transactional
-    public String createEvent(CreateEventRequest request) {
+    @Transactional  // TEST BROKEN
+    public String createEvent(UUID organizerId, CreateEventRequest request) {
         VenueResponse venue = venueService.findVenueById(request.venueId());
 
         Map<String, SectorResponse> venueSectors = venue.sectors().stream()
@@ -58,15 +67,17 @@ public class EventService {
             eventSectors.add(new EventSector(sector, esr.price()));
         }
 
-        Event event = request.toDomain(venue, eventSectors);
+        Event event = request.toDomain(organizerId, venue, eventSectors);
 
         return eventRepository.save(event).getId();
     }
 
 
-    @Transactional
-    public String addSector(String eventId, CreateEventSectorRequest request) {
+    @Transactional  // TEST BROKEN
+    public String addSector(UUID organizerId, String eventId, CreateEventSectorRequest request) {
         Event event = this.getEventValidated(eventId);
+
+        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
 
         VenueResponse venue = venueService.findVenueById(event.getVenueId());
 
@@ -85,9 +96,11 @@ public class EventService {
         return eventSector.getSectorId();
     }
 
-    @Transactional
-    public void publishEvent(String eventId) {
+    @Transactional  // TEST BROKEN
+    public void publishEvent(UUID organizerId, String eventId) {
         Event event = this.getEventValidated(eventId);
+
+        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
 
         event.publish();
 
@@ -106,6 +119,26 @@ public class EventService {
         return eventsPage.map(EventResponse::fromDomain);
     }
 
+    public Page<EventResponse> getRecommended(UUID userId, Pageable pageable) {
+        UserPreference preference = userPreferenceRepository.findById(userId)
+                .orElse(null);
+
+        Page<Event> eventsPage;
+
+        if (preference == null) {
+            Pageable byDate = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(Sort.Direction.ASC, "dateTime")
+            );
+            eventsPage = eventRepository.findByDateTimeGreaterThan(LocalDateTime.now(), byDate);
+        } else {
+            eventsPage = eventCustomRepository.findRecommended(preference, pageable);
+        }
+
+        return eventsPage.map(EventResponse::fromDomain);
+    }
+
     public EventResponse getEventById(String eventId) {
         Event event = this.getEventValidated(eventId);
 
@@ -117,8 +150,11 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
     }
 
-    public void cancelEvent(String eventId) {
+    @Transactional // TEST BROKEN
+    public void cancelEvent(UUID organizerId, String eventId) {
         Event event = getEventValidated(eventId);
+
+        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
 
         event.cancel();
 

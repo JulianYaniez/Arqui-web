@@ -13,13 +13,8 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DatabaseLocalColorSettings">
-    <colors>
-      <entry key="d44ebbf9-4f55-47a9-9aea-ef95fef6bcd7" value="" />
-    </colors>
-  </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="167" />
+    <option name="cachedIndexableFilesCount" value="49" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -36,18 +31,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;JulianYaniez&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/JulianYaniez/Arqui-web.git&quot;,
-    &quot;accountId&quot;: &quot;83ac58bd-daa5-4181-948b-4347cf1ea41d&quot;
-  }
-}</component>
   <component name="JsbtTreeLayoutManager">
     <layout place="tools.popupGrunt">
       <scroll-view-position x="0" y="0" />
@@ -59,61 +42,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0226747676612706" />
-      <entry key="MS500" value="2.8087576339065814" />
-      <entry key="S2" value="10.301361407710017" />
-      <entry key="S5" value="15.054731860817656" />
-      <entry key="S10" value="17.717126921292223" />
-      <entry key="S30" value="20.805015169112234" />
-      <entry key="S60" value="23.373620511558325" />
-      <entry key="M2" value="27.02836488449227" />
-      <entry key="M5" value="36.39848308485849" />
-      <entry key="M10" value="56.96975939210705" />
-      <entry key="M15" value="83.98610830547926" />
-      <entry key="M30" value="180.05065343213403" />
-      <entry key="H1" value="367.83880850844486" />
-      <entry key="H2" value="689.945303269944" />
-      <entry key="H4" value="1200.6846022244083" />
-      <entry key="D1" value="2598.941745464677" />
-      <entry key="W1" value="3093.572898023295" />
+      <entry key="MS100" value="1.0105722118388258" />
+      <entry key="MS500" value="2.5871728418364093" />
+      <entry key="S2" value="5.819567292730559" />
+      <entry key="S5" value="8.247010793041007" />
+      <entry key="S10" value="11.630434392256491" />
+      <entry key="S30" value="18.21728827828853" />
+      <entry key="S60" value="22.21898060951837" />
+      <entry key="M2" value="26.12854901400092" />
+      <entry key="M5" value="37.07968929165733" />
+      <entry key="M10" value="67.10835694745246" />
+      <entry key="M15" value="103.21467858750789" />
+      <entry key="M30" value="212.3119057613481" />
+      <entry key="H1" value="402.2772141617707" />
+      <entry key="H2" value="717.8834397310616" />
+      <entry key="H4" value="1216.9543326751402" />
+      <entry key="D1" value="2566.9044039825535" />
+      <entry key="W1" value="3039.1492288341715" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="8.446868147749371E-201" />
-      <entry key="S5" value="1.329551643737025E-80" />
-      <entry key="S10" value="1.6277963274642256E-40" />
-      <entry key="S30" value="1.0513540814640545E-13" />
-      <entry key="S60" value="6.304418537312554E-7" />
-      <entry key="M2" value="0.0018441655410008112" />
-      <entry key="M5" value="0.4549816431665978" />
-      <entry key="M10" value="5.148739861882081" />
-      <entry key="M15" value="13.623469588906286" />
-      <entry key="M30" value="45.27532435362641" />
-      <entry key="H1" value="108.1604457100069" />
-      <entry key="H2" value="222.2976620803825" />
-      <entry key="H4" value="411.09762701879515" />
-      <entry key="D1" value="922.1993044810495" />
-      <entry key="W1" value="1099.0799115251743" />
+      <entry key="MS100" value="5.430104586319181E-42" />
+      <entry key="MS500" value="5.584257165048801E-9" />
+      <entry key="S2" value="0.009211405686487057" />
+      <entry key="S5" value="0.22103900753904795" />
+      <entry key="S10" value="0.764215459574271" />
+      <entry key="S30" value="2.1202028146578495" />
+      <entry key="S60" value="3.1472520828507013" />
+      <entry key="M2" value="4.441475029677961" />
+      <entry key="M5" value="10.305076593129584" />
+      <entry key="M10" value="24.307605168899652" />
+      <entry key="M15" value="38.28707614992718" />
+      <entry key="M30" value="75.9078789189987" />
+      <entry key="H1" value="140.1260536230763" />
+      <entry key="H2" value="253.1196737953156" />
+      <entry key="H4" value="438.80566023200777" />
+      <entry key="D1" value="932.9248987686362" />
+      <entry key="W1" value="1101.7283348914568" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0017764608519182" />
-      <entry key="MS500" value="2.7774154371140014" />
-      <entry key="S2" value="10.170389312846266" />
-      <entry key="S5" value="14.927957051014205" />
-      <entry key="S10" value="17.614162989897356" />
-      <entry key="S30" value="20.748693908177348" />
-      <entry key="S60" value="23.334887614111175" />
-      <entry key="M2" value="27.001591114200263" />
-      <entry key="M5" value="36.826748635255775" />
-      <entry key="M10" value="62.07785479849872" />
-      <entry key="M15" value="97.55543903298164" />
-      <entry key="M30" value="225.24878674049407" />
-      <entry key="H1" value="475.9097643475965" />
-      <entry key="H2" value="912.1540643493591" />
-      <entry key="H4" value="1611.7029919791753" />
-      <entry key="D1" value="3521.1126830843004" />
-      <entry key="W1" value="4192.648019490875" />
+      <entry key="MS100" value="0.0509869453685861" />
+      <entry key="MS500" value="2.084742230980578" />
+      <entry key="S2" value="5.655548369016952" />
+      <entry key="S5" value="8.35386696904558" />
+      <entry key="S10" value="12.272556138583033" />
+      <entry key="S30" value="20.227281111691525" />
+      <entry key="S60" value="25.274117816442047" />
+      <entry key="M2" value="30.495636722695515" />
+      <entry key="M5" value="47.31303112930185" />
+      <entry key="M10" value="91.32696529047298" />
+      <entry key="M15" value="141.4036632588084" />
+      <entry key="M30" value="288.1126138523515" />
+      <entry key="H1" value="542.2975817538771" />
+      <entry key="H2" value="970.9068138158319" />
+      <entry key="H4" value="1655.6778285282162" />
+      <entry key="D1" value="3499.801001107088" />
+      <entry key="W1" value="4140.8728183998865" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -128,41 +111,38 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Spring Boot.Tpe3Application.executor": "Run",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "feature/testing",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/julia/OneDrive/Documentos/TUDAI/segundo año/Segundo cuatrimestre/Arqui/tpe/tpe_final",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Tpe3Application.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;tpe__final__2&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/julia/OneDrive/Documentos/TUDAI/segundo año/Segundo cuatrimestre/Arqui/Tpe_grupal/tpe_final2&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mongo",
-      "postgresql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java/org/arquiweb/services" />
@@ -187,8 +167,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2df11533d9fe-intellij.indexing.shared.core-IU-262.11879.100" />
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.11879.100" />
+        <option value="bundled-jdk-30f59d01ecdd-a9fadf26ba24-intellij.indexing.shared.core-IU-262.12573.28" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.12573.28" />
       </set>
     </attachedChunks>
   </component>
@@ -216,11 +196,6 @@
           <properties class="java.lang.IllegalStateException" package="java.lang" />
           <option name="timeStamp" value="2" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/frontend/src/pages/EventDetails.jsx</url>
-          <line>1</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

@@ -103,7 +103,7 @@ public class DevService {
                         Instant.now().plus(Duration.ofDays(100)),
                         Instant.now().plus(Duration.ofDays(600))),
                     ZoneId.systemDefault());
-            String organizerId = faker.internet().uuidv7();
+            UUID organizerId = UUID.fromString(faker.internet().uuidv7());
             VenueResponse venueResponse = VenueResponse.fromDomain(eventVenue);
 
             Set<String> participants = new HashSet<>();
@@ -129,7 +129,7 @@ public class DevService {
         List<Event> events = eventRepository.saveAll(eventsCreation);
 
         for (int i = 0; i < random.nextInt(10); i++) {
-            eventService.publishEvent(events.get(i).getId());
+            eventService.publishEvent(events.get(i).getOrganizerId(), events.get(i).getId());
         }
     }
 }

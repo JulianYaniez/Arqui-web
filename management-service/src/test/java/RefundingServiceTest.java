@@ -3,7 +3,6 @@ import com.arquiweb.management.infrastructure.client.PaymentClient;
 import com.arquiweb.management.infrastructure.client.TicketingClient;
 import com.arquiweb.management.infrastructure.client.dto.requests.EventStateResponse;
 import com.arquiweb.management.infrastructure.client.dto.requests.ReservationStateResponse;
-import com.arquiweb.management.infrastructure.client.dto.responses.PaymentRefundRequest;
 import com.arquiweb.management.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.management.infrastructure.exception.ServiceUnavailableException;
 import com.arquiweb.management.infrastructure.exception.UnprocessableEntityException;
@@ -14,7 +13,6 @@ import com.arquiweb.management.refunding.dto.requests.CreateRefundRequest;
 import com.arquiweb.management.refunding.repository.RefundRequestRepository;
 import com.arquiweb.management.refunding.service.RefundingService;
 import feign.FeignException;
-import feign.Request;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -25,12 +23,12 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 public class RefundingServiceTest {
@@ -47,339 +45,389 @@ public class RefundingServiceTest {
     @Mock
     private PaymentClient paymentClient;
 
-    private RefundingService service;
+    private RefundingService refundingService;
     private AutoCloseable closeable;
-
-    private static final UUID CLIENT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    private static final UUID OTHER_CLIENT_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
-    private static final UUID RESERVATION_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
-    private static final UUID PAYMENT_ID = UUID.fromString("44444444-4444-4444-4444-444444444444");
-    private static final UUID REFUND_REQUEST_ID = UUID.fromString("55555555-5555-5555-5555-555555555555");
-    private static final UUID ADMIN_ID = UUID.fromString("66666666-6666-6666-6666-666666666666");
-    private static final String EVENT_ID = "event-test-123";
 
     @BeforeMethod
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        Mockito.reset(ticketingClient, refundRequestRepository, paymentClient, catalogClient);
-            service = new RefundingService(
-                                refundRequestRepository,
-                                ticketingClient,
-                                catalogClient,
-                                paymentClient
-                            );
+        Mockito.reset(refundRequestRepository, ticketingClient, catalogClient, paymentClient);
+        refundingService = new RefundingService(
+                refundRequestRepository,
+                ticketingClient,
+                catalogClient,
+                paymentClient
+        );
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
-        if(closeable != null)
+        if (closeable != null) {
             closeable.close();
-    }
-
-    private FeignException.NotFound buildFeignNotFound() {
-        return new FeignException.NotFound(
-                "Not Found",
-                Request.create(Request.HttpMethod.GET, "/test", Collections.emptyMap(), null, null, null),
-                null,
-                Collections.emptyMap()
-        );
+        }
     }
 
     @Test
     public void testCreateRefundRequest_Successful() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo válido");
+        UUID clientId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+        String eventId = "64b1f2c3d4e5f6a7b8c9d0e1";
 
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.clientId()).thenReturn(CLIENT_ID);
-        when(mockReservation.status()).thenReturn("PAID");
-        when(mockReservation.eventId()).thenReturn(EVENT_ID);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
+        when(request.reason()).thenReturn("No puedo asistir");
 
-        EventStateResponse mockEvent = mock(EventStateResponse.class);
-        when(mockEvent.dateTime()).thenReturn(LocalDateTime.now().plusDays(5)); // Más de 72 hs
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.reservationId()).thenReturn(reservationId);
+        when(reservation.clientId()).thenReturn(clientId);
+        when(reservation.status()).thenReturn("PAID");
+        when(reservation.eventId()).thenReturn(eventId);
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
-        when(catalogClient.getEventById(EVENT_ID)).thenReturn(mockEvent);
+        EventStateResponse event = mock(EventStateResponse.class);
+        when(event.dateTime()).thenReturn(LocalDateTime.now().plusHours(100)); // > 72hs
+        when(catalogClient.getEventById(eventId)).thenReturn(event);
 
-        RefundRequest savedEntity = mock(RefundRequest.class);
-        when(savedEntity.getId()).thenReturn(REFUND_REQUEST_ID);
-        when(refundRequestRepository.save(any(RefundRequest.class))).thenReturn(savedEntity);
+        RefundRequest savedRefund = mock(RefundRequest.class);
+        UUID expectedId = UUID.randomUUID();
+        when(savedRefund.getId()).thenReturn(expectedId);
+        when(refundRequestRepository.save(any(RefundRequest.class))).thenReturn(savedRefund);
 
-        UUID result = service.createRefundRequest(request, CLIENT_ID);
+        UUID resultId = refundingService.createRefundRequest(request, clientId);
 
-        Assert.assertEquals(result, REFUND_REQUEST_ID);
-        verify(ticketingClient, times(1)).setRequestRefund(RESERVATION_ID);
+        Assert.assertEquals(resultId, expectedId);
+        verify(ticketingClient, times(1)).setRequestRefund(reservationId);
         verify(refundRequestRepository, times(1)).save(any(RefundRequest.class));
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
-    public void testCreateRefundRequest_ReservationNotFound_ThrowsResourceNotFoundException() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo");
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(buildFeignNotFound());
+    public void testCreateRefundRequest_ReservationNotFound() {
+        UUID reservationId = UUID.randomUUID();
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
 
-        service.createRefundRequest(request, CLIENT_ID);
+        when(ticketingClient.getReservationById(reservationId)).thenThrow(mock(FeignException.NotFound.class));
+
+        refundingService.createRefundRequest(request, UUID.randomUUID());
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testCreateRefundRequest_TicketingError_ThrowsServiceUnavailableException() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo");
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(new RuntimeException("Ticketing Down"));
+    public void testCreateRefundRequest_TicketingUnavailable() {
+        UUID reservationId = UUID.randomUUID();
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
 
-        service.createRefundRequest(request, CLIENT_ID);
+        when(ticketingClient.getReservationById(reservationId)).thenThrow(new RuntimeException("Timeout"));
+
+        refundingService.createRefundRequest(request, UUID.randomUUID());
     }
 
     @Test(expectedExceptions = UnauthorizedRefundRequestException.class)
-    public void testCreateRefundRequest_ReservationNotBelongingToClient_ThrowsUnauthorized() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo");
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.clientId()).thenReturn(OTHER_CLIENT_ID);
+    public void testCreateRefundRequest_WrongClient() {
+        UUID reservationId = UUID.randomUUID();
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(UUID.randomUUID()); // Other client
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        service.createRefundRequest(request, CLIENT_ID);
+        refundingService.createRefundRequest(request, UUID.randomUUID());
     }
 
     @Test(expectedExceptions = InvalidRefundStatusException.class)
-    public void testCreateRefundRequest_ReservationNotPaid_ThrowsInvalidRefundStatus() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo");
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.clientId()).thenReturn(CLIENT_ID);
-        when(mockReservation.status()).thenReturn("PENDING");
+    public void testCreateRefundRequest_InvalidStatus() {
+        UUID clientId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(clientId);
+        when(reservation.status()).thenReturn("CANCELLED");
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        service.createRefundRequest(request, CLIENT_ID);
+        refundingService.createRefundRequest(request, clientId);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
-    public void testCreateRefundRequest_EventNotFound_ThrowsResourceNotFoundException() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo");
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.clientId()).thenReturn(CLIENT_ID);
-        when(mockReservation.status()).thenReturn("PAID");
-        when(mockReservation.eventId()).thenReturn(EVENT_ID);
+    public void testCreateRefundRequest_EventNotFound() {
+        UUID clientId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+        String eventId = "event-1";
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
-        when(catalogClient.getEventById(EVENT_ID)).thenThrow(buildFeignNotFound());
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
 
-        service.createRefundRequest(request, CLIENT_ID);
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(clientId);
+        when(reservation.status()).thenReturn("PAID");
+        when(reservation.eventId()).thenReturn(eventId);
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
+
+        when(catalogClient.getEventById(eventId)).thenThrow(mock(FeignException.NotFound.class));
+
+        refundingService.createRefundRequest(request, clientId);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testCreateRefundRequest_CatalogError_ThrowsServiceUnavailableException() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo");
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.clientId()).thenReturn(CLIENT_ID);
-        when(mockReservation.status()).thenReturn("PAID");
-        when(mockReservation.eventId()).thenReturn(EVENT_ID);
+    public void testCreateRefundRequest_CatalogUnavailable() {
+        UUID clientId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+        String eventId = "event-1";
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
-        when(catalogClient.getEventById(EVENT_ID)).thenThrow(new RuntimeException("Catalog Down"));
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
 
-        service.createRefundRequest(request, CLIENT_ID);
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(clientId);
+        when(reservation.status()).thenReturn("PAID");
+        when(reservation.eventId()).thenReturn(eventId);
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
+
+        when(catalogClient.getEventById(eventId)).thenThrow(new RuntimeException("Catalog down"));
+
+        refundingService.createRefundRequest(request, clientId);
     }
 
     @Test(expectedExceptions = UnprocessableEntityException.class)
-    public void testCreateRefundRequest_Under72Hours_ThrowsUnprocessableEntityException() {
-        CreateRefundRequest request = new CreateRefundRequest(RESERVATION_ID, "Motivo");
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.clientId()).thenReturn(CLIENT_ID);
-        when(mockReservation.status()).thenReturn("PAID");
-        when(mockReservation.eventId()).thenReturn(EVENT_ID);
+    public void testCreateRefundRequest_Under72Hours() {
+        UUID clientId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+        String eventId = "event-1";
 
-        EventStateResponse mockEvent = mock(EventStateResponse.class);
-        when(mockEvent.dateTime()).thenReturn(LocalDateTime.now().plusHours(24)); // Menos de 72 hs
+        CreateRefundRequest request = mock(CreateRefundRequest.class);
+        when(request.reservationId()).thenReturn(reservationId);
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
-        when(catalogClient.getEventById(EVENT_ID)).thenReturn(mockEvent);
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(clientId);
+        when(reservation.status()).thenReturn("PAID");
+        when(reservation.eventId()).thenReturn(eventId);
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        service.createRefundRequest(request, CLIENT_ID);
+        EventStateResponse event = mock(EventStateResponse.class);
+        when(event.dateTime()).thenReturn(LocalDateTime.now().plusHours(48)); // < 72hs
+        when(catalogClient.getEventById(eventId)).thenReturn(event);
+
+        refundingService.createRefundRequest(request, clientId);
     }
+
+    // =========================================================================
+    // 2. acceptRefund
+    // =========================================================================
 
     @Test
     public void testAcceptRefund_Successful() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+        UUID refundId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+        UUID paymentId = UUID.randomUUID();
 
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
-        when(mockReservation.paymentId()).thenReturn(PAYMENT_ID);
-        when(mockReservation.totalPrice()).thenReturn(BigDecimal.valueOf(10000));
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.reservationId()).thenReturn(reservationId);
+        when(reservation.paymentId()).thenReturn(paymentId);
+        when(reservation.totalPrice()).thenReturn(BigDecimal.valueOf(5000));
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.acceptRefund(refundId, adminId);
 
-        verify(mockRefund, times(1)).accept(ADMIN_ID);
-        verify(ticketingClient, times(1)).acceptRefund(RESERVATION_ID);
-        verify(paymentClient, times(1)).refundPayment(any(UUID.class));
-        verify(refundRequestRepository, times(1)).save(mockRefund);
+        verify(refundRequest, times(1)).accept(adminId);
+        verify(ticketingClient, times(1)).acceptRefund(reservationId);
+        verify(paymentClient, times(1)).refundPayment(paymentId);
+        verify(refundRequestRepository, times(1)).save(refundRequest);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testAcceptRefund_RefundRequestNotFound() {
+        UUID refundId = UUID.randomUUID();
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.empty());
+
+        refundingService.acceptRefund(refundId, UUID.randomUUID());
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testAcceptRefund_ReservationNotFound() {
+        UUID refundId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
+
+        when(ticketingClient.getReservationById(reservationId)).thenThrow(mock(FeignException.NotFound.class));
+
+        refundingService.acceptRefund(refundId, UUID.randomUUID());
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testAcceptRefund_PaymentOrTicketingFails_ThrowsServiceUnavailableException() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+    public void testAcceptRefund_GetReservationUnavailable() {
+        UUID refundId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
 
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
-        when(mockReservation.paymentId()).thenReturn(PAYMENT_ID);
-        when(mockReservation.totalPrice()).thenReturn(BigDecimal.valueOf(10000));
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
-        doThrow(new RuntimeException("Payment service down")).when(paymentClient).refundPayment(any());
+        when(ticketingClient.getReservationById(reservationId)).thenThrow(new RuntimeException("Error"));
 
-        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.acceptRefund(refundId, UUID.randomUUID());
     }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testAcceptRefund_PaymentOrTicketingFails() {
+        UUID refundId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+        UUID paymentId = UUID.randomUUID();
+
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
+
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.reservationId()).thenReturn(reservationId);
+        when(reservation.paymentId()).thenReturn(paymentId);
+        when(reservation.totalPrice()).thenReturn(BigDecimal.valueOf(5000));
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
+
+        doThrow(new RuntimeException("Payment down")).when(paymentClient).refundPayment(paymentId);
+
+        refundingService.acceptRefund(refundId, adminId);
+    }
+
+    // =========================================================================
+    // 3. rejectRefund
+    // =========================================================================
 
     @Test
     public void testRejectRefund_Successful() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+        UUID refundId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
 
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.reservationId()).thenReturn(reservationId);
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        service.rejectRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.rejectRefund(refundId, adminId);
 
-        verify(mockRefund, times(1)).reject(ADMIN_ID);
-        verify(ticketingClient, times(1)).rejectRefund(RESERVATION_ID);
-        verify(refundRequestRepository, times(1)).save(mockRefund);
-        verify(paymentClient, never()).refundPayment(any());
+        verify(refundRequest, times(1)).reject(adminId);
+        verify(ticketingClient, times(1)).rejectRefund(reservationId);
+        verify(refundRequestRepository, times(1)).save(refundRequest);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testRejectRefund_ReservationNotFound() {
+        UUID refundId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
+
+        when(ticketingClient.getReservationById(reservationId)).thenThrow(mock(FeignException.NotFound.class));
+
+        refundingService.rejectRefund(refundId, UUID.randomUUID());
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testRejectRefund_TicketingFails_ThrowsServiceUnavailableException() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+    public void testRejectRefund_GetReservationUnavailable() {
+        UUID refundId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
 
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenReturn(mockReservation);
-        doThrow(new RuntimeException("Ticketing down")).when(ticketingClient).rejectRefund(RESERVATION_ID);
+        when(ticketingClient.getReservationById(reservationId)).thenThrow(new RuntimeException("Error"));
 
-        service.rejectRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.rejectRefund(refundId, UUID.randomUUID());
+    }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testRejectRefund_TicketingRejectFails() {
+        UUID refundId = UUID.randomUUID();
+        UUID adminId = UUID.randomUUID();
+        UUID reservationId = UUID.randomUUID();
+
+        RefundRequest refundRequest = mock(RefundRequest.class);
+        when(refundRequest.getReservationId()).thenReturn(reservationId);
+        when(refundRequestRepository.findById(refundId)).thenReturn(Optional.of(refundRequest));
+
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.reservationId()).thenReturn(reservationId);
+        when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
+
+        doThrow(new RuntimeException("Ticketing down")).when(ticketingClient).rejectRefund(reservationId);
+
+        refundingService.rejectRefund(refundId, adminId);
     }
 
     @Test
     public void testCancelEvent_Successful() {
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
-        when(mockReservation.paymentId()).thenReturn(PAYMENT_ID);
-        when(mockReservation.totalPrice()).thenReturn(BigDecimal.valueOf(5000));
+        String eventId = "event-123";
 
-        when(ticketingClient.getReservationsByEventId(EVENT_ID, "PAID"))
-                .thenReturn(List.of(mockReservation));
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.reservationId()).thenReturn(UUID.randomUUID());
+        when(reservation.paymentId()).thenReturn(UUID.randomUUID());
+        when(reservation.totalPrice()).thenReturn(BigDecimal.valueOf(2500));
 
-        service.cancelEvent(EVENT_ID);
+        when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenReturn(List.of(reservation));
 
-        verify(catalogClient, times(1)).cancelEvent(EVENT_ID);
+        refundingService.cancelEvent(eventId);
+
+        verify(catalogClient, times(1)).cancelEvent(eventId);
         verify(paymentClient, times(1)).bulkRefund(anyList());
-        verify(ticketingClient, times(1)).bulkCancelReservations(EVENT_ID);
+        verify(ticketingClient, times(1)).bulkCancelReservations(eventId);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
-    public void testCancelEvent_EventNotFound_ThrowsResourceNotFoundException() {
-        doThrow(buildFeignNotFound()).when(catalogClient).cancelEvent(EVENT_ID);
+    public void testCancelEvent_EventNotFound() {
+        String eventId = "event-123";
+        doThrow(mock(FeignException.NotFound.class)).when(catalogClient).cancelEvent(eventId);
 
-        service.cancelEvent(EVENT_ID);
+        refundingService.cancelEvent(eventId);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testCancelEvent_PaymentBulkRefundFails_ThrowsServiceUnavailableException() {
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
+    public void testCancelEvent_CatalogUnavailable() {
+        String eventId = "event-123";
+        doThrow(new RuntimeException("Catalog down")).when(catalogClient).cancelEvent(eventId);
 
-        when(ticketingClient.getReservationsByEventId(EVENT_ID, "PAID"))
-                .thenReturn(List.of(mockReservation));
-        doThrow(new RuntimeException("Payment bulk refund error")).when(paymentClient).bulkRefund(anyList());
-
-        service.cancelEvent(EVENT_ID);
-    }
-
-    @Test(expectedExceptions = ResourceNotFoundException.class)
-    public void testAcceptRefund_ReservationNotFound_ThrowsResourceNotFoundException() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
-
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(buildFeignNotFound());
-
-        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.cancelEvent(eventId);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testAcceptRefund_TicketingGenericError_ThrowsServiceUnavailableException() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+    public void testCancelEvent_GetReservationsUnavailable() {
+        String eventId = "event-123";
+        when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenThrow(new RuntimeException("Ticketing down"));
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(new RuntimeException("Ticketing service down"));
-
-        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
-    }
-
-    @Test(expectedExceptions = ResourceNotFoundException.class)
-    public void testRejectRefund_ReservationNotFound_ThrowsResourceNotFoundException() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
-
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(buildFeignNotFound());
-
-        service.rejectRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.cancelEvent(eventId);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testRejectRefund_TicketingGenericError_ThrowsServiceUnavailableException() {
-        RefundRequest mockRefund = mock(RefundRequest.class);
-        when(mockRefund.getReservationId()).thenReturn(RESERVATION_ID);
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.of(mockRefund));
+    public void testCancelEvent_BulkRefundUnavailable() {
+        String eventId = "event-123";
+        when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenReturn(List.of());
+        doThrow(new RuntimeException("Payment down")).when(paymentClient).bulkRefund(anyList());
 
-        when(ticketingClient.getReservationById(RESERVATION_ID)).thenThrow(new RuntimeException("Ticketing service down"));
-
-        service.rejectRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.cancelEvent(eventId);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testCancelEvent_CatalogGenericError_ThrowsServiceUnavailableException() {
-        doThrow(new RuntimeException("Catalog error")).when(catalogClient).cancelEvent(EVENT_ID);
+    public void testCancelEvent_BulkCancelUnavailable() {
+        String eventId = "event-123";
+        when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenReturn(List.of());
+        doThrow(new RuntimeException("Ticketing down")).when(ticketingClient).bulkCancelReservations(eventId);
 
-        service.cancelEvent(EVENT_ID);
-    }
-
-    @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testCancelEvent_TicketingGetReservationsFails_ThrowsServiceUnavailableException() {
-        when(ticketingClient.getReservationsByEventId(EVENT_ID, "PAID"))
-                .thenThrow(new RuntimeException("Ticketing error"));
-
-        service.cancelEvent(EVENT_ID);
-    }
-
-    @Test(expectedExceptions = ServiceUnavailableException.class)
-    public void testCancelEvent_TicketingBulkCancelFails_ThrowsServiceUnavailableException() {
-        ReservationStateResponse mockReservation = mock(ReservationStateResponse.class);
-        when(mockReservation.reservationId()).thenReturn(RESERVATION_ID);
-
-        when(ticketingClient.getReservationsByEventId(EVENT_ID, "PAID"))
-                .thenReturn(List.of(mockReservation));
-        doThrow(new RuntimeException("Ticketing bulk cancel error"))
-                .when(ticketingClient).bulkCancelReservations(EVENT_ID);
-
-        service.cancelEvent(EVENT_ID);
-    }
-
-    @Test(expectedExceptions = ResourceNotFoundException.class)
-    public void testAcceptRefund_RefundRequestNotFound_ThrowsResourceNotFoundException() {
-        when(refundRequestRepository.findById(REFUND_REQUEST_ID)).thenReturn(Optional.empty());
-
-        service.acceptRefund(REFUND_REQUEST_ID, ADMIN_ID);
+        refundingService.cancelEvent(eventId);
     }
 }

@@ -56,7 +56,7 @@
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </DataSourceFromHistory>
-  <DataSourceFromHistory isRemovedFromProject="false">
+  <DataSourceFromHistory isRemovedFromProject="true">
     <data-source source="LOCAL" name="CatalogDB" uuid="d44ebbf9-4f55-47a9-9aea-ef95fef6bcd7">
       <database-info product="Mongo DB" version="7.0.45" jdbc-version="4.2" driver-name="MongoDB JDBC Driver" driver-version="1.24" dbms="MONGO" exact-version="7.0.45" exact-driver-version="1.24" />
       <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />

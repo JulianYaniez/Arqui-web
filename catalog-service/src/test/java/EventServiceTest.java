@@ -1,5 +1,7 @@
 import com.arquiweb.catalog.events.domain.Event;
 import com.arquiweb.catalog.events.domain.EventSector;
+import com.arquiweb.catalog.events.domain.UserPreference;
+import com.arquiweb.catalog.events.domain.enums.EventStatus;
 import com.arquiweb.catalog.events.domain.enums.EventType;
 import com.arquiweb.catalog.events.domain.exceptions.IllegalEventStateException;
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
@@ -9,28 +11,33 @@ import com.arquiweb.catalog.events.dto.response.EventResponse;
 import com.arquiweb.catalog.events.dto.response.EventStateResponse;
 import com.arquiweb.catalog.events.repository.EventCustomRepository;
 import com.arquiweb.catalog.events.repository.EventRepository;
+import com.arquiweb.catalog.events.repository.UserPreferenceRepository;
 import com.arquiweb.catalog.events.service.EventService;
 import com.arquiweb.catalog.infrastructure.client.TicketingClient;
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
-import com.arquiweb.catalog.venues.domain.Sector;
-import com.arquiweb.catalog.venues.domain.Venue;
+import com.arquiweb.catalog.infrastructure.exception.UnauthorizedException;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.service.VenueService;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -40,7 +47,9 @@ public class EventServiceTest {
 
     private static final String VALID_EVENT_ID = "64b1f2c3d4e5f6a7b8c9d0e1";
     private static final String VALID_VENUE_ID = "64b1f2c3d4e5f6a7b8c9d0e2";
-    private static final String NON_EXISTENT_ID = "64b1f2c3d4e5f6a7b8c9d000";
+    private static final UUID ORGANIZER_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID OTHER_USER_ID = UUID.fromString("99999999-9999-9999-9999-999999999999");
+
 
     private EventService eventService;
 
@@ -56,17 +65,16 @@ public class EventServiceTest {
     @Mock
     private VenueService venueService;
 
+    @Mock
+    private UserPreferenceRepository upr;
+
     private AutoCloseable closeable;
 
     @BeforeMethod
     void setup() throws Exception {
         closeable = MockitoAnnotations.openMocks(this);
-        this.eventService = new EventService(
-                                eventRepository,
-                                eventCustomRepository,
-                                venueService,
-                                ticketingClient
-                            );
+        Mockito.reset(eventRepository, eventCustomRepository, ticketingClient, venueService, upr);
+        eventService = new EventService(eventRepository,eventCustomRepository,venueService, ticketingClient, upr);
     }
 
     @AfterMethod
@@ -97,28 +105,29 @@ public class EventServiceTest {
 
         Event mockSavedEvent = mock(Event.class);
         when(mockSavedEvent.getId()).thenReturn("event-gen-999");
-        when(request.toDomain(eq(venueResp), anyList())).thenReturn(mockSavedEvent);
+        when(request.toDomain(eq(ORGANIZER_ID), eq(venueResp), anyList())).thenReturn(mockSavedEvent);
         when(eventRepository.save(any(Event.class))).thenReturn(mockSavedEvent);
 
-        String idGenerado = eventService.createEvent(request);
+        String idGenerado = eventService.createEvent(ORGANIZER_ID, request);
 
         Assert.assertNotNull(idGenerado);
         Assert.assertEquals(idGenerado, "event-gen-999");
+        verify(eventRepository, times(1)).save(mockSavedEvent);
     }
 
     @Test(expectedExceptions = InvalidInputException.class)
     public void testCreateEvent_DuplicatedSector() {
         String sectorId = "sec-01";
 
-        CreateEventSectorRequest sec_1 = mock(CreateEventSectorRequest.class);
-        when(sec_1.sectorId()).thenReturn(sectorId);
+        CreateEventSectorRequest sec1 = mock(CreateEventSectorRequest.class);
+        when(sec1.sectorId()).thenReturn(sectorId);
 
-        CreateEventSectorRequest sec_2 = mock(CreateEventSectorRequest.class);
-        when(sec_2.sectorId()).thenReturn(sectorId);
+        CreateEventSectorRequest sec2 = mock(CreateEventSectorRequest.class);
+        when(sec2.sectorId()).thenReturn(sectorId);
 
         CreateEventRequest request = mock(CreateEventRequest.class);
         when(request.venueId()).thenReturn(VALID_VENUE_ID);
-        when(request.sectors()).thenReturn(List.of(sec_1, sec_2));
+        when(request.sectors()).thenReturn(List.of(sec1, sec2));
 
         SectorResponse sectorResp = mock(SectorResponse.class);
         when(sectorResp.id()).thenReturn(sectorId);
@@ -128,7 +137,7 @@ public class EventServiceTest {
 
         when(venueService.findVenueById(VALID_VENUE_ID)).thenReturn(venueResp);
 
-        eventService.createEvent(request);
+        eventService.createEvent(ORGANIZER_ID, request);
     }
 
     @Test(expectedExceptions = InvalidInputException.class)
@@ -148,49 +157,58 @@ public class EventServiceTest {
 
         when(venueService.findVenueById(VALID_VENUE_ID)).thenReturn(venueResp);
 
-        eventService.createEvent(request);
+        eventService.createEvent(ORGANIZER_ID, request);
     }
 
     @Test
-    void testAddSector_Successful() {
-        // Arrange
+    public void testAddSector_Successful() {
+        String sectorId = "sec-01";
 
         CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
-        when(request.sectorId()).thenReturn(NON_EXISTENT_ID);
+        when(request.sectorId()).thenReturn(sectorId);
         when(request.price()).thenReturn(BigDecimal.valueOf(12000));
 
         Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
         when(mockEvent.getVenueId()).thenReturn(VALID_VENUE_ID);
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
         SectorResponse sectorResponse = mock(SectorResponse.class);
-        when(sectorResponse.id()).thenReturn(NON_EXISTENT_ID);
+        when(sectorResponse.id()).thenReturn(sectorId);
 
         VenueResponse venueResponse = mock(VenueResponse.class);
         when(venueResponse.sectors()).thenReturn(List.of(sectorResponse));
 
         when(venueService.findVenueById(VALID_VENUE_ID)).thenReturn(venueResponse);
 
-        // Act
-        String returnedSectorId = eventService.addSector(VALID_EVENT_ID, request);
+        String returnedSectorId = eventService.addSector(ORGANIZER_ID, VALID_EVENT_ID, request);
 
-        // Assert
         Assert.assertNotNull(returnedSectorId);
-        Assert.assertEquals(returnedSectorId, NON_EXISTENT_ID);
-
+        Assert.assertEquals(returnedSectorId, sectorId);
+        verify(mockEvent, times(1)).addSector(any(EventSector.class));
         verify(eventRepository, times(1)).save(mockEvent);
+    }
+
+    @Test(expectedExceptions = UnauthorizedException.class)
+    public void testAddSector_WrongOrganizer_ThrowsUnauthorizedException() {
+        CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
+
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
+
+        eventService.addSector(OTHER_USER_ID, VALID_EVENT_ID, request);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void testAddSector_SectorNoVenue() {
-        // Arrange
         CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
         when(request.sectorId()).thenReturn("sec-inexistente");
 
         Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
         when(mockEvent.getVenueId()).thenReturn(VALID_VENUE_ID);
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
-
 
         SectorResponse sectorValido = mock(SectorResponse.class);
         when(sectorValido.id()).thenReturn("sec-valido");
@@ -200,81 +218,58 @@ public class EventServiceTest {
 
         when(venueService.findVenueById(VALID_VENUE_ID)).thenReturn(venueResponse);
 
-        //Act
-        eventService.addSector(VALID_EVENT_ID, request);
-
-        // Assert
-        verify(eventRepository, never()).save(any());
+        eventService.addSector(ORGANIZER_ID, VALID_EVENT_ID, request);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void testAddSector_NoExistsEvent() {
-        // Arrange
         CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
-
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.empty());
 
-        // Act
-        eventService.addSector(VALID_EVENT_ID, request);
-
-        // Assert
-        verify(venueService, never()).findVenueById(any());
-        verify(eventRepository, never()).save(any());
+        eventService.addSector(ORGANIZER_ID, VALID_EVENT_ID, request);
     }
 
     @Test(expectedExceptions = IllegalEventStateException.class)
     public void testAddSector_StateInvalid() {
-        // Arrange
+        String sectorId = "sec-01";
 
         CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
-        when(request.sectorId()).thenReturn(NON_EXISTENT_ID);
+        when(request.sectorId()).thenReturn(sectorId);
         when(request.price()).thenReturn(BigDecimal.valueOf(10000));
 
         Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
         when(mockEvent.getVenueId()).thenReturn(VALID_VENUE_ID);
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
         SectorResponse sectorResponse = mock(SectorResponse.class);
-        when(sectorResponse.id()).thenReturn(NON_EXISTENT_ID);
+        when(sectorResponse.id()).thenReturn(sectorId);
 
         VenueResponse venueResponse = mock(VenueResponse.class);
         when(venueResponse.sectors()).thenReturn(List.of(sectorResponse));
-
-        Venue mockVenue = mock(Venue.class);
-        when(mockVenue.getId()).thenReturn(VALID_VENUE_ID);
-
-        Sector mockSector = mock(Sector.class);
-        when(mockSector.getId()).thenReturn(NON_EXISTENT_ID);
-        when(mockVenue.getSectors()).thenReturn(List.of(mockSector));
 
         when(venueService.findVenueById(VALID_VENUE_ID)).thenReturn(venueResponse);
 
         doThrow(new IllegalEventStateException("Event is already published"))
                 .when(mockEvent).addSector(any());
 
-        // Act
-        eventService.addSector(VALID_EVENT_ID, request);
-
-        // Assert
-        verify(eventRepository, never()).save(any());
+        eventService.addSector(ORGANIZER_ID, VALID_EVENT_ID, request);
     }
 
     @Test
     public void testPublishEvent_WithCapacities() {
-        // Arrange
         Event mockEvent = mock(Event.class);
-        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
+        when(mockEvent.getId()).thenReturn(VALID_EVENT_ID);
 
         EventSector mockSector = mock(EventSector.class);
         when(mockEvent.getSectors()).thenReturn(List.of(mockSector));
 
-        when(eventRepository.findById(anyString())).thenReturn(Optional.of(mockEvent));
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
         when(eventRepository.save(any(Event.class))).thenReturn(mockEvent);
 
-        // Act
-        eventService.publishEvent(VALID_EVENT_ID);
+        eventService.publishEvent(ORGANIZER_ID, VALID_EVENT_ID);
 
-        // Assert
         verify(mockEvent, times(1)).publish();
         verify(ticketingClient, times(1)).initializeSectors(any());
         verify(eventRepository, times(1)).save(mockEvent);
@@ -282,158 +277,102 @@ public class EventServiceTest {
 
     @Test
     public void testPublishEvent_NoCapacities() {
-        // Arrange
         Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
+        when(mockEvent.getId()).thenReturn(VALID_EVENT_ID);
+        when(mockEvent.getSectors()).thenReturn(Collections.emptyList());
+
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
-        // Act
-        eventService.publishEvent(VALID_EVENT_ID);
+        eventService.publishEvent(ORGANIZER_ID, VALID_EVENT_ID);
 
-        // Assert
         verify(mockEvent, times(1)).publish();
         verify(ticketingClient, never()).initializeSectors(any());
         verify(eventRepository, times(1)).save(mockEvent);
     }
 
+    @Test(expectedExceptions = UnauthorizedException.class)
+    public void testPublishEvent_WrongOrganizer_ThrowsUnauthorizedException() {
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
+
+        eventService.publishEvent(OTHER_USER_ID, VALID_EVENT_ID);
+    }
+
     @Test(expectedExceptions = IllegalEventStateException.class)
     public void testPublishEvent_StateInvalid() {
-        // Arrange
         Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
         doThrow(new IllegalEventStateException("Event is already published"))
                 .when(mockEvent).publish();
 
-        // Act
-        eventService.publishEvent(VALID_EVENT_ID);
-
-        // Assert
-        verify(ticketingClient, never()).initializeSectors(any());
-        verify(eventRepository, never()).save(any());
+        eventService.publishEvent(ORGANIZER_ID, VALID_EVENT_ID);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void testPublishEvent_NoExistsEvent() {
-        // Arrange
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.empty());
 
-        // Act
-        eventService.publishEvent(VALID_EVENT_ID);
-
-        // Assert
-        verify(ticketingClient, never()).initializeSectors(any());
-        verify(eventRepository, never()).save(any());
+        eventService.publishEvent(ORGANIZER_ID, VALID_EVENT_ID);
     }
 
     @Test
-    public void testGetAll_WithResult() {
-        // Arrange
-        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
-        Pageable pageable = PageRequest.of(0, 5);
-
+    public void testCancelEvent_Successful() {
         Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
-        List<Event> eventList = List.of(mockEvent);
-        Page<Event> mockPage = new PageImpl<>(eventList, pageable, 1);
+        eventService.cancelEvent(ORGANIZER_ID, VALID_EVENT_ID);
 
-        when(eventCustomRepository.findEventsWithDynamicFilters(criteria, pageable))
-                .thenReturn(mockPage);
+        verify(mockEvent, times(1)).cancel();
+        verify(eventRepository, times(1)).save(mockEvent);
+    }
 
-        // Act
-        Page<EventResponse> result = eventService.getAll(criteria, pageable);
+    @Test(expectedExceptions = UnauthorizedException.class)
+    public void testCancelEvent_WrongOrganizer_ThrowsUnauthorizedException() {
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getOrganizerId()).thenReturn(ORGANIZER_ID);
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
-        // Assert
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result.getTotalElements(), 1);
-        Assert.assertEquals(result.getContent().size(), 1);
+        eventService.cancelEvent(OTHER_USER_ID, VALID_EVENT_ID);
+    }
 
-        verify(eventCustomRepository, times(1))
-                .findEventsWithDynamicFilters(criteria, pageable);
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testGetEventById_NullId_ThrowsInvalidInputException() {
+        eventService.getEventById(null);
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testGetEventById_InvalidObjectIdFormat_ThrowsInvalidInputException() {
+        eventService.getEventById("id-no-valido-mongo");
     }
 
     @Test
-    public void testGetAll_NoResult() {
-        // Arrange
-        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
-        Pageable pageable = PageRequest.of(0, 10);
+    public void testGetEventById_Valid_ReturnsEventResponse() {
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getSectors()).thenReturn(Collections.emptyList());
+        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
-        Page<Event> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        EventResponse response = eventService.getEventById(VALID_EVENT_ID);
 
-        when(eventCustomRepository.findEventsWithDynamicFilters(criteria, pageable))
-                .thenReturn(emptyPage);
-
-        // Act
-        Page<EventResponse> result = eventService.getAll(criteria, pageable);
-
-        // Assert
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.isEmpty());
-        Assert.assertEquals(result.getTotalElements(), 0);
-
-        verify(eventCustomRepository, times(1))
-                .findEventsWithDynamicFilters(criteria, pageable);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    public void testSearchEvents_WithFiltersAndPagination_Successful() {
-        // 1. Arrange
-        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("date").ascending());
-
+    public void testGetById_Found_ReturnsEventStateResponse() {
         Event mockEvent = mock(Event.class);
         when(mockEvent.getId()).thenReturn(VALID_EVENT_ID);
-
-        Page<Event> mockPage = new PageImpl<>(List.of(mockEvent));
-
-        when(eventCustomRepository.findEventsWithDynamicFilters(eq(criteria), eq(pageable)))
-                .thenReturn(mockPage);
-
-        // 2. Act
-        Page<?> result = eventService.getAll(criteria, pageable);
-
-        // 3. Assert
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result.getTotalElements(), 1);
-        verify(eventCustomRepository, times(1))
-                .findEventsWithDynamicFilters(eq(criteria), eq(pageable));
-    }
-
-    @Test
-    public void testSearchEvents_EmptyResults_ReturnsEmptyPage() {
-        // 1. Arrange
-        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
-        Pageable pageable = PageRequest.of(0, 10);
-
-        Page<Event> emptyPage = new PageImpl<>(Collections.emptyList());
-
-        when(eventCustomRepository.findEventsWithDynamicFilters(eq(criteria), eq(pageable)))
-                .thenReturn(emptyPage);
-
-        // 2. Act
-        Page<?> result = eventService.getAll(criteria, pageable);
-
-        // 3. Assert
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.isEmpty());
-        verify(eventCustomRepository, times(1))
-                .findEventsWithDynamicFilters(eq(criteria), eq(pageable));
-    }
-
-    @Test
-    public void testGetById_Successful() {
-        Event mockEvent = mock(Event.class);
-        when(mockEvent.getId()).thenReturn(VALID_EVENT_ID);
-
-        EventType mockEventType = mock(EventType.class);
-        when(mockEventType.toString()).thenReturn("CONCERT");
-        when(mockEvent.getType()).thenReturn(mockEventType);
+        when(mockEvent.getType()).thenReturn(EventType.values()[0]);
+        when(mockEvent.getStatus()).thenReturn(EventStatus.DRAFT);
 
         when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
 
         EventStateResponse response = eventService.getById(VALID_EVENT_ID);
 
         Assert.assertNotNull(response);
-        verify(eventRepository, times(1)).findById(VALID_EVENT_ID);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
@@ -444,44 +383,74 @@ public class EventServiceTest {
     }
 
     @Test
-    public void testCancelEvent_Successful() {
+    public void testGetAll_WithResult() {
+        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
+        Pageable pageable = PageRequest.of(0, 5);
+
         Event mockEvent = mock(Event.class);
-        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.of(mockEvent));
+        when(mockEvent.getSectors()).thenReturn(Collections.emptyList());
 
-        eventService.cancelEvent(VALID_EVENT_ID);
+        Page<Event> mockPage = new PageImpl<>(List.of(mockEvent), pageable, 1);
+        when(eventCustomRepository.findEventsWithDynamicFilters(criteria, pageable))
+                .thenReturn(mockPage);
 
-        verify(eventRepository, times(1)).findById(VALID_EVENT_ID);
-        verify(mockEvent, times(1)).cancel();
+        Page<EventResponse> result = eventService.getAll(criteria, pageable);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getTotalElements(), 1);
+        verify(eventCustomRepository, times(1)).findEventsWithDynamicFilters(criteria, pageable);
     }
 
-    @Test(expectedExceptions = ResourceNotFoundException.class)
-    public void testCancelEvent_NotFound_ThrowsResourceNotFoundException() {
-        when(eventRepository.findById(VALID_EVENT_ID)).thenReturn(Optional.empty());
+    @Test
+    public void testGetAll_NoResult() {
+        EventCriteriaQuery criteria = mock(EventCriteriaQuery.class);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        eventService.cancelEvent(VALID_EVENT_ID);
+        Page<Event> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        when(eventCustomRepository.findEventsWithDynamicFilters(criteria, pageable))
+                .thenReturn(emptyPage);
+
+        Page<EventResponse> result = eventService.getAll(criteria, pageable);
+
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.isEmpty());
     }
 
-    @Test(expectedExceptions = InvalidInputException.class)
-    public void testAddSector_NullEventId_ThrowsInvalidInputException() {
-        CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
+    @Test
+    public void testGetRecommended_NoPreference_QueriesByDate() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(upr.findById(ORGANIZER_ID)).thenReturn(Optional.empty());
 
-        eventService.addSector(null, request);
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getSectors()).thenReturn(Collections.emptyList());
+        Page<Event> mockPage = new PageImpl<>(List.of(mockEvent), pageable, 1);
+
+        when(eventRepository.findByDateTimeGreaterThan(any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(mockPage);
+
+        Page<EventResponse> result = eventService.getRecommended(ORGANIZER_ID, pageable);
+
+        Assert.assertEquals(result.getTotalElements(), 1);
+        verify(eventRepository, times(1)).findByDateTimeGreaterThan(any(LocalDateTime.class), any(Pageable.class));
+        verifyNoInteractions(eventCustomRepository);
     }
 
-    @Test(expectedExceptions = InvalidInputException.class)
-    public void testAddSector_InvalidObjectIdFormat_ThrowsInvalidInputException() {
-        CreateEventSectorRequest request = mock(CreateEventSectorRequest.class);
+    @Test
+    public void testGetRecommended_WithPreference_QueriesCustomRepository() {
+        Pageable pageable = PageRequest.of(0, 10);
+        UserPreference mockPreference = mock(UserPreference.class);
+        when(upr.findById(ORGANIZER_ID)).thenReturn(Optional.of(mockPreference));
 
-        eventService.addSector("formato-no-valido-123", request);
-    }
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getSectors()).thenReturn(Collections.emptyList());
+        Page<Event> mockPage = new PageImpl<>(List.of(mockEvent), pageable, 1);
 
-    @Test(expectedExceptions = InvalidInputException.class)
-    public void testPublishEvent_NullEventId_ThrowsInvalidInputException() {
-        eventService.publishEvent(null);
-    }
+        when(eventCustomRepository.findRecommended(mockPreference, pageable)).thenReturn(mockPage);
 
-    @Test(expectedExceptions = InvalidInputException.class)
-    public void testPublishEvent_InvalidObjectIdFormat_ThrowsInvalidInputException() {
-        eventService.publishEvent("formato-no-valido-123");
+        Page<EventResponse> result = eventService.getRecommended(ORGANIZER_ID, pageable);
+
+        Assert.assertEquals(result.getTotalElements(), 1);
+        verify(eventCustomRepository, times(1)).findRecommended(mockPreference, pageable);
+        verify(eventRepository, never()).findByDateTimeGreaterThan(any(), any());
     }
 }

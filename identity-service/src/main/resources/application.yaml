@@ -5,3 +5,7 @@ spring:
     url: jdbc:postgresql://localhost:5434/identity
     username: group_7
     password: root
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:14400000} # 4hs | Could implement shorter periods with refresh tokens; kept simple for time's sake.

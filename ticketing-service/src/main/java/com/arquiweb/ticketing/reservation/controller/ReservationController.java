@@ -1,5 +1,6 @@
 package com.arquiweb.ticketing.reservation.controller;
 
+import com.arquiweb.ticketing.infrastructure.utils.AuthGuard;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveNumberedRequest;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
@@ -8,8 +9,11 @@ import com.arquiweb.ticketing.reservation.dto.responses.ReservationStateResponse
 import com.arquiweb.ticketing.reservation.dto.responses.TicketQrResponse;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/reservation")
 @RequiredArgsConstructor
+@Tag(name = "Reservation Management", description = "Operations pertaining reservation management.")
 class ReservationController {
 
     private final ReservationService reservationService;
@@ -46,15 +51,24 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "422",
                     description = "Event has already happened or was cancelled."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identity."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/unnumbered")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ReservationResponse> reserveUnnumbered(
-            @RequestBody ReserveUnnumberedRequest request,
-            @RequestHeader(value = "X-Client-Id", required = false) UUID headerClientId  // TODO
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
+            @RequestBody ReserveUnnumberedRequest request
     ) {
-        // Placeholder
-        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
+        UUID clientId = AuthGuard.requireUserId(headerUserId);
 
         ReservationResponse response = reservationService.reserveUnnumbered(request, clientId);
 
@@ -83,15 +97,24 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "422",
                     description = "Event has already happened or was cancelled."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identity."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/numbered")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ReservationResponse> reserveNumbered(
             @RequestBody ReserveNumberedRequest request,
-            @RequestHeader(value = "X-Client-Id", required = false ) UUID headerClientId
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId
     ) {
-        // Placeholder
-        UUID clientId = headerClientId != null ? headerClientId : UUID.randomUUID();
+        UUID clientId = AuthGuard.requireUserId(headerUserId);
         ReservationResponse response = reservationService.reserveNumbered(request, clientId);
 
         return  ResponseEntity.ok(response);
@@ -124,12 +147,21 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Reservation cancelled."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/{reservationId}/cancel")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> paymentFailure(
-            @PathVariable("reservationId") UUID id
+            @PathVariable("reservationId") UUID id,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole
     ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+
         reservationService.handlePaymentFailure(id);
 
         return ResponseEntity.noContent().build();
@@ -148,14 +180,23 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Reservation or tickets are not valid to confirm."
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identity."
             )
     })
     @PostMapping("/{reservationId}/confirm")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> confirmReservation(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
             @PathVariable("reservationId") UUID reservationId,
             @RequestBody UUID paymentId
     ) {
-        reservationService.confirmReservation(reservationId, paymentId);
+        UUID clientId = AuthGuard.requireUserId(headerUserId);
+
+        reservationService.confirmReservation(reservationId, clientId, paymentId);
 
         return ResponseEntity.noContent().build();
     }
@@ -170,12 +211,21 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "404",
                     description = "No reservation found with given ID."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/{reservationId}/request-refund")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> setReservationPendingRequest(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
             @PathVariable("reservationId") UUID reservationId
     ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+
         reservationService.setPendingRefund(reservationId);
 
         return ResponseEntity.noContent().build();
@@ -194,12 +244,20 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Given reservation's state is not correct for this action."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/{reservationId}/accept-refund")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> refundReservation(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
             @PathVariable("reservationId") UUID reservationId
     ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
         reservationService.acceptRefund(reservationId);
 
         return  ResponseEntity.noContent().build();
@@ -231,12 +289,21 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Reservations canceled without issue."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/bulk-cancel")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> bulkReservationCancel(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
             @RequestBody List<UUID> request
     ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+
         reservationService.cancelReservations(request);
 
         return ResponseEntity.noContent().build();
@@ -255,12 +322,20 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Given reservation's state is not correct for this action."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/{reservationId}/reject-refund")
     public ResponseEntity<Void> rejectRefund(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
             @PathVariable("reservationId") UUID reservationId
     ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+
         reservationService.rejectRefund(reservationId);
 
         return ResponseEntity.noContent().build();
@@ -285,7 +360,11 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "500",
                     description = "Something went wrong creating the QR."
-            )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid identity"
+            ),
     })
     @GetMapping("/{reservationId}/ticket/{ticketId}/qr")
     public ResponseEntity<TicketQrResponse> getTicketQr(
@@ -310,12 +389,21 @@ class ReservationController {
             @ApiResponse(
                     responseCode = "409",
                     description = "Given ticket is not valid."
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Invalid permissions."
             )
     })
     @PostMapping("/use")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> spendTicket(
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role") String headerUserRole,
             @RequestParam("token") String qrToken
     ) {
+        AuthGuard.requireRole(headerUserRole, "ACCESS_STAFF", "ORGANIZER", "ADMIN");
+
         reservationService.spendTicket(qrToken);
 
         return ResponseEntity.noContent().build();

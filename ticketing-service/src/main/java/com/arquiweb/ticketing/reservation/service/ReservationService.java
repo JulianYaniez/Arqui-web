@@ -4,6 +4,8 @@ package com.arquiweb.ticketing.reservation.service;
 import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
+import com.arquiweb.ticketing.infrastructure.exception.UnauthorizedException;
+import com.arquiweb.ticketing.infrastructure.messaging.ReservationEventListener;
 import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
@@ -38,20 +40,22 @@ public class ReservationService {
 
     // private final EventService eventService;
     private final EventValidator eventValidator;
+    private final ReservationEventListener reservationEventListener;
 
     public ReservationService(
-           @Value("${app.config.reservation.max-tickets}") int maxTickets,
-           @Value("${app.config.reservation.max-ttl}") int ttl,
-           @Value("${app.url}") String appUrl,
-           ReservationRepository reservationRepository,
-           InventoryService inventoryService,
-           EventValidator eventValidator) {
+            @Value("${app.config.reservation.max-tickets}") int maxTickets,
+            @Value("${app.config.reservation.max-ttl}") int ttl,
+            @Value("${app.url}") String appUrl,
+            ReservationRepository reservationRepository,
+            InventoryService inventoryService,
+            EventValidator eventValidator, ReservationEventListener reservationEventListener) {
         this.maxTickets = maxTickets;
         this.ttl = ttl;
         this.appUrl = appUrl;
         this.reservationRepository = reservationRepository;
         this.inventoryService = inventoryService;
         this.eventValidator = eventValidator;
+        this.reservationEventListener = reservationEventListener;
     }
 
     private final int ttl;
@@ -199,15 +203,21 @@ public class ReservationService {
         return reservationRepository.findExpired(now, ReservationStatus.PENDING);
     }
 
-    public void confirmReservation(UUID reservationId, UUID paymentId) {
+    public void confirmReservation(UUID reservationId, UUID clientId, UUID paymentId) { // TEST BROKEN
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
+
+        if (!reservation.getClientId().equals(clientId)) throw new UnauthorizedException("Reservation does not belong to current user.");
 
         if (reservation.getStatus() != ReservationStatus.PENDING) throw new IllegalReservationStateChangeException("Given reservation is not valid.");
 
         inventoryService.confirmTickets(reservation.getTickets());
         reservation.setStatus(ReservationStatus.PAID);
         reservation.setPaymentId(paymentId);
+
+        reservationRepository.save(reservation);
+        
+        reservationEventListener.publishReservationConfirmed(reservation.getClientId(), reservation.getEventId());
     }
 
     public TicketQrResponse getTicketQr(UUID reservationId, UUID ticketId) {

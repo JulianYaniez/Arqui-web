@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
 
 spring:
   application:
@@ -8,23 +9,22 @@ spring:
     gateway:
       server:
         webflux:
-
           globalcors:
             add-to-simple-url-handler-mapping: true
             cors-configurations:
               '[/**]':
-                allowedOrigins:
-                  - "http://localhost:5173"
-                allowedMethods:
+                allowed-origin-patterns:
+                  - "http://localhost:*"
+                allowed-methods:
                   - GET
                   - POST
                   - PUT
                   - DELETE
                   - PATCH
                   - OPTIONS
-                allowedHeaders:
+                allowed-headers:
                   - "*"
-                allowCredentials: true
+                allow-credentials: true
 
           routes:
             - id: catalog-route
@@ -54,3 +54,31 @@ spring:
                 - Path=/api/payment/**
               filters:
                 - StripPrefix=2
+
+            - id: identity-route
+              uri: http://identity-service:8080
+              predicates:
+                - Path=/api/identity/**
+              filters:
+                - StripPrefix=2
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: 1. Catalog Service
+        url: /api/catalog/v3/api-docs
+      - name: 2. Ticketing Service
+        url: /api/ticketing/v3/api-docs
+      - name: 3. Management Service
+        url: /api/management/v3/api-docs
+      - name: 4. Payment Service
+        url: /api/payment/v3/api-docs
+      - name: 5. Identity Service
+        url: /api/identity/v3/api-docs
+
+jwt:
+  secret: ${JWT_SECRET:FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}

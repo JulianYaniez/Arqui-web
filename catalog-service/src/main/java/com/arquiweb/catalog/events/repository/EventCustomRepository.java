@@ -1,6 +1,7 @@
 package com.arquiweb.catalog.events.repository;
 
 import com.arquiweb.catalog.events.domain.Event;
+import com.arquiweb.catalog.events.domain.UserPreference;
 import com.arquiweb.catalog.events.domain.enums.EventStatus;
 import com.arquiweb.catalog.events.dto.request.EventCriteriaQuery;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -27,9 +29,7 @@ public class EventCustomRepository {
 
         Query query = new Query();
 
-        // Redo later with JWT role
         if (criteria == null || !Boolean.TRUE.equals(criteria.admin())) {
-        // if (criteria == null || !criteria.admin()) {
             query.addCriteria(Criteria.where("status").is(EventStatus.PUBLISHED));
         }
 
@@ -73,4 +73,25 @@ public class EventCustomRepository {
         return new PageImpl<>(events, pageable, totalCount);
     }
 
+    public Page<Event> findRecommended(UserPreference prefs, Pageable pageable) {
+        Criteria futureEvents = Criteria.where("dateTime").gt(Instant.now());
+        Criteria notPurchased = Criteria.where("_id").nin(prefs.getPurchasedEventsIds());
+
+        Criteria matchesAny = new Criteria().orOperator(
+                Criteria.where("type").in(prefs.getEventTypes()),
+                Criteria.where("city").in(prefs.getCities()),
+                Criteria.where("participants").in(prefs.getParticipants())
+        );
+
+        Query query = new Query()
+                .addCriteria(futureEvents)
+                .addCriteria(notPurchased)
+                .addCriteria(matchesAny)
+                .with(pageable);
+
+        long totalCount = mongoTemplate.count(query, Event.class);
+
+        List<Event> events = mongoTemplate.find(query, Event.class);
+        return new PageImpl<>(events, pageable, totalCount);
+    }
 }
