@@ -7,6 +7,7 @@ import com.arquiweb.catalog.venues.repository.VenueRepository;
 import com.arquiweb.catalog.venues.service.VenueService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -23,9 +24,7 @@ public class VenueServiceTest {
     @Mock
     private VenueRepository venueRepository;
 
-    @InjectMocks
-    private VenueService venueService; // Clase REAL bajo prueba
-
+    private VenueService venueService;
     private AutoCloseable closeable;
 
     private static final String VALID_VENUE_ID = "64b1f2c3d4e5f6a7b8c9d0e2";
@@ -33,6 +32,8 @@ public class VenueServiceTest {
     @BeforeMethod
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
+        Mockito.reset(venueRepository);
+        venueService = new VenueService(venueRepository);
     }
 
     @AfterMethod
