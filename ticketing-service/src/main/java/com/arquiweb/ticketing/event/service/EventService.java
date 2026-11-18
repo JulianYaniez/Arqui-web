@@ -1,7 +1,6 @@
 package com.arquiweb.ticketing.event.service;
 
 import com.arquiweb.ticketing.event.domain.TicketingEvent;
-import com.arquiweb.ticketing.event.domain.exceptions.InvalidEventException;
 import com.arquiweb.ticketing.event.dto.requests.InitEventRequest;
 import com.arquiweb.ticketing.event.repository.TicketingEventRepository;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
@@ -40,6 +39,12 @@ public class EventService {
         reservationService.cancelByEvent(eventId);
 
         event.setSalesEnabled(false);
+    }
+
+    public TicketingEvent getById(String eventId) {
+        return ticketingEventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("No event with given ID."));
+
     }
 
 }
