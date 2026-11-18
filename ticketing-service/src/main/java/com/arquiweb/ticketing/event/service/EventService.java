@@ -19,7 +19,7 @@ public class EventService {
     private final ReservationService reservationService;
 
     public void initEvent(InitEventRequest request) {
-        TicketingEvent event = new TicketingEvent(request.eventId(), true);
+        TicketingEvent event = new TicketingEvent(request.eventId(), true, request.isHighDemand());
 
         inventoryService.initSector(request.eventId(), request.capacities(), request.seats());
 

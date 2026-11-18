@@ -7,6 +7,7 @@ import java.util.List;
 
 public record InitEventRequest(
         String eventId,
+        Boolean isHighDemand,
         List<SectorCapacityDto> capacities,
         List<SectorSeatsDto> seats
 ) {
