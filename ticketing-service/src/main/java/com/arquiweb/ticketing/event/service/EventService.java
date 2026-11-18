@@ -41,10 +41,4 @@ public class EventService {
         event.setSalesEnabled(false);
     }
 
-    public TicketingEvent getById(String eventId) {
-        return ticketingEventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("No event with given ID."));
-
-    }
-
 }

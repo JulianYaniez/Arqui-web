@@ -1,7 +1,7 @@
 package com.arquiweb.ticketing.queue.service;
 
 import com.arquiweb.ticketing.event.domain.TicketingEvent;
-import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.service.EventQueryService;
 import com.arquiweb.ticketing.infrastructure.exception.ForbiddenException;
 import com.arquiweb.ticketing.queue.domain.enums.QueueStatus;
 import com.arquiweb.ticketing.queue.dto.response.QueueStatusResponse;
@@ -23,17 +23,17 @@ public class VirtualQueueService {
     private final StringRedisTemplate redis;
     private final int batchSize;
     private final long admissionTtlSeconds;
-    private final EventService eventService;
+    private final EventQueryService eventQueryService;
 
     public VirtualQueueService(
             StringRedisTemplate redis,
             @Value("${app.config.queue.batch-size}") int batchSize,
             @Value("${app.config.queue.admission-ttl-seconds}") long admissionTtlSeconds,
-            EventService eventService) {
+            EventQueryService eventQueryService) {
         this.redis = redis;
         this.batchSize = batchSize;
         this.admissionTtlSeconds = admissionTtlSeconds;
-        this.eventService = eventService;
+        this.eventQueryService = eventQueryService;
     }
 
     private String waitingKey(String eventId) {
@@ -59,7 +59,7 @@ public class VirtualQueueService {
             return new QueueStatusResponse(QueueStatus.SOLD_OUT, null, null);
         }
 
-        TicketingEvent event = eventService.getById(eventId);
+        TicketingEvent event = eventQueryService.getById(eventId);
 
         if (!event.isSalesEnabled()) {
             markSoldOut(eventId);
