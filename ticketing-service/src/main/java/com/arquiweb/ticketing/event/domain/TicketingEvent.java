@@ -22,6 +22,9 @@ public class TicketingEvent {
     private String eventId;
 
     @Column(name = "sales_enabled", nullable = false)
-    private Boolean salesEnabled;
+    private boolean salesEnabled;
+
+    @Column(name = "is_high_demand", nullable = false)
+    private boolean isHighDemand;
 
 }

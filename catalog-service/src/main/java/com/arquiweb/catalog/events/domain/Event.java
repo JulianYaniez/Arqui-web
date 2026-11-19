@@ -37,12 +37,14 @@ public class Event {
     private String venueId;
     private String city;
     private List<EventSector> sectors;
+    private boolean isHighDemand;
 
     public Event(
             String name,
             String description,
             EventType type,
             LocalDateTime dateTime,
+            boolean isHighDemand,
             UUID organizerId,
             List<String> participants,
             VenueResponse venue,
@@ -76,6 +78,7 @@ public class Event {
         this.type = type;
         this.status = EventStatus.DRAFT;
         this.dateTime = dateTime;
+        this.isHighDemand = isHighDemand;
         this.organizerId = organizerId;
         this.participants = participants;
         this.venueId = venue.id();

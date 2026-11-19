@@ -14,14 +14,16 @@ public class EventValidator {
 
     private final TicketingEventRepository ticketingEventRepository;
 
-    public void validateEvent(String eventId) {
+    public TicketingEvent validateEvent(String eventId) {
         TicketingEvent event = ticketingEventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        if (!event.getSalesEnabled()) {
+        if (!event.isSalesEnabled()) {
             throw new InvalidEventException(
                     "Given event has already happened or was canceled."
             );
         }
+
+        return event;
     }
 }
