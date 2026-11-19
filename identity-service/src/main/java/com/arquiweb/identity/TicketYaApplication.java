@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 				@Server(url = "/api/identity", description = "API Gateway Route")
 		}
 )
+@EnableResilientMethods
 public class TicketYaApplication {
 
 	public static void main(String[] args) {

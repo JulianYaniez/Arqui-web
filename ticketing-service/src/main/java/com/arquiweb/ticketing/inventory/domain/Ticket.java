@@ -1,9 +1,11 @@
 package com.arquiweb.ticketing.inventory.domain;
 
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
+import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
+import com.arquiweb.ticketing.reservation.domain.exceptions.QrGenerationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -115,6 +117,16 @@ public class Ticket {
         if (!this.status.equals(TicketStatus.SOLD)) throw new IllegalTicketStateChangeException("Only sold tickets can be refunded.");
 
         this.status = TicketStatus.AVAILABLE;
+    }
+
+    public String genQrImage(String route) {
+        try {
+            String usageLink = route + this.getQrToken();
+            return QrHandler.generateQrBase64(usageLink);
+        } catch (Exception e) {
+            throw new QrGenerationException("Something went wrong generating QR code.");
+        }
+
     }
 
 }
