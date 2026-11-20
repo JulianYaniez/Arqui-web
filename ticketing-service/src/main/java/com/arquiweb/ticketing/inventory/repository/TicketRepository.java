@@ -3,6 +3,7 @@ package com.arquiweb.ticketing.inventory.repository;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
+import com.arquiweb.ticketing.inventory.dto.requests.SectorMetricsDto;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -58,4 +59,22 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Optional<Ticket> findByQrToken(String qrToken);
 
     List<Ticket> findByIsNumbered(boolean isNumbered);
+
+    @Query("""
+        SELECT new com.arquiweb.ticketing.inventory.dto.requests.SectorMetricsDto(
+            t.sectorId,
+            COUNT(CASE WHEN t.status <> :refundedStatus THEN 1 END),
+            COUNT(CASE WHEN t.status IN :soldStatuses THEN 1L END),
+            COUNT(CASE WHEN t.status = :refundedStatus THEN 1L END),
+            CAST(COALESCE(SUM(CASE WHEN t.status IN :soldStatuses THEN t.price END), 0L) AS bigdecimal)
+        )
+        FROM Ticket t
+        WHERE t.eventId = :eventId AND t.isNumbered = true
+        GROUP BY t.sectorId
+    """)
+    List<SectorMetricsDto> findNumberedSectorStats(
+            @Param("eventId") String eventId,
+            @Param("soldStatuses") List<TicketStatus> soldStatuses,
+            @Param("refundedStatus") TicketStatus refundedStatus
+    );
 }

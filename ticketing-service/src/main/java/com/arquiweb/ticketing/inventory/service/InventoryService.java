@@ -1,6 +1,5 @@
 package com.arquiweb.ticketing.inventory.service;
 
-// import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
@@ -9,6 +8,7 @@ import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorCapacityDto;
+import com.arquiweb.ticketing.inventory.dto.requests.SectorMetricsDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorSeatsDto;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
 import com.arquiweb.ticketing.inventory.repository.SectorCapacityRepository;
@@ -27,7 +27,6 @@ public class InventoryService {
 
     private final SectorCapacityRepository sectorCapacityRepository;
     private final TicketRepository ticketRepository;
-    // private final EventService eventService;
     private final EventValidator eventValidator;
 
     @Transactional
@@ -58,6 +57,15 @@ public class InventoryService {
             ticketRepository.saveAll(seatTickets);
         }
     }
+
+    public List<SectorMetricsDto> getEventMetrics(String eventId) {
+        eventValidator.validateEvent(eventId);
+
+        List<TicketStatus> validStatus = List.of(TicketStatus.USED, TicketStatus.SOLD);
+
+        return null; // TODO
+    }
+
 
     public SectorAvailabilityResponse findSectorAvailability(String eventId, String sectorId) {
 
