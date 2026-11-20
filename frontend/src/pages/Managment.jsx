@@ -8,7 +8,9 @@ import '../styles/managment.css'
 import {
   getEvents,
   createEvent,
-  cancelEvent
+  cancelEvent,
+  publishEvent,
+  updateEventStatus
 } from '../services/eventService'
 import { getVenues } from '../services/venueService'
 
@@ -46,6 +48,28 @@ function Managment() {
     return now.toISOString().slice(0, 16)
   }
 
+  const handleStatusChange = async (event, newStatus) => {
+    if (event.status === newStatus) return
+
+    const confirmed = window.confirm(
+      `¿Querés cambiar el estado de "${event.name}" a ${newStatus}?`
+    )
+
+    if (!confirmed) return
+
+    try {
+      setError('')
+
+      await updateEventStatus(event.id, newStatus)
+
+      await loadEvents()
+
+    } catch (error) {
+      console.error('Error cambiando estado:', error)
+      setError(error.message || 'No se pudo actualizar el estado.')
+    }
+  }
+
   // Estados de Venue
   const [venues, setVenues] = useState([])
   const [venue, setVenue] = useState(null)
@@ -76,11 +100,26 @@ function Managment() {
 
       const data = await getEvents()
 
-      setEvents(
-        Array.isArray(data)
-          ? data
-          : data.content || []
+      console.log(
+        'EVENTOS RECIBIDOS DEL BACKEND:',
+        JSON.stringify(data, null, 2)
       )
+
+      const eventList = Array.isArray(data)
+        ? data
+        : data.content || []
+
+      console.log(
+        'ESTADOS DE EVENTOS:',
+        eventList.map(event => ({
+          id: event.id,
+          name: event.name,
+          status: event.status,
+          statusLabel: event.statusLabel
+        }))
+      )
+
+      setEvents(eventList)
 
     } catch (error) {
       console.error('Error cargando eventos:', error)
@@ -245,10 +284,12 @@ function Managment() {
         })
       )
 
+      console.log('JSON ENVIADO:', JSON.stringify(eventData, null, 2))
+
+      // Crear evento como DRAFT
       await createEvent(eventData)
 
       await loadEvents()
-
       closeForm()
 
     } catch (error) {
@@ -649,6 +690,10 @@ function Managment() {
 
       )}
 
+      {/* {showForm && (
+        <EventForm />
+      )} */}
+
       {/* TABLA DE EVENTOS */}
       <section className="management__content">
 
@@ -713,6 +758,7 @@ function Managment() {
 
                     <td>
                       <div className="management__row-actions">
+
                         <Link
                           to={`/event/${event.id}`}
                           className="management__view"
@@ -720,16 +766,19 @@ function Managment() {
                           Ver
                         </Link>
 
-                        {event.status !== 'CANCELLED' &&
-                          event.status !== 'FINISHED' && (
-                            <button
-                              type="button"
-                              className="management__delete"
-                              onClick={() => handleCancel(event.id)}
-                            >
-                              Dar de baja
-                            </button>
-                          )}
+                        <select
+                          className="management__status-select"
+                          value={event.status}
+                          onChange={(e) =>
+                            handleStatusChange(event, e.target.value)
+                          }
+                        >
+                          <option value="DRAFT">Borrador</option>
+                          <option value="PUBLISHED">Publicado</option>
+                          <option value="CANCELLED">Cancelado</option>
+                          <option value="FINISHED">Finalizado</option>
+                        </select>
+
                       </div>
                     </td>
                   </tr>

@@ -57,15 +57,15 @@ export async function getEventById(id) {
 }
 
 // Crear evento
-export async function createEvent(event) {
+export const createEvent = async (eventData) => {
   return apiFetch(`${API_URL}/event`, {
     method: 'POST',
-    body: JSON.stringify(event)
+    body: JSON.stringify(eventData)
   })
 }
 
 // Publicar evento
-export function publishEvent(id) {
+export const publishEvent = async (id) => {
   return apiFetch(`${API_URL}/event/${id}/publish`, {
     method: 'POST'
   })
@@ -89,5 +89,22 @@ export function addEventSector(id, sector) {
     method: 'POST',
     body: JSON.stringify(sector)
   })
+}
+
+// actualizar el estado del evento
+export const updateEventStatus = async (id, status) => {
+  const response = await fetch(`${API_URL}/api/events/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ status })
+  })
+
+  if (!response.ok) {
+    throw new Error('No se pudo actualizar el estado del evento')
+  }
+
+  return response.json()
 }
 
