@@ -57,7 +57,8 @@ function VenueForm({ onClose, onCreated }) {
   const [form, setForm] = useState({
     name: '',
     address: '',
-    city: ''
+    city: '',
+    status: 'DRAFT'
   })
 
   const [sectors, setSectors] = useState([emptySector()])

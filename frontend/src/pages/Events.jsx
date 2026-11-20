@@ -141,6 +141,8 @@ function Events() {
   const filteredEvents = events.filter(event => {
     const eventCategory = getCategory(event.type)
 
+    const isPublished = event.status === 'PUBLISHED'
+
     const matchesCategory =
       category === 'Todos' || eventCategory === category
 
@@ -150,7 +152,7 @@ function Events() {
       eventCategory.toLowerCase().includes(search) ||
       event.city?.toLowerCase().includes(search)
 
-    return matchesCategory && matchesSearch
+    return isPublished && matchesCategory && matchesSearch
   })
 
   return (
