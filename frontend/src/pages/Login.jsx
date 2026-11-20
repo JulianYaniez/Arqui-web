@@ -1,8 +1,10 @@
 
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import users from '../data/users.json'
 import '../styles/login.css'
+
+import { login } from '../services/authService'
+
 
 function Login() {
   const navigate = useNavigate()
@@ -40,33 +42,29 @@ function Login() {
     setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
-    // Buscar usuario en users.json
-    const foundUser = users.find(
-      user =>
-        user.email === form.email &&
-        user.password === form.password &&
-        user.isActive
-    )
+    try {
+      const response = await login(form)
 
-    if (!foundUser) {
-      setError('Correo o contraseña incorrectos.')
-      return
-    }
+      const user = {
+        id: response.userId,
+        email: response.email,
+        role: response.role
+      }
 
-    // Guardar usuario sin la contraseña
-    const { password, ...userData } = foundUser
+      localStorage.setItem('token', response.token)
+      localStorage.setItem('user', JSON.stringify(user))
 
-    localStorage.setItem('user', JSON.stringify(userData))
-
-    // Redireccionar según el rol
-    if (userData.role === 'ADMIN') {
-      navigate('/managment')
-    } else {
-      navigate('/')
+      if (user.role === 'ADMIN') {
+        navigate('/managment')
+      } else {
+        navigate('/')
+      }
+    } catch (error) {
+      setError(error.message || 'No se pudo iniciar sesión.')
     }
   }
 

@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import '../styles/register.css'
 
+import { register } from '../services/authService'
+
 function Register() {
   const navigate = useNavigate()
 
@@ -21,24 +23,23 @@ function Register() {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Crear objeto del usuario
-    const user = {
-      id: crypto.randomUUID(),
-      name: form.name,
-      email: form.email,
-      role: 'USER'
+    try {
+      const [firstName, ...lastNameParts] = form.name.trim().split(' ')
+
+      await register({
+        firstName,
+        lastName: lastNameParts.join(' '),
+        email: form.email,
+        password: form.password
+      })
+
+      navigate('/login')
+    } catch (error) {
+      console.error('Error al registrarse:', error)
     }
-
-    // Guardar usuario en localStorage
-    localStorage.setItem('user', JSON.stringify(user))
-
-    console.log('Usuario registrado:', user)
-
-    // Redirigir al inicio
-    navigate('/')
   }
 
   return (
