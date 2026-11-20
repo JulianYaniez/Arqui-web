@@ -61,6 +61,15 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     List<Ticket> findByIsNumbered(boolean isNumbered);
 
     @Query("""
+        SELECT t
+        FROM Ticket t
+        WHERE t.reservation.id IN :reservationIds
+    """)
+    List<Ticket> findByReservationIdIn(
+            @Param("reservationIds") List<UUID> reservationIds
+    );
+
+    @Query("""
         SELECT new com.arquiweb.ticketing.inventory.dto.requests.SectorMetricsDto(
             t.sectorId,
             COUNT(CASE WHEN t.status <> :refundedStatus THEN 1 END),
