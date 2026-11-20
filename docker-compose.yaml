@@ -154,6 +154,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-management:5432/management
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
+      - MIN_METRIC_AGE_MINUTES=20
     depends_on:
       postgres-management:
         condition: service_healthy
