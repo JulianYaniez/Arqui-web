@@ -1,3 +1,4 @@
+import com.arquiweb.ticketing.event.domain.TicketingEvent;
 import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.messaging.NotificationEventProducer;
@@ -76,11 +77,19 @@ public class ReservationConcurrencyTest {
         }
     }
 
+    private TicketingEvent mockEvent(boolean highDemand) {
+        TicketingEvent event = mock(TicketingEvent.class);
+        when(event.isHighDemand()).thenReturn(highDemand);
+        when(eventValidator.validateEvent(EVENT_ID)).thenReturn(event);
+        return event;
+    }
+
     @Test
     public void testConcurrentReservation_OnlyOneSucceeds() throws InterruptedException {
 
         // Arrange
         int threadsCount = 5;
+        mockEvent(false);
 
         ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
         CountDownLatch startLatch = new CountDownLatch(1);
@@ -93,7 +102,6 @@ public class ReservationConcurrencyTest {
         when(sector.getSectorId()).thenReturn(SECTOR_ID);
         when(sector.getPrice()).thenReturn(BigDecimal.valueOf(5000));
 
-        // Act
         //doAnswer(invocation -> null).when(sector).reduceCapacity(anyInt());
 
         doAnswer(invocation -> {
@@ -116,6 +124,7 @@ public class ReservationConcurrencyTest {
         AtomicInteger successCounter = new AtomicInteger(0);
         AtomicInteger failureCounter = new AtomicInteger(0);
 
+        // Act
         for (int i = 0; i < threadsCount; i++) {
             final String clientId = UUID.randomUUID().toString();
             executor.submit(() -> {
