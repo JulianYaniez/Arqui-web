@@ -3,16 +3,19 @@ import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
+import com.arquiweb.ticketing.inventory.domain.TicketRefundLog;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorCapacityDto;
+import com.arquiweb.ticketing.inventory.dto.requests.SectorMetricsDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorSeatsDto;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
 import com.arquiweb.ticketing.inventory.repository.SectorCapacityRepository;
 import com.arquiweb.ticketing.inventory.repository.TicketRefundLogRepository;
 import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -357,5 +360,48 @@ public class InventoryServiceTest {
         verify(ticketRepo, never()).findByEventIdAndSectorId(anyString(), anyString());
     }
 
+    @Test
+    public void testGetEventMetrics_Successful_CombinesNumberedAndUnnumberedStats() {
+        List<TicketStatus> validStatus = List.of(TicketStatus.USED, TicketStatus.SOLD);
 
+        SectorMetricsDto numberedMetric = mock(SectorMetricsDto.class);
+        SectorMetricsDto unnumberedMetric = mock(SectorMetricsDto.class);
+
+        // Must return a mutable list because getEventMetrics calls metrics.addAll(...)
+        List<SectorMetricsDto> mutableMetricsList = new ArrayList<>(List.of(numberedMetric));
+        when(ticketRepo.findNumberedSectorStats(EVENT_ID, validStatus)).thenReturn(mutableMetricsList);
+        when(scr.findUnnumberedSectorStats(EVENT_ID, validStatus)).thenReturn(List.of(unnumberedMetric));
+
+        List<SectorMetricsDto> result = service.getEventMetrics(EVENT_ID);
+
+        Assert.assertEquals(result.size(), 2);
+        Assert.assertTrue(result.contains(numberedMetric));
+        Assert.assertTrue(result.contains(unnumberedMetric));
+        verify(eventValidator, times(1)).validateEvent(EVENT_ID);
+    }
+
+    @Test(expectedExceptions = ResourceNotFoundException.class)
+    public void testGetEventMetrics_EventValidationFails_ThrowsException() {
+        doThrow(new ResourceNotFoundException("Event not found"))
+                .when(eventValidator).validateEvent(EVENT_ID);
+
+        service.getEventMetrics(EVENT_ID);
+
+        verifyNoInteractions(ticketRepo, scr);
+    }
+
+    @Test
+    public void testLogRefunds_Successful_SavesLogsForAllFoundTickets() {
+        List<UUID> reservationIds = List.of(RESERVATION_ID);
+        Ticket t1 = mock(Ticket.class);
+        Ticket t2 = mock(Ticket.class);
+        when(ticketRepo.findByReservationIdIn(reservationIds)).thenReturn(List.of(t1, t2));
+
+        service.logRefunds(reservationIds);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<TicketRefundLog>> captor = ArgumentCaptor.forClass(List.class);
+        verify(trlr, times(1)).saveAll(captor.capture());
+        Assert.assertEquals(captor.getValue().size(), 2);
+    }
 }
