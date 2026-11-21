@@ -36,7 +36,6 @@ public class JwtAutheticationFilterTest {
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
         filter = new JwtAuthenticationFilter(jwtValidator);
-        // Por defecto, cuando el chain avanza, devuelve Mono.empty()
         when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
     }
 
@@ -102,7 +101,6 @@ public class JwtAutheticationFilterTest {
         String token = "valid.jwt.token";
         MockServerHttpRequest request = MockServerHttpRequest.get("/api/reservations")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                // Intentamos hacer spoofing mandando headers falsos
                 .header("X-User-Id", "hacker-id")
                 .header("X-User-Role", "ADMIN")
                 .build();
@@ -118,7 +116,7 @@ public class JwtAutheticationFilterTest {
         // Act
         filter.filter(exchange, filterChain).block();
 
-        // Assert: Capturamos el exchange mutado que recibió el filterChain
+        // Assert
         ArgumentCaptor<ServerWebExchange> exchangeCaptor = ArgumentCaptor.forClass(ServerWebExchange.class);
         verify(filterChain, times(1)).filter(exchangeCaptor.capture());
 
@@ -126,7 +124,6 @@ public class JwtAutheticationFilterTest {
         Assert.assertEquals(resultHeaders.getFirst("X-User-Id"), "user-123");
         Assert.assertEquals(resultHeaders.getFirst("X-User-Role"), "CLIENT");
         Assert.assertEquals(resultHeaders.getFirst("X-User-Email"), "user@test.com");
-        // Verificamos que no haya quedado el valor viejo duplicado
         Assert.assertEquals(resultHeaders.get("X-User-Id").size(), 1);
     }
 
