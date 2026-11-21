@@ -33,6 +33,8 @@ import static com.arquiweb.payment.transaction.domain.enums.PaymentMethod.CREDIT
 @Slf4j
 public class PaymentTransactionService {
 
+    private static final String PAYMENT_SERVICE_ROLE = "PAYMENT_SERVICE";
+
     private final PaymentRepository paymentRepository;
     private final PaymentGateway paymentGateway;
     private final TicketingClient ticketingClient;
@@ -105,7 +107,7 @@ public class PaymentTransactionService {
 
     private void releaseReservation(UUID reservationId) {
         try {
-            ticketingClient.releaseReservations(reservationId);
+            ticketingClient.releaseReservations(reservationId, PAYMENT_SERVICE_ROLE);
         } catch (FeignException e){
             log.error("Error communicating with the ticketing service to release the reservation id={}: {}", reservationId, e.getMessage());
             throw new ReservationReleaseException(

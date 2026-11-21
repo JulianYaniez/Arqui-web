@@ -19,4 +19,4 @@ app:
 payment:
   gateway:
     max-attempts: 5
-    sleep-tieme: 50
+    sleep-time: 50
