@@ -10,6 +10,7 @@ import com.arquiweb.ticketing.inventory.dto.requests.SectorCapacityDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorSeatsDto;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
 import com.arquiweb.ticketing.inventory.repository.SectorCapacityRepository;
+import com.arquiweb.ticketing.inventory.repository.TicketRefundLogRepository;
 import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
 import org.mockito.Mock;
@@ -36,6 +37,9 @@ public class InventoryServiceTest {
     @Mock
     private EventValidator eventValidator;
 
+    @Mock
+    private TicketRefundLogRepository trlr;
+
     private InventoryService service;
     private AutoCloseable closeable;
 
@@ -47,8 +51,8 @@ public class InventoryServiceTest {
     @BeforeMethod
     void setUp() throws Exception {
         closeable = MockitoAnnotations.openMocks(this);
-        Mockito.reset(scr, ticketRepo);
-        service = new InventoryService(scr, ticketRepo, eventValidator);
+        Mockito.reset(scr, ticketRepo, eventValidator, trlr);
+        service = new InventoryService(scr, ticketRepo, eventValidator, trlr);
     }
 
     @AfterMethod
@@ -352,4 +356,6 @@ public class InventoryServiceTest {
         verify(scr, never()).findByEventIdAndSectorId(anyString(), anyString());
         verify(ticketRepo, never()).findByEventIdAndSectorId(anyString(), anyString());
     }
+
+
 }
