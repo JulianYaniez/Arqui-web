@@ -1,17 +1,17 @@
 import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.event.service.EventValidator;
+import com.arquiweb.ticketing.infrastructure.messaging.NotificationEventProducer;
+import com.arquiweb.ticketing.infrastructure.messaging.ReservationEventListener;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
+import com.arquiweb.ticketing.queue.service.VirtualQueueService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
 import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
 import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -29,6 +29,9 @@ import static org.mockito.Mockito.*;
 
 public class ReservationConcurrencyTest {
 
+    private static final String EVENT_ID = UUID.randomUUID().toString();
+    private static final String SECTOR_ID = UUID.randomUUID().toString();
+
     @Mock
     private ReservationRepository reservationRepository;
 
@@ -38,23 +41,31 @@ public class ReservationConcurrencyTest {
     @Mock
     private EventValidator eventValidator;
 
+    @Mock
+    private ReservationEventListener reservationEventListener;
+
+    @Mock
+    private VirtualQueueService virtualQueueService;
+
+    @Mock
+    private NotificationEventProducer notificationEventProducer;
+
     private ReservationService reservationService;
     private AutoCloseable closeable;
 
-    private static final String EVENT_ID = UUID.randomUUID().toString();
-    private static final String SECTOR_ID = UUID.randomUUID().toString();
-
     @BeforeMethod
-    public void setUp() {
+    void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        Mockito.reset(inventoryService, reservationRepository, eventValidator);
         this.reservationService = new ReservationService(
-                4,
                 15,
+                4,
                 "http://localhost:8080",
                 reservationRepository,
                 inventoryService,
-                eventValidator
+                eventValidator,
+                reservationEventListener,
+                virtualQueueService,
+                notificationEventProducer
         );
     }
 
