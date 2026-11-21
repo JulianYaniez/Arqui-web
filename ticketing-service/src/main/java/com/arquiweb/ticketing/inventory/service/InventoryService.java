@@ -1,22 +1,25 @@
 package com.arquiweb.ticketing.inventory.service;
 
-// import com.arquiweb.ticketing.event.service.EventService;
 import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
 import com.arquiweb.ticketing.inventory.domain.Ticket;
+import com.arquiweb.ticketing.inventory.domain.TicketRefundLog;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.domain.exceptions.IllegalTicketStateChangeException;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorCapacityDto;
+import com.arquiweb.ticketing.inventory.dto.requests.SectorMetricsDto;
 import com.arquiweb.ticketing.inventory.dto.requests.SectorSeatsDto;
 import com.arquiweb.ticketing.inventory.dto.responses.SectorAvailabilityResponse;
 import com.arquiweb.ticketing.inventory.repository.SectorCapacityRepository;
+import com.arquiweb.ticketing.inventory.repository.TicketRefundLogRepository;
 import com.arquiweb.ticketing.inventory.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -27,8 +30,8 @@ public class InventoryService {
 
     private final SectorCapacityRepository sectorCapacityRepository;
     private final TicketRepository ticketRepository;
-    // private final EventService eventService;
     private final EventValidator eventValidator;
+    private final TicketRefundLogRepository ticketRefundLogRepository;
 
     @Transactional
     public void initSector(
@@ -59,6 +62,25 @@ public class InventoryService {
         }
     }
 
+    public List<SectorMetricsDto> getEventMetrics(String eventId) {
+        eventValidator.validateEvent(eventId);
+
+        List<TicketStatus> validStatus = List.of(TicketStatus.USED, TicketStatus.SOLD);
+
+        List<SectorMetricsDto> metrics = ticketRepository.findNumberedSectorStats(
+                eventId, validStatus
+        );
+
+        metrics.addAll(
+                sectorCapacityRepository.findUnnumberedSectorStats(
+                        eventId, validStatus
+                )
+        );
+
+        return metrics;
+    }
+
+
     public SectorAvailabilityResponse findSectorAvailability(String eventId, String sectorId) {
 
         eventValidator.validateEvent(eventId);
@@ -87,6 +109,17 @@ public class InventoryService {
 
     public void saveSectorCapacity(SectorCapacity sectorCapacity) {
         this.sectorCapacityRepository.save(sectorCapacity);
+    }
+
+    public void logRefunds(List<UUID> reservationIds) {
+        List<Ticket> toRefund = ticketRepository.findByReservationIdIn(reservationIds);
+
+        List<TicketRefundLog> logList = new ArrayList<>();
+        for (Ticket t : toRefund) {
+            logList.add(new TicketRefundLog(t));
+        }
+
+        ticketRefundLogRepository.saveAll(logList);
     }
 
     public List<Ticket> findTicketWithIdIn(List<UUID> ticketIds) {

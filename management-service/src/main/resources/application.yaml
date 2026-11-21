@@ -17,3 +17,6 @@ app:
       url: http://ticketing-service:8080
     payment:
       url: http://payment-service:8080
+  config:
+    metrics:
+      min-metric-age-minutes: ${MIN_METRIC_AGE_MINUTES:20}
