@@ -19,6 +19,7 @@ public record CreateEventRequest(
     String description,
     EventType type,
     LocalDateTime dateTime,
+    boolean isHighDemand,
     List<String> participants,
     String venueId,
     List<CreateEventSectorRequest> sectors
@@ -33,13 +34,13 @@ public record CreateEventRequest(
         if (!errors.isEmpty()) throw new InvalidInputException("Given venue has invalid field/s.", errors);
     }
 
-    // Add organizerId later
     public Event toDomain(UUID organizerId, VenueResponse venue, List<EventSector> sectors) {
         return new Event(
                 this.name,
                 this.description,
                 this.type,
                 this.dateTime,
+                this.isHighDemand,
                 organizerId,
                 this.participants,
                 venue,

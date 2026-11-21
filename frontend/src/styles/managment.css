@@ -266,8 +266,24 @@
   color: var(--text-h);
 }
 
-.management__button--secondary:hover {
-  background: var(--bg-secondary);
+.management__status-select {
+  padding: 9px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.management__status-select:hover {
+  border-color: #8b5cf6;
+}
+
+.management__status-select:focus {
+  border-color: #8b5cf6;
 }
 
 /* Formulario */

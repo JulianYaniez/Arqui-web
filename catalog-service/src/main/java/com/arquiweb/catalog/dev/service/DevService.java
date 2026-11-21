@@ -99,6 +99,7 @@ public class DevService {
             String eventTypeString = eventType.name().substring(0, 1).toUpperCase() + eventType.name().substring(1).toLowerCase();
             String name = faker.minecraft().itemName() + " " + eventTypeString;
             String description = faker.lorem().characters(40, 100);
+            Boolean isHighDemand = random.nextInt(10) > 8;
             LocalDateTime dateTime = LocalDateTime.ofInstant(faker.timeAndDate().between(
                         Instant.now().plus(Duration.ofDays(100)),
                         Instant.now().plus(Duration.ofDays(600))),
@@ -118,6 +119,7 @@ public class DevService {
                             description,
                             eventType,
                             dateTime,
+                            isHighDemand,
                             organizerId,
                             participants.stream().toList(),
                             venueResponse,

@@ -1,10 +1,12 @@
 package com.arquiweb.ticketing.reservation.service;
 
 // import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.domain.TicketingEvent;
 import com.arquiweb.ticketing.event.service.EventValidator;
 import com.arquiweb.ticketing.infrastructure.exception.InvalidInputException;
 import com.arquiweb.ticketing.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.ticketing.infrastructure.exception.UnauthorizedException;
+import com.arquiweb.ticketing.infrastructure.messaging.NotificationEventProducer;
 import com.arquiweb.ticketing.infrastructure.messaging.ReservationEventListener;
 import com.arquiweb.ticketing.infrastructure.utils.QrHandler;
 import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
@@ -12,6 +14,7 @@ import com.arquiweb.ticketing.inventory.domain.Ticket;
 import com.arquiweb.ticketing.inventory.domain.enums.TicketStatus;
 import com.arquiweb.ticketing.inventory.dto.internal.CapacityRefundDto;
 import com.arquiweb.ticketing.inventory.service.InventoryService;
+import com.arquiweb.ticketing.queue.service.VirtualQueueService;
 import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.domain.enums.ReservationStatus;
 import com.arquiweb.ticketing.reservation.domain.exceptions.IllegalReservationStateChangeException;
@@ -41,6 +44,12 @@ public class ReservationService {
     // private final EventService eventService;
     private final EventValidator eventValidator;
     private final ReservationEventListener reservationEventListener;
+    private final VirtualQueueService virtualQueueService;
+    private final NotificationEventProducer notificationEventProducer;
+
+    private static final String QR_PREFIX = "/reservation/use?token=";
+    private final String qrRoute;
+
 
     public ReservationService(
             @Value("${app.config.reservation.max-tickets}") int maxTickets,
@@ -48,26 +57,31 @@ public class ReservationService {
             @Value("${app.url}") String appUrl,
             ReservationRepository reservationRepository,
             InventoryService inventoryService,
-            EventValidator eventValidator, ReservationEventListener reservationEventListener) {
+            EventValidator eventValidator, ReservationEventListener reservationEventListener, VirtualQueueService virtualQueueService, NotificationEventProducer notificationEventProducer) {
         this.maxTickets = maxTickets;
         this.ttl = ttl;
-        this.appUrl = appUrl;
+        this.qrRoute = appUrl + QR_PREFIX;
         this.reservationRepository = reservationRepository;
         this.inventoryService = inventoryService;
         this.eventValidator = eventValidator;
         this.reservationEventListener = reservationEventListener;
+        this.virtualQueueService = virtualQueueService;
+        this.notificationEventProducer = notificationEventProducer;
     }
 
     private final int ttl;
     private final int maxTickets;
-    private final String appUrl;
     private final ReservationRepository reservationRepository;
     private final InventoryService inventoryService;
 
     @Transactional
     @Retryable(maxRetries = 3, includes = OptimisticLockingFailureException.class)
     public ReservationResponse reserveUnnumbered(ReserveUnnumberedRequest request, UUID clientId) {
-        eventValidator.validateEvent(request.eventId());
+        TicketingEvent event = eventValidator.validateEvent(request.eventId());
+
+        if (event.isHighDemand()) {
+            virtualQueueService.validateAndConsumeAdmission(request.eventId(), clientId);
+        }
 
         this.checkMaxTickets(request.eventId(), clientId, request.ticketQuantity());
 
@@ -96,7 +110,11 @@ public class ReservationService {
 
 
     public ReservationResponse reserveNumbered(ReserveNumberedRequest request, UUID clientId) {
-        eventValidator.validateEvent(request.eventId());
+        TicketingEvent event = eventValidator.validateEvent(request.eventId());
+
+        if (event.isHighDemand()) {
+            virtualQueueService.validateAndConsumeAdmission(request.eventId(), clientId);
+        }
 
         checkMaxTickets(request.eventId(), clientId, request.ticketIds().size());
 
@@ -107,7 +125,7 @@ public class ReservationService {
         boolean allAvailable = tickets.stream()
                 .allMatch(t -> t.getStatus() == TicketStatus.AVAILABLE && t.getEventId().equals(request.eventId()));
 
-        if (!allAvailable) throw new OccupiedSpotException("Some of the selected seats are not available.");;
+        if (!allAvailable) throw new OccupiedSpotException("Some of the selected seats are not available.");
 
         tickets.forEach(Ticket::lockTemporary);
         BigDecimal total = tickets.get(0).getPrice().multiply(BigDecimal.valueOf(tickets.size()));
@@ -124,12 +142,12 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
     }
 
-    public void cancelByEvent(String eventId) {
-        List<UUID> reservationIds = reservationRepository.findByEventIdAndStatus(eventId, ReservationStatus.PAID).stream()
-                .map(Reservation::getId)
-                .toList();
+    public List<Reservation> cancelByEvent(String eventId) {
+        List<Reservation> reservations = reservationRepository.findByEventIdAndStatus(eventId, ReservationStatus.PAID);
 
+        List<UUID> reservationIds = reservations.stream().map(Reservation::getId).toList();
         this.cancelReservations(reservationIds);
+        return reservations;
     }
 
     @Transactional
@@ -218,6 +236,12 @@ public class ReservationService {
         reservationRepository.save(reservation);
         
         reservationEventListener.publishReservationConfirmed(reservation.getClientId(), reservation.getEventId());
+
+        List<String> qrImages = reservation.getTickets().stream()
+                .map(t -> t.genQrImage(qrRoute))
+                .toList();
+
+        notificationEventProducer.publishPurchaseConfirmed(reservation.getClientId(), reservation.getPaymentId(), qrImages);
     }
 
     public TicketQrResponse getTicketQr(UUID reservationId, UUID ticketId) {
@@ -230,15 +254,8 @@ public class ReservationService {
                 .filter(t -> t.getId().equals(ticketId)).findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("No ticket found with given ID for this reservation"));
 
-        try {
-            String qrCode = QrHandler.generateQrBase64(ticket.getQrToken());
-            String usageLink = appUrl + "/reservation/use?token=" + ticket.getQrToken();
-            return new TicketQrResponse(ticketId, usageLink);
-
-
-        } catch (Exception e) {
-            throw new QrGenerationException("Something went wrong generating QR code.");
-        }
+        String qrImage = ticket.genQrImage(qrRoute);
+        return new TicketQrResponse(ticketId, qrImage);
     }
 
     public void spendTicket(String qrToken) {

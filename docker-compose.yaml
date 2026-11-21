@@ -18,6 +18,22 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"  
 
+  # --- Redis ---
+  redis: 
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  # --- Email Server ---
+  mailpit: 
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+
   # --- DBs ---
   # * Ticketing *
   postgres-ticketing:
@@ -120,6 +136,11 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - QUEUE_BATCH_SIZE=3
+      - QUEUE_INTERVAL_MS=10000
+      - QUEUE_ADMISSION_TTL_SEC=1200
     depends_on:
       postgres-ticketing:
         condition: service_healthy
@@ -133,6 +154,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-management:5432/management
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
+      - MIN_METRIC_AGE_MINUTES=20
     depends_on:
       postgres-management:
         condition: service_healthy
@@ -150,6 +172,8 @@ services:
     depends_on:
       postgres-identity:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   # * Payment *
   payment-service:

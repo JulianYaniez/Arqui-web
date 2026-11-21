@@ -25,7 +25,7 @@ import java.util.UUID;
 @RequestMapping("/reservation")
 @RequiredArgsConstructor
 @Tag(name = "Reservation Management", description = "Operations pertaining reservation management.")
-class ReservationController {
+public class ReservationController {
 
     private final ReservationService reservationService;
 

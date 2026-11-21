@@ -6,11 +6,13 @@ import com.arquiweb.catalog.events.domain.enums.EventType;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public record EventResponse(
     String id,
     String name,
     String description,
+    UUID organizerId,
     EventType type,
     LocalDateTime dateTime,
     List<String> participants,
@@ -24,6 +26,7 @@ public record EventResponse(
                 event.getId(),
                 event.getName(),
                 event.getDescription(),
+                event.getOrganizerId(),
                 event.getType(),
                 event.getDateTime(),
                 event.getParticipants(),

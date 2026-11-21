@@ -1,7 +1,6 @@
 package com.arquiweb.ticketing.infrastructure.messaging;
 
 import com.arquiweb.ticketing.infrastructure.messaging.events.ReservationConfirmedEvent;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
