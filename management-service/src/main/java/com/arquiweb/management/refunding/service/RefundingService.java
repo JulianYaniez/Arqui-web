@@ -1,5 +1,7 @@
 package com.arquiweb.management.refunding.service;
 
+import com.arquiweb.management.audit.domain.enums.AuditActionType;
+import com.arquiweb.management.audit.service.AuditService;
 import com.arquiweb.management.infrastructure.client.CatalogClient;
 import com.arquiweb.management.infrastructure.client.PaymentClient;
 import com.arquiweb.management.infrastructure.client.TicketingClient;
@@ -33,6 +35,7 @@ public class RefundingService {
     private final TicketingClient ticketingClient;
     private final CatalogClient catalogClient;
     private final PaymentClient paymentClient;
+    private final AuditService auditService;
 
     @Transactional
     public UUID createRefundRequest(CreateRefundRequest request, UUID clientId) {
@@ -84,12 +87,6 @@ public class RefundingService {
 
         refundRequest.accept(adminId);
 
-        PaymentRefundRequest paymentRefundRequest = new PaymentRefundRequest(
-                reservation.reservationId(),
-                reservation.paymentId(),
-                reservation.totalPrice()
-        );
-
         try {
             ticketingClient.acceptRefund(reservation.reservationId());
             paymentClient.refundPayment(reservation.paymentId());
@@ -98,6 +95,12 @@ public class RefundingService {
         }
 
         refundRequestRepository.save(refundRequest);
+        auditService.log(
+                AuditActionType.REFUND_APPROVED,
+                refundRequest.getReservationId().toString(),
+                adminId,
+                "Reservation refund accepted."
+        );
     }
 
 
@@ -123,10 +126,16 @@ public class RefundingService {
         }
 
         refundRequestRepository.save(refundRequest);
+        auditService.log(
+                AuditActionType.REFUND_REJECTED,
+                refundRequest.getReservationId().toString(),
+                adminId,
+                "Reservation refund rejected."
+        );
     }
 
     @Transactional
-    public void cancelEvent(String eventId) {
+    public void cancelEvent(String eventId, UUID adminId) {
         try {
             catalogClient.cancelEvent(eventId);
         } catch (FeignException.NotFound e) {
@@ -159,6 +168,13 @@ public class RefundingService {
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
         }
+
+        auditService.log(
+                AuditActionType.EVENT_CANCELLED,
+                eventId,
+                adminId,
+                "Event got canceled by admin."
+        );
     }
 
 
