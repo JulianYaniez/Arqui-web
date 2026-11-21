@@ -54,8 +54,9 @@ public class PaymentTransactionController {
             }
     )
     @PostMapping
-    public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody RequestPaymentDTO request){
-        PaymentTransaction transaction = pts.processPayment(request);
+    public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody RequestPaymentDTO request,
+                                                             @RequestHeader(value = "x-Simulate-Fail", required = false) String simulateFail){
+        PaymentTransaction transaction = pts.processPayment(request, simulateFail);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(transaction.getId())

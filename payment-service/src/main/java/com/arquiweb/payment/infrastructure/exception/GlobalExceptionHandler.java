@@ -102,4 +102,39 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(httpStatus).body(response);
     }
 
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceUnavailableException(
+            HttpServletRequest request
+    ) {
+        HttpStatus httpStatus = HttpStatus.SERVICE_UNAVAILABLE;
+        ErrorResponse response = new ErrorResponse(
+                httpStatus,
+                "server unavailable",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
+    @ExceptionHandler(GatewayRetriesExhaustedException.class)
+    public ResponseEntity<ErrorResponse> handleGatewayRetriesExhaustedException(
+            GatewayRetriesExhaustedException ex,
+            HttpServletRequest request
+    ){
+        HttpStatus httpStatus = HttpStatus.SERVICE_UNAVAILABLE;
+        ErrorResponse response  = new ErrorResponse(
+                httpStatus,
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+
+    @ExceptionHandler(InvalidGatewayResponseException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidGatewayResponse(
+            InvalidGatewayResponseException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_GATEWAY;
+        ErrorResponse response = new ErrorResponse(status, ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(response);
+    }
 }
