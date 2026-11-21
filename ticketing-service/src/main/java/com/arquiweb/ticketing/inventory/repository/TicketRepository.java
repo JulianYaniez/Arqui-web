@@ -74,7 +74,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
             t.sectorId,
             COUNT(CASE WHEN t.status <> :refundedStatus THEN 1 END),
             COUNT(CASE WHEN t.status IN :soldStatuses THEN 1L END),
-            COUNT(CASE WHEN t.status = :refundedStatus THEN 1L END),
+            (SELECT COUNT(r) FROM TicketRefundLog r WHERE  r.eventId = t.eventId AND r.sectorId = t.sectorId),
             CAST(COALESCE(SUM(CASE WHEN t.status IN :soldStatuses THEN t.price END), 0L) AS bigdecimal)
         )
         FROM Ticket t
@@ -83,7 +83,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     """)
     List<SectorMetricsDto> findNumberedSectorStats(
             @Param("eventId") String eventId,
-            @Param("soldStatuses") List<TicketStatus> soldStatuses,
-            @Param("refundedStatus") TicketStatus refundedStatus
+            @Param("soldStatuses") List<TicketStatus> soldStatuses
     );
 }

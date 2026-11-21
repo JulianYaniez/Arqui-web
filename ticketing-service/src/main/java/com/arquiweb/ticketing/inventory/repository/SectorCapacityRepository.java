@@ -27,7 +27,7 @@ public interface SectorCapacityRepository extends JpaRepository<SectorCapacity, 
             sc.sectorId,
             CAST(sc.totalCapacity AS Long),
             COUNT(CASE WHEN t.status IN :soldStatuses THEN 1 END),
-            COUNT(CASE WHEN t.status = :refundedStatus THEN 1 END),
+            (SELECT COUNT(r) FROM TicketRefundLog r WHERE r.eventId = sc.eventId AND r.sectorId = sc.sectorId),
             CAST(COALESCE(SUM(CASE WHEN t.status IN :soldStatuses THEN t.price END), 0L) AS BIGDECIMAL)
         )
         FROM SectorCapacity sc
@@ -37,7 +37,6 @@ public interface SectorCapacityRepository extends JpaRepository<SectorCapacity, 
     """)
     List<SectorMetricsDto> findUnnumberedSectorStats(
             @Param("eventId") String eventId,
-            @Param("soldStatuses") List<TicketStatus> soldStatuses,
-            @Param("refundedStatus") TicketStatus refundedStatus
+            @Param("soldStatuses") List<TicketStatus> soldStatuses
     );
 }

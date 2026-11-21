@@ -67,7 +67,17 @@ public class InventoryService {
 
         List<TicketStatus> validStatus = List.of(TicketStatus.USED, TicketStatus.SOLD);
 
-        return null; // TODO
+        List<SectorMetricsDto> metrics = ticketRepository.findNumberedSectorStats(
+                eventId, validStatus
+        );
+
+        metrics.addAll(
+                sectorCapacityRepository.findUnnumberedSectorStats(
+                        eventId, validStatus
+                )
+        );
+
+        return metrics;
     }
 
 

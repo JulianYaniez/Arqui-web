@@ -8,9 +8,9 @@ import java.util.Map;
 
 public record SectorMetrics(
         String sectorId,
-        int capacity,
-        int soldTickets,
-        int refundedTickets,
+        long capacity,
+        long soldTickets,
+        long refundedTickets,
         BigDecimal revenue
 ) {
 

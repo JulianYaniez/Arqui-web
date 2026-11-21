@@ -28,17 +28,20 @@ public class EventMetric {
     @Id
     private String eventId;
 
+    @Column(name = "event_name", nullable = false)
+    private String eventName;
+
     @Column(name = "organizer_id", nullable = false)
     private UUID organizerId;
 
     @Column(name = "total_capacity", nullable = false)
-    private int totalCapacity;
+    private long totalCapacity;
 
     @Column(name = "total_sold_tickets", nullable = false)
-    private int totalSoldTickets;
+    private long totalSoldTickets;
 
     @Column(name = "total_refunded_tickets", nullable = false)
-    private int totalRefundedTickets;
+    private long totalRefundedTickets;
 
     @Column(name = "occupancy_percentage", nullable = false)
     private double occupancyPercentage;
@@ -56,6 +59,7 @@ public class EventMetric {
 
     public EventMetric(
             String eventId,
+            String eventName,
             UUID organizerId,
             List<SectorMetrics> sectorMetrics
     ) {
@@ -63,6 +67,7 @@ public class EventMetric {
 
         if (eventId == null || eventId.isBlank()) errors.put("eventId", "Event ID cannot be null or blank.");
         if (organizerId == null) errors.put("organizerId", "Organizer ID cannot be null.");
+        if (eventName == null || eventName.isBlank()) errors.put("eventName", "Event name cannot be null or blank.");
         if (sectorMetrics == null || sectorMetrics.isEmpty()) errors.put("sectorsMetrics", "Sector metrics cannot be null or empty.");
 
         if (!errors.isEmpty()) throw new InvalidInputException("Event metrics has invalid field/s.", errors);
