@@ -25,6 +25,14 @@ services:
     ports:
       - "6379:6379"
 
+  # --- Email Server ---
+  mailpit: 
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 
   # --- DBs ---
   # * Ticketing *
@@ -146,6 +154,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-management:5432/management
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
+      - MIN_METRIC_AGE_MINUTES=20
     depends_on:
       postgres-management:
         condition: service_healthy
@@ -163,6 +172,8 @@ services:
     depends_on:
       postgres-identity:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   # * Payment *
   payment-service:

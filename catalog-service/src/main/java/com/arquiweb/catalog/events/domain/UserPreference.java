@@ -1,6 +1,7 @@
 package com.arquiweb.catalog.events.domain;
 
 import com.arquiweb.catalog.events.domain.enums.EventType;
+import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 public class UserPreference {
 
     @Id
+    @Getter
     private UUID id;
 
     public UserPreference(UUID id) {
@@ -33,7 +35,6 @@ public class UserPreference {
 
         if (event.getParticipants() != null) participants.addAll(event.getParticipants());
     }
-
 
     public Set<EventType> getEventTypes() {
         return Collections.unmodifiableSet(eventTypes);

@@ -34,7 +34,6 @@ public record CreateEventRequest(
         if (!errors.isEmpty()) throw new InvalidInputException("Given venue has invalid field/s.", errors);
     }
 
-    // Add organizerId later
     public Event toDomain(UUID organizerId, VenueResponse venue, List<EventSector> sectors) {
         return new Event(
                 this.name,

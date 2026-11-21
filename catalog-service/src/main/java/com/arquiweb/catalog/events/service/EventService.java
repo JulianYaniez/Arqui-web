@@ -16,6 +16,7 @@ import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityReque
 import com.arquiweb.catalog.infrastructure.exception.InvalidInputException;
 import com.arquiweb.catalog.infrastructure.exception.ResourceNotFoundException;
 import com.arquiweb.catalog.infrastructure.exception.UnauthorizedException;
+import com.arquiweb.catalog.infrastructure.messaging.NotificationEventProducer;
 import com.arquiweb.catalog.venues.dto.response.SectorResponse;
 import com.arquiweb.catalog.venues.dto.response.VenueResponse;
 import com.arquiweb.catalog.venues.service.VenueService;
@@ -43,6 +44,7 @@ public class EventService {
     private final VenueService venueService;
     private final TicketingClient ticketingClient;
     private final UserPreferenceRepository userPreferenceRepository;
+    private final NotificationEventProducer notificationEventProducer;
 
     @Transactional  // TEST BROKEN
     public String createEvent(UUID organizerId, CreateEventRequest request) {
@@ -111,6 +113,13 @@ public class EventService {
         }
 
         eventRepository.save(event);
+
+        List<UUID> users = userPreferenceRepository.findByParticipantsInAndCitiesContaining(event.getParticipants(), event.getCity())
+                .stream()
+                .map(UserPreference::getId)
+                .toList();
+
+        notificationEventProducer.publishFavoriteArtistEvent(users, event.getId(), event.getName(), event.getParticipants(), event.getCity());
     }
 
     public Page<EventResponse> getAll(EventCriteriaQuery criteria, Pageable pageable) {

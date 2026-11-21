@@ -1,6 +1,7 @@
 package com.arquiweb.management.infrastructure.client;
 
 import com.arquiweb.management.infrastructure.client.dto.requests.ReservationStateResponse;
+import com.arquiweb.management.infrastructure.client.dto.requests.SectorMetricsResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,9 @@ public interface TicketingClient {
             @RequestParam("eventId") String eventId,
             @RequestParam("status") String status
     );
+
+    @GetMapping("/inventory/event/{eventId}/metrics")
+    List<SectorMetricsResponse> getSectorsMetrics(@PathVariable("eventId") String eventId);
 
     @PostMapping("/event/{eventId}/cancel")
     void bulkCancelReservations(@PathVariable("eventId") String eventId);
