@@ -1,6 +1,7 @@
 package com.arquiweb.payment.transaction.service;
 
 import com.arquiweb.payment.infrastructure.breaker.CircuitBreaker;
+import com.arquiweb.payment.infrastructure.client.dto.ReservationStateResponse;
 import com.arquiweb.payment.infrastructure.exception.*;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
 
@@ -210,5 +211,12 @@ public class PaymentTransactionService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    public boolean isReservationOwnedBy(UUID reservationId, UUID userId) {
+        ReservationStateResponse reservation =
+                ticketingClient.getReservationState(reservationId);
+
+        return userId.equals(reservation.clientId());
     }
 }

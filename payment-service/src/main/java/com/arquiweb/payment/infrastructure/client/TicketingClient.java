@@ -1,6 +1,8 @@
 package com.arquiweb.payment.infrastructure.client;
 
+import com.arquiweb.payment.infrastructure.client.dto.ReservationStateResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,5 +17,10 @@ public interface TicketingClient {
     void releaseReservations(
             @PathVariable("reservationId") UUID reservationId,
             @RequestHeader("X-User-Role") String serviceRole
+    );
+
+    @GetMapping("/reservation/{reservationId}/state")
+    ReservationStateResponse getReservationState(
+            @PathVariable("reservationId") UUID reservationId
     );
 }

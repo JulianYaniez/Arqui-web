@@ -1,5 +1,6 @@
 package com.arquiweb.payment.transaction.controller;
 
+import com.arquiweb.payment.infrastructure.exception.ForbiddenException;
 import com.arquiweb.payment.transaction.dtos.request.PaymentRefundRequest;
 import com.arquiweb.payment.transaction.dtos.response.PaymentResponseDTO;
 import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
@@ -14,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import com.arquiweb.payment.infrastructure.utils.AuthGuard;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.net.URI;
 import java.util.List;
@@ -53,9 +57,13 @@ public class PaymentTransactionController {
                     )
             }
     )
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody RequestPaymentDTO request,
-                                                             @RequestHeader(value = "x-Simulate-Fail", required = false) String simulateFail){
+                                                             @RequestHeader(value = "x-Simulate-Fail", required = false) String simulateFail,
+                                                             @Parameter(hidden = true)
+                                                             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
         PaymentTransaction transaction = pts.processPayment(request, simulateFail);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -94,8 +102,25 @@ public class PaymentTransactionController {
     )
 
     @GetMapping("/{id}")
-    public ResponseEntity<PaymentResponseDTO> getPaymentById(@PathVariable UUID id) {
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<PaymentResponseDTO> getPaymentById(@PathVariable UUID id,
+                                                             @Parameter(hidden = true)
+                                                             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
+                                                             @Parameter(hidden = true)
+                                                             @RequestHeader(value = "X-User-Id", required = false) String headerUserId
+    ) {
         PaymentTransaction transaction = pts.getById(id);
+
+        if ("ADMIN".equals(headerUserRole == null ? "" : headerUserRole.trim())) {
+            AuthGuard.requireRole(headerUserRole, "ADMIN");
+        } else {
+            AuthGuard.requireRole(headerUserRole, "CLIENT");
+            UUID userId = AuthGuard.requireUserId(headerUserId);
+
+            if (!pts.isReservationOwnedBy(transaction.getReservationId(), userId)) {
+                throw new ForbiddenException("You do not have permission to access this payment.");
+            }
+        }
         PaymentResponseDTO response = new PaymentResponseDTO(
                 transaction.getId(),
                 transaction.getReservationId(),
@@ -123,8 +148,11 @@ public class PaymentTransactionController {
             )
     })
     @PostMapping("/{id}/refunds")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> refundTransaction(@PathVariable UUID id,
-                                                  @RequestHeader(value = "X-Simulate-Fail", required = false) boolean simulateFail) {
+                                                  @RequestHeader(value = "X-Simulate-Fail", required = false) boolean simulateFail,
+                                                  @RequestHeader(value = "X-User-Role", required = false) String headerUserRole) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
         pts.refundTransaction(id, simulateFail);
         return ResponseEntity.noContent().build();
     }
@@ -149,7 +177,11 @@ public class PaymentTransactionController {
             }
     )
     @PostMapping("/bulk-refund")
-    public ResponseEntity<Void> bulkRefund(@Valid @RequestBody List<PaymentRefundRequest> refundRequests) {
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Void> bulkRefund(@Valid @RequestBody List<PaymentRefundRequest> refundRequests,
+                                           @Parameter(hidden = true)
+                                           @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
+    ) {
         pts.processBulkRefund(refundRequests);
         return ResponseEntity.noContent().build();
     }
