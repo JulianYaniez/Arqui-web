@@ -58,6 +58,24 @@ export async function getEvents(params = {}) {
   }
 }
 
+// Obtener todos los eventos para administración
+export async function findAllEvents(params = {}) {
+  const query = new URLSearchParams(params).toString()
+
+  const data = await apiFetch(
+    `${API_URL}/event${query ? `?${query}` : ''}`
+  )
+
+  const eventList = Array.isArray(data)
+    ? data
+    : data?.content || []
+
+  return {
+    ...data,
+    content: eventList.map(adaptEvent)
+  }
+}
+
 export async function getEventById(id) {
   const event = await apiFetch(`${API_URL}/event/${id}`)
   return adaptEvent(event)
