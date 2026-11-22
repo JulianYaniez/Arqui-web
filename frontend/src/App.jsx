@@ -12,6 +12,7 @@ import Login from './pages/Login.jsx'
 import Managment from './pages/Managment.jsx'
 import MyTickets from './pages/MyTickets.jsx'
 import Profile from './pages/Profile.jsx'
+import Contact from './pages/Contact.jsx'
 import PageTitle from './components/PageTitle.jsx'
 
 
@@ -52,6 +53,9 @@ function App() {
         <Route path="/managment" element={<Managment />} />
 
         <Route path="/event/:id/buy" element={<Checkout />} ></Route>
+
+        {/* Contacto */}
+        <Route path="/contact" element={<Contact />} />
 
         {/* Página no encontrada */}
         <Route path="*" element={<h2>404 - Página no encontrada</h2>} />
