@@ -1,7 +1,7 @@
-package com.arquiweb.management.infrastructure.utils;
+package com.arquiweb.payment.infrastructure.util;
 
-import com.arquiweb.management.infrastructure.exception.ForbiddenException;
-import com.arquiweb.management.infrastructure.exception.UnauthorizedException;
+import com.arquiweb.payment.infrastructure.exception.ForbiddenException;
+import com.arquiweb.payment.infrastructure.exception.UnauthorizedException;
 
 import java.util.List;
 import java.util.UUID;

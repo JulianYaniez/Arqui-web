@@ -21,6 +21,7 @@ public interface TicketingClient {
 
     @GetMapping("/reservation/{reservationId}/state")
     ReservationStateResponse getReservationState(
-            @PathVariable("reservationId") UUID reservationId
+            @PathVariable("reservationId") UUID reservationId,
+            @RequestHeader("X-User-Role") String role
     );
 }

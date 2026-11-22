@@ -14,6 +14,8 @@ import com.arquiweb.payment.infrastructure.client.TicketingClient;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
 import com.arquiweb.payment.transaction.repository.interfaces.PaymentRepository;
 import feign.FeignException;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,7 @@ import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -215,8 +218,27 @@ public class PaymentTransactionService {
 
     public boolean isReservationOwnedBy(UUID reservationId, UUID userId) {
         ReservationStateResponse reservation =
-                ticketingClient.getReservationState(reservationId);
+                ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE);
 
         return userId.equals(reservation.clientId());
+    }
+
+    public void validateReservationForPayment(@NotNull UUID reservationId, UUID userId, @NotNull @Positive BigDecimal paymentAmount) {
+        ReservationStateResponse reservation =
+                ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE);
+
+        if (!userId.equals(reservation.clientId())) {
+            throw new ForbiddenException(
+                    "The reservation does not belong to the authenticated user."
+            );
+        }
+
+        if (paymentAmount.compareTo(reservation.totalPrice()) != 0) {
+            throw new InvalidInputException(
+                    "Payment amount does not match the reservation total.",
+                    Map.of("amount", "Amount must match the reservation total.")
+            );
+        }
+
     }
 }

@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.arquiweb.payment.infrastructure.utils.AuthGuard;
+import com.arquiweb.payment.infrastructure.util.AuthGuard;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
@@ -62,8 +62,18 @@ public class PaymentTransactionController {
     public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody RequestPaymentDTO request,
                                                              @RequestHeader(value = "x-Simulate-Fail", required = false) String simulateFail,
                                                              @Parameter(hidden = true)
-                                                             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole) {
-        AuthGuard.requireRole(headerUserRole, "ADMIN");
+                                                             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
+                                                             @Parameter(hidden = true)
+                                                             @RequestHeader(value = "X-User-Id", required = false) String headerUserId
+    ) {
+        AuthGuard.requireRole(headerUserRole, "CLIENT");
+        UUID clientId = AuthGuard.requireUserId(headerUserId);
+
+        pts.validateReservationForPayment(
+                request.reservationId(),
+                clientId,
+                request.amount()
+        );
         PaymentTransaction transaction = pts.processPayment(request, simulateFail);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -109,16 +119,17 @@ public class PaymentTransactionController {
                                                              @Parameter(hidden = true)
                                                              @RequestHeader(value = "X-User-Id", required = false) String headerUserId
     ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN", "CLIENT");
+
         PaymentTransaction transaction = pts.getById(id);
 
-        if ("ADMIN".equals(headerUserRole == null ? "" : headerUserRole.trim())) {
-            AuthGuard.requireRole(headerUserRole, "ADMIN");
-        } else {
-            AuthGuard.requireRole(headerUserRole, "CLIENT");
+        if ("CLIENT".equals(headerUserRole == null ? "" : headerUserRole.trim())){
             UUID userId = AuthGuard.requireUserId(headerUserId);
 
             if (!pts.isReservationOwnedBy(transaction.getReservationId(), userId)) {
-                throw new ForbiddenException("You do not have permission to access this payment.");
+                throw new ForbiddenException(
+                        "You do not have permission to access this payment."
+                );
             }
         }
         PaymentResponseDTO response = new PaymentResponseDTO(
@@ -151,6 +162,7 @@ public class PaymentTransactionController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> refundTransaction(@PathVariable UUID id,
                                                   @RequestHeader(value = "X-Simulate-Fail", required = false) boolean simulateFail,
+                                                  @Parameter(hidden = true)
                                                   @RequestHeader(value = "X-User-Role", required = false) String headerUserRole) {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
         pts.refundTransaction(id, simulateFail);
@@ -182,6 +194,7 @@ public class PaymentTransactionController {
                                            @Parameter(hidden = true)
                                            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
     ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
         pts.processBulkRefund(refundRequests);
         return ResponseEntity.noContent().build();
     }
