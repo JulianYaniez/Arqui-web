@@ -1,9 +1,8 @@
-import { useState } from 'react'
 
+import { useState } from 'react'
 import '../styles/contact.css'
 
 function Contact() {
-
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -14,7 +13,6 @@ function Contact() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
 
-  // Modificar campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target
 
@@ -24,10 +22,8 @@ function Contact() {
     }))
   }
 
-  // Enviar formulario
   const handleSubmit = (e) => {
     e.preventDefault()
-
     setError('')
 
     if (!form.name || !form.email || !form.subject || !form.message) {
@@ -35,7 +31,7 @@ function Contact() {
       return
     }
 
-    // Acá se enviaría el mensaje al backend
+    // Acá se enviaría el mensaje al backend.
 
     setSubmitted(true)
 
@@ -50,195 +46,118 @@ function Contact() {
   return (
     <main className="contact">
 
-      {/* HEADER */}
-
       <section className="contact__header">
-
         <div>
-          <span className="contact__tag">
-            CONTACTO
-          </span>
-
-          <h1>¿Necesitás ayuda?</h1>
-
+          <span className="contact__tag">CENTRO DE AYUDA</span>
+          <h1>Contacto</h1>
           <p>
-            Estamos acá para ayudarte. Dejanos tu consulta
-            y nos pondremos en contacto con vos.
+            ¿Tenés alguna consulta o problema?
+            Estamos acá para ayudarte.
           </p>
         </div>
-
       </section>
 
+      <section className="contact__content">
 
-      {/* FORMULARIO */}
+        <div className="contact__form-card">
 
-      <section className="contact__container">
-
-        <div className="contact__form-header">
-
-          <h2>Contactanos</h2>
-
-          <p>
-            Completá el formulario y envianos tu consulta.
-          </p>
-
-        </div>
-
-
-        {submitted ? (
-
-          <div className="contact__success">
-
-            <h3>¡Mensaje enviado!</h3>
-
+          <div className="contact__form-header">
+            <h2>Envianos tu consulta</h2>
             <p>
-              Gracias por contactarte con TicketYa.
-              Recibimos tu mensaje y pronto nos pondremos
-              en contacto con vos.
+              Completá el formulario y nuestro equipo
+              se pondrá en contacto con vos.
             </p>
-
-            <button
-              type="button"
-              className="contact__button"
-              onClick={() => setSubmitted(false)}
-            >
-              Enviar otro mensaje
-            </button>
-
           </div>
 
-        ) : (
+          {submitted ? (
 
-          <form
-            className="contact__form"
-            onSubmit={handleSubmit}
-          >
-
-            {/* NOMBRE */}
-
-            <div className="contact__field">
-
-              <label htmlFor="name">
-                Nombre completo
-              </label>
-
-              <input
-                id="name"
-                name="name"
-                type="text"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Ingresá tu nombre"
-                required
-              />
-
-            </div>
-
-
-            {/* EMAIL */}
-
-            <div className="contact__field">
-
-              <label htmlFor="email">
-                Email
-              </label>
-
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="ejemplo@email.com"
-                required
-              />
-
-            </div>
-
-
-            {/* ASUNTO */}
-
-            <div className="contact__field">
-
-              <label htmlFor="subject">
-                Asunto
-              </label>
-
-              <select
-                id="subject"
-                name="subject"
-                value={form.subject}
-                onChange={handleChange}
-                required
-              >
-
-                <option value="">
-                  Seleccioná un asunto
-                </option>
-
-                <option value="PURCHASE">
-                  Problemas con una compra
-                </option>
-
-                <option value="EVENT">
-                  Consulta sobre un evento
-                </option>
-
-                <option value="ACCOUNT">
-                  Problemas con mi cuenta
-                </option>
-
-                <option value="REFUND">
-                  Reembolsos
-                </option>
-
-                <option value="OTHER">
-                  Otro
-                </option>
-
-              </select>
-
-            </div>
-
-
-            {/* MENSAJE */}
-
-            <div className="contact__field contact__field--full">
-
-              <label htmlFor="message">
-                Mensaje
-              </label>
-
-              <textarea
-                id="message"
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                placeholder="Contanos en qué podemos ayudarte..."
-                rows={6}
-                maxLength={1000}
-                required
-              />
-
-              <small>
-                Máximo 1000 caracteres.
-              </small>
-
-            </div>
-
-
-            {/* ERROR */}
-
-            {error && (
-              <p className="contact__error">
-                {error}
+            <div className="contact__success">
+              <div className="contact__success-icon">✓</div>
+              <h3>¡Mensaje enviado!</h3>
+              <p>
+                Gracias por contactarte con TicketYa.
+                Recibimos tu consulta y pronto nos
+                pondremos en contacto con vos.
               </p>
-            )}
 
+              <button
+                type="button"
+                className="contact__button"
+                onClick={() => setSubmitted(false)}
+              >
+                Enviar otro mensaje
+              </button>
+            </div>
 
-            {/* BOTÓN */}
+          ) : (
 
-            <div className="contact__form-actions">
+            <form
+              className="contact__form"
+              onSubmit={handleSubmit}
+            >
+
+              <div className="contact__field">
+                <label htmlFor="name">Nombre completo</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Ingresá tu nombre"
+                  required
+                />
+              </div>
+
+              <div className="contact__field">
+                <label htmlFor="email">Correo electrónico</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="ejemplo@email.com"
+                  required
+                />
+              </div>
+
+              <div className="contact__field">
+                <label htmlFor="subject">Asunto</label>
+                <select
+                  id="subject"
+                  name="subject"
+                  value={form.subject}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccioná un asunto</option>
+                  <option value="PURCHASE">Problemas con una compra</option>
+                  <option value="EVENT">Consulta sobre un evento</option>
+                  <option value="ACCOUNT">Problemas con mi cuenta</option>
+                  <option value="REFUND">Reembolsos</option>
+                  <option value="OTHER">Otro</option>
+                </select>
+              </div>
+
+              <div className="contact__field">
+                <label htmlFor="message">Mensaje</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={form.message}
+                  onChange={handleChange}
+                  placeholder="Contanos en qué podemos ayudarte..."
+                  rows={6}
+                  maxLength={1000}
+                  required
+                />
+                <small>{form.message.length}/1000 caracteres</small>
+              </div>
+
+              {error && (
+                <p className="contact__error">{error}</p>
+              )}
 
               <button
                 type="submit"
@@ -247,44 +166,39 @@ function Contact() {
                 Enviar mensaje
               </button>
 
-            </div>
+            </form>
 
-          </form>
-
-        )}
-
-      </section>
-
-
-      {/* INFORMACIÓN DE CONTACTO */}
-
-      <section className="contact__info">
-
-        <h2>También podés contactarnos</h2>
-
-        <div className="contact__info-cards">
-
-          <article className="contact__info-card">
-
-            <h3>Email</h3>
-
-            <p>
-              soporte@ticketya.com
-            </p>
-
-          </article>
-
-          <article className="contact__info-card">
-
-            <h3>Atención al cliente</h3>
-
-            <p>
-              Estamos para ayudarte con tus consultas.
-            </p>
-
-          </article>
+          )}
 
         </div>
+
+        <aside className="contact__sidebar">
+
+          <div className="contact__info-card">
+            <div className="contact__info-icon">✉</div>
+            <h3>Correo electrónico</h3>
+            <p>Escribinos y te responderemos a la brevedad.</p>
+            <span>soporte@ticketya.com</span>
+          </div>
+
+          <div className="contact__info-card">
+            <div className="contact__info-icon">?</div>
+            <h3>Atención al cliente</h3>
+            <p>
+              Estamos disponibles para ayudarte con
+              tus compras, eventos y consultas.
+            </p>
+          </div>
+
+          <div className="contact__help-card">
+            <h3>¿Necesitás ayuda?</h3>
+            <p>
+              Nuestro equipo está comprometido con
+              brindarte la mejor experiencia en TicketYa.
+            </p>
+          </div>
+
+        </aside>
 
       </section>
 

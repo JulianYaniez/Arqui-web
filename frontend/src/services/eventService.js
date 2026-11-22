@@ -43,11 +43,18 @@ function adaptEvent(event) {
 // Obtener todos los eventos
 export async function getEvents(params = {}) {
   const query = new URLSearchParams(params).toString()
-  const data = await apiFetch(`${API_URL}/event${query ? `?${query}` : ''}`)
+
+  const data = await apiFetch(
+    `${API_URL}/event${query ? `?${query}` : ''}`
+  )
+
+  const eventList = Array.isArray(data)
+    ? data
+    : data?.content || []
 
   return {
     ...data,
-    content: data.content.map(adaptEvent)
+    content: eventList.map(adaptEvent)
   }
 }
 
@@ -93,18 +100,17 @@ export function addEventSector(id, sector) {
 
 // actualizar el estado del evento
 export const updateEventStatus = async (id, status) => {
-  const response = await fetch(`${API_URL}/api/events/${id}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ status })
-  })
+  switch (status) {
+    case 'PUBLISHED':
+      return publishEvent(id)
 
-  if (!response.ok) {
-    throw new Error('No se pudo actualizar el estado del evento')
+    case 'CANCELLED':
+      return cancelEvent(id)
+
+    default:
+      throw new Error(
+        `No existe una operación para cambiar el evento a ${status}`
+      )
   }
-
-  return response.json()
 }
 

@@ -98,7 +98,7 @@ function Managment() {
     try {
       setLoading(true)
 
-      const data = await getEvents({ admin: true })
+      const data = await getEvents()
 
       console.log(
         'EVENTOS RECIBIDOS DEL BACKEND:',
@@ -776,7 +776,6 @@ function Managment() {
                           <option value="DRAFT">Borrador</option>
                           <option value="PUBLISHED">Publicado</option>
                           <option value="CANCELLED">Cancelado</option>
-                          <option value="FINISHED">Finalizado</option>
                         </select>
 
                       </div>

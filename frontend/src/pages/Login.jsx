@@ -55,7 +55,7 @@ function Login() {
         role: response.role
       }
 
-      localStorage.setItem('token', response.token)
+      localStorage.setItem('token', response.accessToken)
       localStorage.setItem('user', JSON.stringify(user))
 
       if (user.role === 'ADMIN') {
