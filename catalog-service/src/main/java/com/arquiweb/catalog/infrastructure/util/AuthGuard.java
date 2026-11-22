@@ -21,7 +21,8 @@ public final class AuthGuard {
 
     public static void requireRole(String headerUserRole, String... allowedRoles) {
         if (headerUserRole == null || !List.of(allowedRoles).contains(headerUserRole.trim())) {
-            throw new ForbiddenException("Invalid permissions. Access denied.");
+            String accepted = String.join(", ", allowedRoles);
+            throw new ForbiddenException("Invalid permissions. Access denied. Allowed Roles: [" + accepted + "].");
         }
     }
 
