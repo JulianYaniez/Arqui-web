@@ -1,3 +1,4 @@
+
 package com.arquiweb.catalog.events.repository;
 
 import com.arquiweb.catalog.events.domain.Event;
@@ -25,41 +26,68 @@ public class EventCustomRepository {
 
     private final MongoTemplate mongoTemplate;
 
-    public Page<Event> findEventsWithDynamicFilters(EventCriteriaQuery criteria, Pageable pageable) {
-
+    public Page<Event> findEventsWithDynamicFilters(
+            EventCriteriaQuery criteria,
+            Pageable pageable,
+            boolean isAdmin
+    ) {
         Query query = new Query();
 
-        if (criteria == null || !Boolean.TRUE.equals(criteria.admin())) {
-            query.addCriteria(Criteria.where("status").is(EventStatus.PUBLISHED));
+        if (!isAdmin) {
+            query.addCriteria(
+                    Criteria.where("status").is(EventStatus.PUBLISHED)
+            );
         }
 
         if (criteria != null) {
 
             if (criteria.name() != null && !criteria.name().isBlank()) {
-                query.addCriteria(Criteria.where("name").regex(criteria.name()));
-            }
-
-            if (criteria.type() != null) {
-                query.addCriteria(Criteria.where("type").is(criteria.type()));
-            }
-
-            if (criteria.participant() != null) {
-                Pattern participantRegex = Pattern.compile(Pattern.quote(criteria.participant()), Pattern.CASE_INSENSITIVE);
                 query.addCriteria(
-                        Criteria.where("participants").elemMatch(new Criteria().regex(participantRegex))
+                        Criteria.where("name").regex(
+                                Pattern.quote(criteria.name()), "i"
+                        )
                 );
             }
 
-            if (criteria.city() != null) {
-                query.addCriteria(Criteria.where("city").regex(criteria.city()));
+            if (criteria.type() != null) {
+                query.addCriteria(
+                        Criteria.where("type").is(criteria.type())
+                );
+            }
+
+            if (criteria.participant() != null
+                    && !criteria.participant().isBlank()) {
+
+                Pattern participantRegex = Pattern.compile(
+                        Pattern.quote(criteria.participant()),
+                        Pattern.CASE_INSENSITIVE
+                );
+
+                query.addCriteria(
+                        Criteria.where("participants").elemMatch(
+                                new Criteria().regex(participantRegex)
+                        )
+                );
+            }
+
+            if (criteria.city() != null && !criteria.city().isBlank()) {
+                query.addCriteria(
+                        Criteria.where("city").regex(
+                                Pattern.quote(criteria.city()), "i"
+                        )
+                );
             }
 
             if (criteria.afterDate() != null) {
-                query.addCriteria(Criteria.where("dateTime").gte(criteria.afterDate()));
+                query.addCriteria(
+                        Criteria.where("dateTime").gte(criteria.afterDate())
+                );
             }
 
             if (criteria.beforeDate() != null) {
-                query.addCriteria(Criteria.where("dateTime").lte(criteria.beforeDate()));
+                query.addCriteria(
+                        Criteria.where("dateTime").lte(criteria.beforeDate())
+                );
             }
 
             query.collation(Collation.of("en").strength(1));
@@ -68,6 +96,7 @@ public class EventCustomRepository {
         long totalCount = mongoTemplate.count(query, Event.class);
 
         query.with(pageable);
+
         List<Event> events = mongoTemplate.find(query, Event.class);
 
         return new PageImpl<>(events, pageable, totalCount);

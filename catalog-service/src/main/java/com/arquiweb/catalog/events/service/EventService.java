@@ -1,3 +1,4 @@
+
 package com.arquiweb.catalog.events.service;
 
 import com.arquiweb.catalog.events.domain.Event;
@@ -122,8 +123,19 @@ public class EventService {
         notificationEventProducer.publishFavoriteArtistEvent(users, event.getId(), event.getName(), event.getParticipants(), event.getCity());
     }
 
-    public Page<EventResponse> getAll(EventCriteriaQuery criteria, Pageable pageable) {
-        Page<Event> eventsPage = eventCustomRepository.findEventsWithDynamicFilters(criteria, pageable);
+    public Page<EventResponse> getAll(
+            EventCriteriaQuery criteria,
+            Pageable pageable,
+            String userRole
+    ) {
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole);
+
+        Page<Event> eventsPage =
+                eventCustomRepository.findEventsWithDynamicFilters(
+                        criteria,
+                        pageable,
+                        isAdmin
+                );
 
         return eventsPage.map(EventResponse::fromDomain);
     }

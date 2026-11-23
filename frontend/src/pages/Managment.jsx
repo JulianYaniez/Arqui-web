@@ -99,7 +99,7 @@ function Managment() {
     try {
       setLoading(true)
 
-      const data = await findAllEvents({ admin: true })
+      const data = await findAllEvents()
 
       const eventList = Array.isArray(data)
         ? data
