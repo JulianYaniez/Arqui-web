@@ -169,6 +169,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=group_7
       - SPRING_DATASOURCE_PASSWORD=root
       - JWT_SECRET=${JWT_SECRET:-FV/rcST35TJbxp6BVq9wOF59Fx5sfmUdR06/ykY/h58=}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_MAIL_HOST=mailpit
     depends_on:
       postgres-identity:
         condition: service_healthy

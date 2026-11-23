@@ -10,6 +10,7 @@ import com.arquiweb.ticketing.reservation.domain.Reservation;
 import com.arquiweb.ticketing.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +39,7 @@ public class EventService {
     //     if (!event.getSalesEnabled()) throw new InvalidEventException("Given event has already happened or was canceled.");
     // }
 
+    @Transactional
     public void cancelEvent(String eventId) {
         TicketingEvent event = ticketingEventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));

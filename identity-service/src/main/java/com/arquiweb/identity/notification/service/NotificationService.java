@@ -68,7 +68,7 @@ public class NotificationService {
     }
 
     public void notifyEventChanged(EventChangedNotification event) {
-        List<User> users = authService.getAllById(event.usersId());
+        List<User> users = authService.getAllById(event.userIds());
 
         boolean isCancelled = "CANCELLED".equalsIgnoreCase(event.changeType());
 
