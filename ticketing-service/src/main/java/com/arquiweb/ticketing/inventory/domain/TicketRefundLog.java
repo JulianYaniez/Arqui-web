@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -23,11 +24,11 @@ public class TicketRefundLog {
     private String sectorId;
 
     @Column(name = "refunded_at", nullable = false)
-    private Instant refundedAt;
+    private LocalDateTime refundedAt;
 
     public TicketRefundLog(Ticket ticket) {
         this.eventId = ticket.getEventId();
         this.sectorId = ticket.getSectorId();
-        this.refundedAt = Instant.now();
+        this.refundedAt = LocalDateTime.now();
     }
 }
