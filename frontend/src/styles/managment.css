@@ -553,7 +553,44 @@
   cursor: pointer;
 }
 
+.management__table-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
+.management__table-controls label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.management__sort-select {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.management__sort-select:focus {
+  border-color: #7545d6;
+}
+
+@media (max-width: 650px) {
+  .management__table-controls {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .management__sort-select {
+    flex: 1;
+  }
+}
 
 @media (max-width: 650px) {
   .management__header {

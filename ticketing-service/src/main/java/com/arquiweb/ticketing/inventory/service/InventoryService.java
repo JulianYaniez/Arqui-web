@@ -39,18 +39,23 @@ public class InventoryService {
             List<SectorCapacityDto> capacities,
             List<SectorSeatsDto> seats
     ) {
-
-        List<Ticket> seatTickets = seats.stream()
-                .map( sectorSeats -> {
-                    return sectorSeats.toTickets(eventId);
-                })
-                .flatMap(List::stream)
+        List<SectorCapacity> sectorCapacities = capacities.stream()
+                .filter(sector -> sectorCapacityRepository
+                        .findByEventIdAndSectorId(eventId, sector.sectorId())
+                        .isEmpty())
+                .map(sector -> sector.toCapacity(eventId))
                 .toList();
 
-        List<SectorCapacity> sectorCapacities = capacities.stream()
-                .map(sector -> {
-                    return sector.toCapacity(eventId);
-                })
+        List<Ticket> seatTickets = seats.stream()
+                .map(sectorSeats -> sectorSeats.toTickets(eventId))
+                .flatMap(List::stream)
+                .filter(ticket -> !ticketRepository
+                        .existsByEventIdAndSectorIdAndRowNumberAndSeatNumber(
+                                ticket.getEventId(),
+                                ticket.getSectorId(),
+                                ticket.getRowNumber(),
+                                ticket.getSeatNumber()
+                        ))
                 .toList();
 
         if (!sectorCapacities.isEmpty()) {
