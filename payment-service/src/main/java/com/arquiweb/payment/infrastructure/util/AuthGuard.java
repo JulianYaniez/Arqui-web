@@ -1,4 +1,4 @@
-package com.arquiweb.management.infrastructure.utils;
+package com.arquiweb.payment.infrastructure.util;
 
 import com.arquiweb.management.infrastructure.exception.ForbiddenException;
 import com.arquiweb.management.infrastructure.exception.UnauthorizedException;
