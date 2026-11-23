@@ -22,7 +22,7 @@ public class NotificationEventListener {
         properties = "spring.json.value.default.type=com.arquiweb.identity.infrastructure.messaging.events.PurchaseConfirmedNotification"
     )
     public void onPurchaseConfirmed(PurchaseConfirmedNotification event) {
-
+        notificationService.notifyPurchaseConfirmation(event);
     }
 
 
@@ -32,7 +32,7 @@ public class NotificationEventListener {
             properties = "spring.json.value.default.type=com.arquiweb.identity.infrastructure.messaging.events.EventChangedNotification"
     )
     public void onEventChanged(EventChangedNotification event) {
-
+        notificationService.notifyEventChanged(event);
     }
 
 
@@ -43,6 +43,7 @@ public class NotificationEventListener {
             properties = "spring.json.value.default.type=com.arquiweb.identity.infrastructure.messaging.events.FavoriteArtistNotification"
     )
     public void onFavoriteArtistPublished(FavoriteArtistNotification event) {
+        notificationService.notifyFavoriteArtistPublish(event);
 
     }
 }
