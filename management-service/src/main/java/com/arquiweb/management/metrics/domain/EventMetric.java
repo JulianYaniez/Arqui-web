@@ -73,6 +73,7 @@ public class EventMetric {
         if (!errors.isEmpty()) throw new InvalidInputException("Event metrics has invalid field/s.", errors);
 
         this.eventId = eventId;
+        this.eventName = eventName;
         this.organizerId = organizerId;
         this.updateMetrics(sectorMetrics);
     }
