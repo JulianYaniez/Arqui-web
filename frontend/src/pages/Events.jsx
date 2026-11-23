@@ -49,7 +49,17 @@ function Events() {
 
         const data = await getEvents()
 
-        setEvents(data.content)
+        const eventList = Array.isArray(data)
+          ? data
+          : data.content || data.events || []
+
+        // Mostrar únicamente eventos publicados,
+        // independientemente del rol del usuario.
+        const publishedEvents = eventList.filter(
+          event => event.status === 'PUBLISHED'
+        )
+
+        setEvents(publishedEvents)
 
       } catch (error) {
         console.error('Error cargando eventos:', error)

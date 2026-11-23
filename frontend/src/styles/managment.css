@@ -168,17 +168,20 @@
   font-weight: 700;
 }
 
-.management__status--publicado {
+/* PUBLICADO */
+.management__status--published {
   background: #e5f7ed;
   color: #21834b;
 }
 
-.management__status--borrador {
+/* BORRADOR */
+.management__status--draft {
   background: #fff4dc;
   color: #a66b12;
 }
 
-.management__status--cancelado {
+/* CANCELADO */
+.management__status--cancelled {
   background: #fde8e8;
   color: #bd3838;
 }
@@ -549,6 +552,8 @@
   white-space: nowrap;
   cursor: pointer;
 }
+
+
 
 @media (max-width: 650px) {
   .management__header {

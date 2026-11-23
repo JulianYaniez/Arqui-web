@@ -1,3 +1,4 @@
+
 package com.arquiweb.catalog.events.dto.request;
 
 import com.arquiweb.catalog.events.domain.enums.EventType;
@@ -11,8 +12,6 @@ public record EventCriteriaQuery(
         String participant,
         String city,
         LocalDateTime afterDate,
-        LocalDateTime beforeDate,
-        // Remove after implementing JWT
-        Boolean admin
+        LocalDateTime beforeDate
 ) {
 }
