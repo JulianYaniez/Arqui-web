@@ -1,6 +1,7 @@
-package com.arquiweb.management.infrastructure.exception;
+package com.arquiweb.payment.infrastructure.exception;
 
 public class ForbiddenException extends RuntimeException {
-    public ForbiddenException(String s) {
+    public ForbiddenException(String message) {
+        super(message);
     }
 }

@@ -1,4 +1,4 @@
-package com.arquiweb.management.infrastructure.exception;
+package com.arquiweb.payment.infrastructure.exception;
 
 public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException(String message) {
