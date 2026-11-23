@@ -9,10 +9,14 @@ function Register() {
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    password: ''
+    password: '',
+    passwordRepeat: ''
   })
+
+  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -21,24 +25,46 @@ function Register() {
       ...form,
       [name]: value
     })
+
+    setError('')
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
+
+    if (!passwordRegex.test(form.password)) {
+      setError(
+        'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.'
+      )
+      return
+    }
+
+    if (form.password !== form.passwordRepeat) {
+      setError('Las contraseñas no coinciden.')
+      return
+    }
 
     try {
-      const [firstName, ...lastNameParts] = form.name.trim().split(' ')
-
       await register({
-        firstName,
-        lastName: lastNameParts.join(' '),
-        email: form.email,
-        password: form.password
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        passwordRepeat: form.passwordRepeat
       })
 
       navigate('/login')
     } catch (error) {
       console.error('Error al registrarse:', error)
+
+      setError(
+        error.response?.data?.message ||
+        'No se pudo crear la cuenta. Intentá nuevamente.'
+      )
     }
   }
 
@@ -55,13 +81,24 @@ function Register() {
           className="register__form"
           onSubmit={handleSubmit}
         >
-          <label htmlFor="name">Nombre completo</label>
+          <label htmlFor="firstName">Nombre</label>
           <input
             type="text"
-            name="name"
-            id="name"
-            autoComplete="name"
-            value={form.name}
+            name="firstName"
+            id="firstName"
+            autoComplete="given-name"
+            value={form.firstName}
+            onChange={handleChange}
+            required
+          />
+
+          <label htmlFor="lastName">Apellido</label>
+          <input
+            type="text"
+            name="lastName"
+            id="lastName"
+            autoComplete="family-name"
+            value={form.lastName}
             onChange={handleChange}
             required
           />
@@ -85,8 +122,31 @@ function Register() {
             autoComplete="new-password"
             value={form.password}
             onChange={handleChange}
+            minLength={8}
             required
           />
+
+          <label htmlFor="passwordRepeat">Repetir contraseña</label>
+            <input
+              type="password"
+              name="passwordRepeat"
+              id="passwordRepeat"
+              autoComplete="new-password"
+              value={form.passwordRepeat}
+              onChange={handleChange}
+              required
+            />
+
+          <small className="register__hint">
+            Mínimo 8 caracteres, incluyendo mayúscula, minúscula,
+            número y símbolo.
+          </small>
+
+          {error && (
+            <p className="register__error">
+              {error}
+            </p>
+          )}
 
           <button type="submit" className="register__submit">
             Crear cuenta

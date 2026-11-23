@@ -21,6 +21,7 @@ function Profile() {
   // Cerrar sesión
   const handleLogout = () => {
     localStorage.removeItem('user')
+    localStorage.removeItem('token')
     navigate('/login')
   }
 

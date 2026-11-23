@@ -17,13 +17,10 @@ export async function apiFetch(endpoint, options = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => null)
-
-    throw new Error(
-      errorData?.message || `Error ${response.status}: ${response.statusText}`
-    )
+    throw new Error(errorData?.message || `Error ${response.status}: ${response.statusText}`)
   }
 
-  if (response.status === 204) return null
+  const text = await response.text()
 
-  return response.json()
+  return text ? JSON.parse(text) : null
 }

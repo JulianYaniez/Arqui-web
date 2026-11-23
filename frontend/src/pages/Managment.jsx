@@ -6,12 +6,13 @@ import VenueForm from '../components/VenueForm'
 import '../styles/managment.css'
 
 import {
-  getEvents,
+  findAllEvents,
   createEvent,
   cancelEvent,
   publishEvent,
   updateEventStatus
 } from '../services/eventService'
+
 import { getVenues } from '../services/venueService'
 
 function Managment() {
@@ -98,26 +99,11 @@ function Managment() {
     try {
       setLoading(true)
 
-      const data = await getEvents({ admin: true })
-
-      console.log(
-        'EVENTOS RECIBIDOS DEL BACKEND:',
-        JSON.stringify(data, null, 2)
-      )
+      const data = await findAllEvents({ admin: true })
 
       const eventList = Array.isArray(data)
         ? data
         : data.content || []
-
-      console.log(
-        'ESTADOS DE EVENTOS:',
-        eventList.map(event => ({
-          id: event.id,
-          name: event.name,
-          status: event.status,
-          statusLabel: event.statusLabel
-        }))
-      )
 
       setEvents(eventList)
 
@@ -776,7 +762,6 @@ function Managment() {
                           <option value="DRAFT">Borrador</option>
                           <option value="PUBLISHED">Publicado</option>
                           <option value="CANCELLED">Cancelado</option>
-                          <option value="FINISHED">Finalizado</option>
                         </select>
 
                       </div>
