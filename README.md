@@ -8,7 +8,7 @@ TicketYa is a distributed microservices platform for event management, ticket re
 - [Yañez, Julian Fidel]
 - [Tami, Marcos David]
 - [Fennema, Agustina Magali]
-- [Gomez, Nicolaz Valentin]
+- [Gomez, Nicolas Valentin]
 
 ## Quickstart & Execution
 
