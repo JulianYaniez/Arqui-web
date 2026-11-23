@@ -81,7 +81,7 @@ public class VirtualQueueService {
 
         redis.opsForSet().add(ACTIVE_EVENTS_KEY, eventId);
 
-        Long rank = redis.opsForZSet().rank(waitKey, userId);
+        Long rank = redis.opsForZSet().rank(waitKey, userId.toString());
         Long position = (rank != null) ? rank + 1 : 1L;
 
         return new QueueStatusResponse(QueueStatus.WAITING, position, null);
@@ -98,7 +98,7 @@ public class VirtualQueueService {
             return new QueueStatusResponse(QueueStatus.ADMITTED, 0L, ttl);
         }
 
-        Long rank = redis.opsForZSet().rank(waitingKey(eventId), userId);
+        Long rank = redis.opsForZSet().rank(waitingKey(eventId), userId.toString());
         if (rank != null) {
             return new QueueStatusResponse(QueueStatus.WAITING, rank + 1, null);
         }
