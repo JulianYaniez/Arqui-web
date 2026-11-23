@@ -14,7 +14,7 @@ function Login() {
 
   const [error, setError] = useState('')
 
-  // Verificar si ya existe una sesión
+  // Redirect if a session already exists
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
 
@@ -53,6 +53,7 @@ function Login() {
         role: response.role
       }
 
+      // Store authentication data
       localStorage.setItem('token', response.accessToken)
       localStorage.setItem('user', JSON.stringify(user))
 

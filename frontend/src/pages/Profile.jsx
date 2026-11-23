@@ -22,6 +22,7 @@ function Profile() {
         setLoading(true)
         setError('')
 
+        // Fetch the user's profile information
         const data = await getUserById(user.id)
         setProfile(data)
 
@@ -37,6 +38,7 @@ function Profile() {
     loadProfile()
   }, [user?.id])
 
+  // Redirect if the user is not authenticated
   if (!user) {
     return <Navigate to="/login" replace />
   }
