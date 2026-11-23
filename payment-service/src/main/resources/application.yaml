@@ -10,7 +10,13 @@ spring:
       ddl-auto: update
     show-sql: true
 
+
 app:
   feign:
     ticketing:
       url: http://ticketing-service:8080
+
+payment:
+  gateway:
+    max-attempts: 5
+    sleep-time: 50

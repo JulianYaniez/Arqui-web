@@ -44,5 +44,6 @@ public class NotificationEventListener {
     )
     public void onFavoriteArtistPublished(FavoriteArtistNotification event) {
         notificationService.notifyFavoriteArtistPublish(event);
+
     }
 }
