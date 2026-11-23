@@ -1,29 +1,66 @@
-
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, Navigate } from 'react-router-dom'
+import { getUserById } from '../services/authService'
 import '../styles/profile.css'
 
 function Profile() {
+
   const navigate = useNavigate()
 
-  // Recuperar usuario de localStorage
   const storedUser = localStorage.getItem('user')
   const user = storedUser ? JSON.parse(storedUser) : null
 
-  // Si no hay sesión, volver al login
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    const loadProfile = async () => {
+      try {
+        setLoading(true)
+        setError('')
+
+        const data = await getUserById(user.id)
+        setProfile(data)
+
+      } catch (error) {
+        console.error('Error cargando perfil:', error)
+        setError('No se pudo cargar la información del usuario.')
+
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProfile()
+  }, [user?.id])
+
   if (!user) {
     return <Navigate to="/login" replace />
   }
 
-  // Datos del usuario
-  const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim()
-  const displayName = fullName || user.name || 'Usuario'
-
-  // Cerrar sesión
   const handleLogout = () => {
     localStorage.removeItem('user')
     localStorage.removeItem('token')
     navigate('/login')
   }
+
+  if (loading) {
+    return <main className="profile">Cargando perfil...</main>
+  }
+
+  if (error) {
+    return (
+      <main className="profile">
+        <p>{error}</p>
+      </main>
+    )
+  }
+
+  const fullName = `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
+  const displayName = fullName || profile.email
 
   return (
     <main className="profile">
@@ -38,7 +75,6 @@ function Profile() {
 
       <section className="profile__content">
 
-        {/* Tarjeta del usuario */}
         <div className="profile__card profile__user">
           <div className="profile__avatar">
             {displayName.charAt(0).toUpperCase()}
@@ -46,12 +82,11 @@ function Profile() {
 
           <div className="profile__user-info">
             <h2>{displayName}</h2>
-            <p>{user.email}</p>
-            <span className="profile__role">{user.role}</span>
+            <p>{profile.email}</p>
+            <span className="profile__role">{profile.role}</span>
           </div>
         </div>
 
-        {/* Información personal */}
         <div className="profile__card">
           <div className="profile__section-header">
             <div>
@@ -64,38 +99,32 @@ function Profile() {
 
             <div className="profile__field">
               <span>Nombre</span>
-              <strong>{user.firstName || '-'}</strong>
+              <strong>{profile.firstName || '-'}</strong>
             </div>
 
             <div className="profile__field">
               <span>Apellido</span>
-              <strong>{user.lastName || '-'}</strong>
+              <strong>{profile.lastName || '-'}</strong>
             </div>
 
             <div className="profile__field">
               <span>Correo electrónico</span>
-              <strong>{user.email || '-'}</strong>
-            </div>
-
-            <div className="profile__field">
-              <span>Teléfono</span>
-              <strong>{user.phone || '-'}</strong>
+              <strong>{profile.email || '-'}</strong>
             </div>
 
             <div className="profile__field">
               <span>Tipo de cuenta</span>
-              <strong>{user.role || '-'}</strong>
+              <strong>{profile.role || '-'}</strong>
             </div>
 
             <div className="profile__field">
               <span>Estado de cuenta</span>
-              <strong>{user.isActive ? 'Activa' : 'Inactiva'}</strong>
+              <strong>{profile.isActive ? 'Activa' : 'Inactiva'}</strong>
             </div>
 
           </div>
         </div>
 
-        {/* Actividades */}
         <div className="profile__card">
           <h2>Mis actividades</h2>
           <p>Accedé rápidamente a tu actividad en TicketYa.</p>
@@ -121,7 +150,6 @@ function Profile() {
           </div>
         </div>
 
-        {/* Cerrar sesión */}
         <div className="profile__logout">
           <button
             id="btn__logout"
