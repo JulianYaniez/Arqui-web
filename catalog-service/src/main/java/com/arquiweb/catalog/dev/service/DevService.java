@@ -131,7 +131,7 @@ public class DevService {
         List<Event> events = eventRepository.saveAll(eventsCreation);
 
         for (int i = 0; i < random.nextInt(10); i++) {
-            eventService.publishEvent(events.get(i).getOrganizerId(), events.get(i).getId());
+            eventService.publishEvent(events.get(i).getOrganizerId(), events.get(i).getId(), true);
         }
     }
 }

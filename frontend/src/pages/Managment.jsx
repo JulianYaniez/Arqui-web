@@ -42,6 +42,8 @@ function Managment() {
     dateTime: ''
   })
 
+  const [sortBy, setSortBy] = useState('status-date')
+
   const getMinDateTime = () => {
     const now = new Date()
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
@@ -98,6 +100,7 @@ function Managment() {
   const loadEvents = async () => {
     try {
       setLoading(true)
+      setError('')
 
       const data = await findAllEvents()
 
@@ -114,6 +117,57 @@ function Managment() {
       setLoading(false)
     }
   }
+
+  // Ordenar eventos según la opción seleccionada
+  const sortedEvents = [...events].sort((a, b) => {
+    const dateA = new Date(a.dateTime || a.date).getTime()
+    const dateB = new Date(b.dateTime || b.date).getTime()
+
+    const statusOrder = {
+      CANCELLED: 1,
+      PUBLISHED: 2,
+      DRAFT: 3
+    }
+
+    switch (sortBy) {
+      case 'status-date':
+        return (
+          (statusOrder[a.status] ?? 99) -
+          (statusOrder[b.status] ?? 99) ||
+          dateA - dateB
+        )
+
+      case 'cancelled-first':
+        return (
+          (a.status === 'CANCELLED' ? 0 : 1) -
+          (b.status === 'CANCELLED' ? 0 : 1) ||
+          dateA - dateB
+        )
+
+      case 'published-first':
+        return (
+          (a.status === 'PUBLISHED' ? 0 : 1) -
+          (b.status === 'PUBLISHED' ? 0 : 1) ||
+          dateA - dateB
+        )
+
+      case 'draft-first':
+        return (
+          (a.status === 'DRAFT' ? 0 : 1) -
+          (b.status === 'DRAFT' ? 0 : 1) ||
+          dateA - dateB
+        )
+
+      case 'date-asc':
+        return dateA - dateB
+
+      case 'date-desc':
+        return dateB - dateA
+
+      default:
+        return dateA - dateB
+    }
+  })
 
   // Cargar eventos al entrar
   useEffect(() => {
@@ -685,19 +739,58 @@ function Managment() {
 
         <div className="management__section-header">
 
-          <div>
-            <h2>Gestión de eventos</h2>
+  <div>
+    <h2>Gestión de eventos</h2>
 
-            <p>
-              Consultá y administrá los eventos de la plataforma.
-            </p>
-          </div>
+    <p>
+      Consultá y administrá los eventos de la plataforma.
+    </p>
+  </div>
 
-          <Link to="/event">
-            Ver catálogo
-          </Link>
+    <div className="management__table-controls">
 
-        </div>
+      <label htmlFor="sortEvents">
+        Ordenar por:
+      </label>
+
+      <select
+        id="sortEvents"
+        className="management__sort-select"
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value)}
+      >
+        <option value="status-date">
+          Estado y fecha
+        </option>
+
+        <option value="cancelled-first">
+          Cancelados primero
+        </option>
+
+        <option value="published-first">
+          Publicados primero
+        </option>
+
+        <option value="draft-first">
+          Borradores primero
+        </option>
+
+        <option value="date-asc">
+          Fecha: más próximos
+        </option>
+
+        <option value="date-desc">
+          Fecha: más lejanos
+        </option>
+      </select>
+
+      <Link to="/event">
+        Ver catálogo
+      </Link>
+
+    </div>
+
+  </div>
 
         <div className="management__table-container">
 
@@ -725,7 +818,7 @@ function Managment() {
 
               ) : events.length > 0 ? (
 
-                events.map(event => (
+                sortedEvents.map(event => (
 
                   <tr key={event.id}>
                     <td>{event.name}</td>

@@ -166,7 +166,6 @@ class EventController {
         return ResponseEntity.created(uri).build();
     }
 
-
     @Operation(summary = "Publish a drafted event.")
     @ApiResponses(value = {
             @ApiResponse(
@@ -193,16 +192,22 @@ class EventController {
     @PostMapping("/{id}/publish")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> publishEvent(
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
-            @PathVariable String id
-    ) {
-        UUID organizerId = AuthGuard.requireUserId(headerUserId);
+                @Parameter(hidden = true)
+                @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+
+                @Parameter(hidden = true)
+                @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
+
+                @PathVariable String id
+        ) {
+        UUID userId = AuthGuard.requireUserId(headerUserId);
+
         AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
 
-        eventService.publishEvent(organizerId, id);
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(headerUserRole);
+
+        eventService.publishEvent(userId, id, isAdmin);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -279,16 +284,16 @@ class EventController {
     @PostMapping("/{eventId}/cancel")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> cancelEvent(
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
-            @PathVariable("eventId") String eventId
-    ) {
-        UUID organizerId = AuthGuard.requireUserId(headerUserId);
-        AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
+                @Parameter(hidden = true)
+                @RequestHeader(value = "X-User-Role", required = false)
+                String headerUserRole,
 
-        eventService.cancelEvent(organizerId, eventId);
+                @PathVariable("eventId") String eventId
+        ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+
+        eventService.cancelEvent(eventId);
+
         return ResponseEntity.noContent().build();
     }
 

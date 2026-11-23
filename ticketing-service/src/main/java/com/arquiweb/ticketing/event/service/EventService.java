@@ -24,20 +24,28 @@ public class EventService {
     private final ReservationService reservationService;
     private final NotificationEventProducer notificationEventProducer;
 
+    @Transactional
     public void initEvent(InitEventRequest request) {
-        TicketingEvent event = new TicketingEvent(request.eventId(), true, request.isHighDemand());
 
-        inventoryService.initSector(request.eventId(), request.capacities(), request.seats());
+        // Evitar inicializar nuevamente un evento existente.
+        if (ticketingEventRepository.existsById(request.eventId())) {
+            return;
+        }
+
+        TicketingEvent event = new TicketingEvent(
+                request.eventId(),
+                true,
+                request.isHighDemand()
+        );
+
+        inventoryService.initSector(
+                request.eventId(),
+                request.capacities(),
+                request.seats()
+        );
 
         ticketingEventRepository.save(event);
     }
-
-    // public void validateEvent(String eventId) {
-    //     TicketingEvent event = ticketingEventRepository.findById(eventId)
-    //             .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
-
-    //     if (!event.getSalesEnabled()) throw new InvalidEventException("Given event has already happened or was canceled.");
-    // }
 
     @Transactional
     public void cancelEvent(String eventId) {

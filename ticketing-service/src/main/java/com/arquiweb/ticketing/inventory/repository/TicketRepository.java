@@ -85,4 +85,11 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
             @Param("eventId") String eventId,
             @Param("soldStatuses") List<TicketStatus> soldStatuses
     );
+    
+    boolean existsByEventIdAndSectorIdAndRowNumberAndSeatNumber(
+            String eventId,
+            String sectorId,
+            Integer rowNumber,
+            Integer seatNumber
+    );
 }

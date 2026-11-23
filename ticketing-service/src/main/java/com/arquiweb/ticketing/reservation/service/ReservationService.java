@@ -271,4 +271,16 @@ public class ReservationService {
             throw new InvalidInputException("Given has previously bough more tickets (" + previousTickets + "), and the max limit is " + maxTickets + ".", null);
     }
 
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getMyTickets(UUID clientId) {
+        return reservationRepository
+                .findByClientIdAndStatusOrderByCreatedAtDesc(
+                        clientId,
+                        ReservationStatus.PAID
+                )
+                .stream()
+                .map(ReservationResponse::fromDomain)
+                .toList();
+    }
+
 }

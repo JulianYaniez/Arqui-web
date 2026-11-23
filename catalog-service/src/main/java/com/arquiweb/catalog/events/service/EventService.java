@@ -99,15 +99,24 @@ public class EventService {
         return eventSector.getSectorId();
     }
 
-    @Transactional  // TEST BROKEN
-    public void publishEvent(UUID organizerId, String eventId) {
-        Event event = this.getEventValidated(eventId);
+    @Transactional
+    public void publishEvent(UUID userId, String eventId, boolean isAdmin) {
+        Event event = getEventValidated(eventId);
 
-        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
+        // El administrador puede publicar cualquier evento.
+        // El organizador solamente puede publicar sus propios eventos.
+        if (!isAdmin && !event.getOrganizerId().equals(userId)) {
+            throw new UnauthorizedException(
+                    "You can only publish your own events."
+            );
+        }
 
+        // La entidad valida que el evento pueda publicarse.
         event.publish();
 
-        InitCapacityRequest ticketingRequest = InitCapacityRequest.fromDomain(event);
+        // Inicializar capacidad en Ticketing
+        InitCapacityRequest ticketingRequest =
+                InitCapacityRequest.fromDomain(event);
 
         if (!ticketingRequest.capacities().isEmpty()) {
             ticketingClient.initializeSectors(ticketingRequest);
@@ -115,12 +124,33 @@ public class EventService {
 
         eventRepository.save(event);
 
-        List<UUID> users = userPreferenceRepository.findByParticipantsInAndCitiesContaining(event.getParticipants(), event.getCity())
+        // Notificar usuarios interesados
+        List<UUID> users = userPreferenceRepository
+                .findByParticipantsInAndCitiesContaining(
+                        event.getParticipants(),
+                        event.getCity()
+                )
                 .stream()
                 .map(UserPreference::getId)
                 .toList();
 
-        notificationEventProducer.publishFavoriteArtistEvent(users, event.getId(), event.getName(), event.getParticipants(), event.getCity());
+        notificationEventProducer.publishFavoriteArtistEvent(
+                users,
+                event.getId(),
+                event.getName(),
+                event.getParticipants(),
+                event.getCity()
+        );
+    }
+
+
+    @Transactional
+    public void cancelEvent(String eventId) {
+        Event event = getEventValidated(eventId);
+
+        event.cancel();
+
+        eventRepository.save(event);
     }
 
     public Page<EventResponse> getAll(
@@ -170,19 +200,6 @@ public class EventService {
         return eventRepository.findById(eventId).map(EventStateResponse::fromDomain)
                 .orElseThrow(() -> new ResourceNotFoundException("No event found with given ID."));
     }
-
-    @Transactional // TEST BROKEN
-    public void cancelEvent(UUID organizerId, String eventId) {
-        Event event = getEventValidated(eventId);
-
-        if (!event.getOrganizerId().equals(organizerId)) throw new UnauthorizedException("Event does not belong to current user.");
-
-        event.cancel();
-
-        eventRepository.save(event);
-    }
-
-
 
     private Event getEventValidated(String eventId) {
         if (eventId == null) throw new InvalidInputException("Event ID cannot be null.", null);

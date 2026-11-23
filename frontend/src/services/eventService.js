@@ -40,40 +40,67 @@ function adaptEvent(event) {
   }
 }
 
-// Obtener todos los eventos
+// Obtener todos los eventos publicados para el catálogo
 export async function getEvents(params = {}) {
-  const query = new URLSearchParams(params).toString()
+  const pageSize = 100
+  let page = 0
+  let allEvents = []
+  let totalPages = 1
 
-  const data = await apiFetch(
-    `${API_URL}/event${query ? `?${query}` : ''}`
-  )
+  do {
+    const queryParams = new URLSearchParams({
+      ...params,
+      page: page.toString(),
+      size: pageSize.toString()
+    })
 
-  const eventList = Array.isArray(data)
-    ? data
-    : data?.content || []
+    const data = await apiFetch(
+      `${API_URL}/event?${queryParams.toString()}`
+    )
 
-  return {
-    ...data,
-    content: eventList.map(adaptEvent)
-  }
+    const eventList = Array.isArray(data)
+      ? data
+      : data?.content || []
+
+    allEvents = [...allEvents, ...eventList]
+
+    totalPages = data?.page?.totalPages ?? 1
+    page++
+
+  } while (page < totalPages)
+
+  return allEvents.map(adaptEvent)
 }
 
 // Obtener todos los eventos para administración
-export async function findAllEvents(params = {}) {
-  const query = new URLSearchParams(params).toString()
+export async function findAllEvents() {
+  const pageSize = 100
+  let page = 0
+  let allEvents = []
+  let totalPages = 1
 
-  const data = await apiFetch(
-    `${API_URL}/event${query ? `?${query}` : ''}`
-  )
+  do {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: pageSize.toString()
+    })
 
-  const eventList = Array.isArray(data)
-    ? data
-    : data?.content || []
+    const data = await apiFetch(
+      `${API_URL}/event?${params.toString()}`
+    )
 
-  return {
-    ...data,
-    content: eventList.map(adaptEvent)
-  }
+    const eventList = Array.isArray(data)
+      ? data
+      : data?.content || []
+
+    allEvents = [...allEvents, ...eventList]
+
+    totalPages = data?.page?.totalPages ?? 1
+    page++
+
+  } while (page < totalPages)
+
+  return allEvents.map(adaptEvent)
 }
 
 export async function getEventById(id) {
@@ -126,9 +153,7 @@ export const updateEventStatus = async (id, status) => {
       return cancelEvent(id)
 
     default:
-      throw new Error(
-        `No existe una operación para cambiar el evento a ${status}`
-      )
+      throw new Error(`Estado no soportado: ${status}`)
   }
 }
 
