@@ -98,6 +98,7 @@ public class EventMetric {
         this.totalRefundedTickets = totalRefundedTickets;
         this.occupancyPercentage = occupancyPercentage;
         this.totalRevenue = totalRevenue;
+        this.sectorMetrics = sectorMetrics;
 
         this.updatedAt = LocalDateTime.now();
     }

@@ -33,7 +33,7 @@ public interface SectorCapacityRepository extends JpaRepository<SectorCapacity, 
         FROM SectorCapacity sc
         LEFT JOIN Ticket t ON t.eventId = sc.eventId AND t.sectorId = sc.sectorId
         WHERE sc.eventId = :eventId
-        GROUP BY sc.sectorId, sc.totalCapacity
+        GROUP BY sc.eventId, sc.sectorId, sc.totalCapacity
     """)
     List<SectorMetricsDto> findUnnumberedSectorStats(
             @Param("eventId") String eventId,

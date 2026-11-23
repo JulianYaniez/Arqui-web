@@ -72,14 +72,14 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     @Query("""
         SELECT new com.arquiweb.ticketing.inventory.dto.requests.SectorMetricsDto(
             t.sectorId,
-            COUNT(CASE WHEN t.status <> :refundedStatus THEN 1 END),
+            COUNT(t),
             COUNT(CASE WHEN t.status IN :soldStatuses THEN 1L END),
             (SELECT COUNT(r) FROM TicketRefundLog r WHERE  r.eventId = t.eventId AND r.sectorId = t.sectorId),
             CAST(COALESCE(SUM(CASE WHEN t.status IN :soldStatuses THEN t.price END), 0L) AS bigdecimal)
         )
         FROM Ticket t
         WHERE t.eventId = :eventId AND t.isNumbered = true
-        GROUP BY t.sectorId
+        GROUP BY t.eventId, t.sectorId
     """)
     List<SectorMetricsDto> findNumberedSectorStats(
             @Param("eventId") String eventId,
