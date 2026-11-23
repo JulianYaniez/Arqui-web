@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
@@ -7,33 +6,43 @@ import { getEvents } from '../services/eventService'
 import '../styles/home.css'
 
 function Home() {
+  // Stores the events displayed in the featured section.
   const [featuredEvents, setFeaturedEvents] = useState([])
+
+  // Indicates whether the events are being loaded.
   const [loading, setLoading] = useState(true)
+
+  // Stores an error message if the request fails.
   const [error, setError] = useState('')
 
+  // Fetches the events when the component is mounted.
   useEffect(() => {
     const loadEvents = async () => {
       try {
         setLoading(true)
         setError('')
 
+        // Retrieves the events from the backend.
         const data = await getEvents()
 
-        // Adaptarse tanto a una lista como a una respuesta paginada
+        // Supports both a direct list and a paginated response.
         const events = Array.isArray(data)
           ? data
           : data.content || data.events || []
 
-        // Mostrar únicamente eventos publicados
+        // Only published events are displayed.
         const publishedEvents = events.filter(
           event => event.status === 'PUBLISHED'
         )
 
+        // Selects the first three published events for the homepage.
         setFeaturedEvents(publishedEvents.slice(0, 3))
       } catch (error) {
+        // Logs the error and stores a message to display to the user.
         console.error('Error cargando eventos destacados:', error)
         setError('No se pudieron cargar los eventos.')
       } finally {
+        // Stops the loading state after the request finishes.
         setLoading(false)
       }
     }
@@ -81,6 +90,8 @@ function Home() {
         </div>
 
         <div className="home__events">
+          {/* Displays the loading state, an error message,
+              the featured events or an empty-state message. */}
           {loading ? (
             <p>Cargando eventos...</p>
           ) : error ? (
