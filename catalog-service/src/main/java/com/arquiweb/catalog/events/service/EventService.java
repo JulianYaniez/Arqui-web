@@ -100,26 +100,22 @@ public class EventService {
     }
 
     @Transactional
-    public void publishEvent(UUID userId, String eventId, boolean isAdmin) {
+    public void publishEvent(UUID userId, String eventId, String userRole) {
         Event event = getEventValidated(eventId);
 
-        // El administrador puede publicar cualquier evento.
-        // El organizador solamente puede publicar sus propios eventos.
-        if (!isAdmin && !event.getOrganizerId().equals(userId)) {
+        if (!userRole.equalsIgnoreCase("ADMIN") || !event.getOrganizerId().equals(userId)) {
             throw new UnauthorizedException(
                     "You can only publish your own events."
             );
         }
 
-        // La entidad valida que el evento pueda publicarse.
         event.publish();
 
-        // Inicializar capacidad en Ticketing
         InitCapacityRequest ticketingRequest =
                 InitCapacityRequest.fromDomain(event);
 
         if (!ticketingRequest.capacities().isEmpty()) {
-            ticketingClient.initializeSectors(ticketingRequest);
+            ticketingClient.initializeSectors(ticketingRequest, userRole);
         }
 
         eventRepository.save(event);

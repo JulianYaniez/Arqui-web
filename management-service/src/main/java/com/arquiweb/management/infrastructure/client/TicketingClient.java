@@ -24,7 +24,10 @@ public interface TicketingClient {
     List<SectorMetricsResponse> getSectorsMetrics(@PathVariable("eventId") String eventId);
 
     @PostMapping("/event/{eventId}/cancel")
-    void bulkCancelReservations(@PathVariable("eventId") String eventId);
+    void bulkCancelReservations(
+            @PathVariable("eventId") String eventId,
+            @RequestHeader(value = "X-User-Role") String userRole
+    );
 
     @PostMapping("/reservation/{reservationId}/request-refund")
     void setRequestRefund(@PathVariable("reservationId") UUID reservationId);

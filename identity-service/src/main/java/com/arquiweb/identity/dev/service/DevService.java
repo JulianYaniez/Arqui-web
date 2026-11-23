@@ -1,6 +1,7 @@
 package com.arquiweb.identity.dev.service;
 
 import com.arquiweb.identity.auth.domain.User;
+import com.arquiweb.identity.auth.domain.enums.UserRole;
 import com.arquiweb.identity.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +27,7 @@ public class DevService {
                 DEFAULT_PASSWORD,
                 passwordEncoder
         );
+        admin.setRole(UserRole.ADMIN);
 
         User organizer = User.registerClient(
                 "organizer@gmail.com",
@@ -35,6 +37,7 @@ public class DevService {
                 DEFAULT_PASSWORD,
                 passwordEncoder
         );
+        organizer.setRole(UserRole.ORGANIZER);
 
         User staff = User.registerClient(
                 "staff@gmail.com",
@@ -44,6 +47,7 @@ public class DevService {
                 DEFAULT_PASSWORD,
                 passwordEncoder
         );
+        staff.setRole(UserRole.ACCESS_STAFF);
 
         User user = User.registerClient(
                 "user@gmail.com",

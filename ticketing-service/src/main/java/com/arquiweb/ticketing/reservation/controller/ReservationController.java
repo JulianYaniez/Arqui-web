@@ -342,6 +342,7 @@ public class ReservationController {
             )
     })
     @PostMapping("/{reservationId}/reject-refund")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> rejectRefund(
             @Parameter(hidden = true)
             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,

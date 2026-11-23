@@ -204,9 +204,7 @@ class EventController {
 
         AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
 
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(headerUserRole);
-
-        eventService.publishEvent(userId, id, isAdmin);
+        eventService.publishEvent(userId, id, headerUserRole);
 
         return ResponseEntity.noContent().build();
     }
@@ -226,7 +224,6 @@ class EventController {
                 direction = Sort.Direction.ASC
         ) Pageable pageable
     ) {
-        System.out.println("USER ROLE: " + headerUserRole);
         Page<EventResponse> page =
                 eventService.getAll(criteria, pageable, headerUserRole);
 

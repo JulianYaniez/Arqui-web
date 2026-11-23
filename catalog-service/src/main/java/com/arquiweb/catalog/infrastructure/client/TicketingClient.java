@@ -4,10 +4,14 @@ import com.arquiweb.catalog.infrastructure.client.dtos.command.InitCapacityReque
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name = "ticketing-client", url = "${app.feign.ticketing.url}")
 public interface TicketingClient {
 
   @PostMapping("/event/init")
-  void initializeSectors(@RequestBody InitCapacityRequest request);
+  void initializeSectors(
+          @RequestBody InitCapacityRequest request,
+          @RequestHeader(value = "X-User-Role") String userRole
+  );
 }
