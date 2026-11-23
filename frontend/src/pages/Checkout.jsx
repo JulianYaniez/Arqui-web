@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getEventById } from '../services/eventService'
+import { getUserById } from '../services/authService'
 import '../styles/checkout.css'
 
 function Checkout() {
@@ -22,6 +23,39 @@ function Checkout() {
   })
 
   const [purchaseCompleted, setPurchaseCompleted] = useState(false)
+
+  // Obtener y autocompletar información del usuario autenticado
+  useEffect(() => {
+    const loadBuyerData = async () => {
+      try {
+        const storedUser = localStorage.getItem('user')
+
+        if (!storedUser) return
+
+        const user = JSON.parse(storedUser)
+
+        const userId = user.id || user.userId
+
+        if (!userId) {
+          console.error('No se encontró el ID del usuario.')
+          return
+        }
+
+        const userData = await getUserById(userId)
+
+        setBuyer({
+          name: userData.name || userData.firstName || '',
+          surname: userData.surname || userData.lastName || '',
+          email: userData.email || ''
+        })
+
+      } catch (error) {
+        console.error('Error obteniendo información del usuario:', error)
+      }
+    }
+
+    loadBuyerData()
+  }, [])
 
   // Obtener el evento seleccionado
   useEffect(() => {
@@ -49,8 +83,10 @@ function Checkout() {
     name: item.name ?? item.sectorName ?? item.sector?.name ?? 'Sector',
     price: Number(item.price),
     available: Number(
-      item.available ?? item.remainingCapacity ??
-      item.capacity ?? item.sector?.capacity ?? 0
+      item.available ??
+      item.remainingCapacity ??
+      item.capacity ??
+      item.sector?.capacity ?? 0
     )
   }))
 
