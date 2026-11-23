@@ -143,7 +143,6 @@ public class PaymentTransactionService {
         if (gatewaySuccess) {
             transaction.setStatus(TransactionStatus.REFUNDED);
             paymentRepository.save(transaction);
-            this.releaseReservation(transaction.getReservationId());
         }else{
             throw new PaymentGatewayException("the payment gateway refund failed");
         }}catch (PessimisticLockingFailureException e){
@@ -181,7 +180,6 @@ public class PaymentTransactionService {
             }
             transaction.setStatus(TransactionStatus.REFUNDED);
             paymentRepository.save(transaction);
-            this.releaseReservation(transaction.getReservationId());
         }
         catch(Exception e){
             throw new ConflictException("The resource is currently being modified by another request.", Map.of("paymentId", request.paymentId().toString()));
