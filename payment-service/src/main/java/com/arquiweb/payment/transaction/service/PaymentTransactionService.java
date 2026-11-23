@@ -6,6 +6,7 @@ import com.arquiweb.payment.infrastructure.exception.*;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
 
 import com.arquiweb.payment.transaction.domain.Exception.InvalidCardPrefixException;
+import com.arquiweb.payment.transaction.domain.enums.MockFailureSimulation;
 import com.arquiweb.payment.transaction.dtos.request.PaymentRefundRequest;
 import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
@@ -46,7 +47,7 @@ public class PaymentTransactionService {
 
     private final List<String> validPrefixes = List.of("4111", "4242", "5555", "3782");
 
-    public PaymentTransaction processPayment(RequestPaymentDTO request, String simulateFail) {
+    public PaymentTransaction processPayment(RequestPaymentDTO request, MockFailureSimulation simulateFail) {
         if (paymentRepository.isPaymentProcessedAndStatus(request.reservationId(), TransactionStatus.APPROVED)){
             throw new InvalidInputException("Payment already processed",
                     Map.of("reservationId", "Reservation " +
@@ -190,7 +191,7 @@ public class PaymentTransactionService {
     private int maxGatewayAttempts;
     @Value("${payment.gateway.sleep-time}")
     private int sleepTime;
-    public GatewayResponse callGateway(RequestPaymentDTO request, String simulateFail){
+    public GatewayResponse callGateway(RequestPaymentDTO request, MockFailureSimulation simulateFail){
         for (int i = 0; i<maxGatewayAttempts; i++) {
             try {
                 return paymentGateway.processPayment(request.cardToken(), request.amount(), request.paymentMethod(), simulateFail);

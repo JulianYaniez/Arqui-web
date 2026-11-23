@@ -166,7 +166,7 @@ public class RefundingController {
     ) {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
         UUID adminId = AuthGuard.requireUserId(headerUserId);
-        refundingService.cancelEvent(eventId, adminId);
+        refundingService.cancelEvent(eventId, adminId, headerUserRole);
 
         return ResponseEntity.noContent().build();
     }

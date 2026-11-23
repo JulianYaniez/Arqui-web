@@ -135,7 +135,7 @@ public class RefundingService {
     }
 
     @Transactional
-    public void cancelEvent(String eventId, UUID adminId) {
+    public void cancelEvent(String eventId, UUID adminId, String userRole) {
         try {
             catalogClient.cancelEvent(eventId);
         } catch (FeignException.NotFound e) {
@@ -157,14 +157,14 @@ public class RefundingService {
             payments.add(PaymentRefundRequest.fromReservation(reservation));
         }
 
-        try { // Should go Async
+        try {
             paymentClient.bulkRefund(payments);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Payment service.");
         }
 
         try {
-            ticketingClient.bulkCancelReservations(eventId);
+            ticketingClient.bulkCancelReservations(eventId, userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
         }

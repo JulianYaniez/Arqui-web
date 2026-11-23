@@ -17,7 +17,7 @@ TicketYa is a distributed microservices platform for event management, ticket re
 - Docker & Docker Compose.
 - Ensure the following ports are available on your host machine:
   - `5173`: Frontend (React + Vite dev server)
-  - `8080`: API Gateway
+  - `8080`: API Gateway[metrics](management-service/src/main/java/com/arquiweb/management/metrics)
   - `8081–8085`: Backend Microservices (`ticketing`, `management`, `identity`, `payment`, `catalog`)
   - `5432–5435`: PostgreSQL databases (`ticketing`, `management`, `identity`, `payment`)
   - `27017`: MongoDB (`catalog`)
@@ -103,7 +103,7 @@ Detailed architectural models, domain diagrams, and project management tools use
 - **API Gateway & Observability:** Non-blocking asynchronous routing using Spring Cloud Gateway (WebFlux) with centralized JWT validation, role header propagation, and reactive HTTP request tracing.
 - **Hybrid Storage & Reporting:** MongoDB for read-heavy event catalogs; isolated PostgreSQL instances per transactional domain, supporting persistent administrative audit logs and TTL-cached event metrics (`JSONB`).
 - **Event-Driven Messaging (Apache Kafka):** Asynchronous event streaming across `Catalog`, `Ticketing`, and `Identity` to decouple purchase confirmations, event alerts, and SMTP email delivery via Mailpit.
-- **Virtual Waiting Queue (Redis):** Redis-backed admission queue in `Ticketing` regulating concurrent checkout traffic via configurable batch sizes and admission TTLs.
+- **Virtual Waiting Queue (Redis):** Red[src](catalog-service/src)is-backed admission queue in `Ticketing` regulating concurrent checkout traffic via configurable batch sizes and admission TTLs.
 - **Concurrency Strategies:**
   - **Optimistic Locking (`@Version`):** Prevents race conditions during high-volume sector capacity updates.
   - **Pessimistic Locking (`@Lock`):** Enforces row-level write locks (`FOR UPDATE`) on reservation refunds and seat reservations.

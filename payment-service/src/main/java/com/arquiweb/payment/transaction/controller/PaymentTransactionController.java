@@ -1,6 +1,7 @@
 package com.arquiweb.payment.transaction.controller;
 
 import com.arquiweb.payment.infrastructure.exception.ForbiddenException;
+import com.arquiweb.payment.transaction.domain.enums.MockFailureSimulation;
 import com.arquiweb.payment.transaction.dtos.request.PaymentRefundRequest;
 import com.arquiweb.payment.transaction.dtos.response.PaymentResponseDTO;
 import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
@@ -59,12 +60,13 @@ public class PaymentTransactionController {
     )
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
-    public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody RequestPaymentDTO request,
-                                                             @RequestHeader(value = "x-Simulate-Fail", required = false) String simulateFail,
-                                                             @Parameter(hidden = true)
-                                                             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
-                                                             @Parameter(hidden = true)
-                                                             @RequestHeader(value = "X-User-Id", required = false) String headerUserId
+    public ResponseEntity<PaymentResponseDTO> processPayment(
+            @Valid @RequestBody RequestPaymentDTO request,
+            @RequestHeader(value = "x-Simulate-Fail", required = false) MockFailureSimulation simulateFail,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId
     ) {
         AuthGuard.requireRole(headerUserRole, "CLIENT");
         UUID clientId = AuthGuard.requireUserId(headerUserId);
