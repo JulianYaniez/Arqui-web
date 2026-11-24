@@ -137,7 +137,7 @@ public class RefundingService {
     }
 
     @Transactional
-    public void cancelEvent(String eventId, UUID adminId, String role) {
+    public void cancelEvent(String eventId, UUID adminId) {
         try {
             catalogClient.cancelEvent(eventId, role);
         } catch (FeignException.NotFound e) {
@@ -169,18 +169,7 @@ public class RefundingService {
         }
 
         try {
-            ticketingClient.cancelEvent(eventId);
-        } catch (FeignException.NotFound e) {
-            if (!reservations.isEmpty()) {
-                try {
-                    List<UUID> reservationIds = reservations.stream()
-                            .map(ReservationStateResponse::reservationId)
-                            .toList();
-                    ticketingClient.bulkCancelReservations(role, reservationIds);
-                } catch (Exception cancellationException) {
-                    throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
-                }
-            }
+            ticketingClient.bulkCancelReservations(eventId, userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
         }
