@@ -1,3 +1,4 @@
+import com.arquiweb.management.audit.service.AuditService;
 import com.arquiweb.management.infrastructure.client.CatalogClient;
 import com.arquiweb.management.infrastructure.client.PaymentClient;
 import com.arquiweb.management.infrastructure.client.TicketingClient;
@@ -45,18 +46,24 @@ public class RefundingServiceTest {
     @Mock
     private PaymentClient paymentClient;
 
+    @Mock
+    private AuditService auditService;
+
     private RefundingService refundingService;
     private AutoCloseable closeable;
+
+    private final static String ROLE = "ADMIN";
 
     @BeforeMethod
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        Mockito.reset(refundRequestRepository, ticketingClient, catalogClient, paymentClient);
+        Mockito.reset(refundRequestRepository, ticketingClient, catalogClient, paymentClient, auditService);
         refundingService = new RefundingService(
                 refundRequestRepository,
                 ticketingClient,
                 catalogClient,
-                paymentClient
+                paymentClient,
+                auditService
         );
     }
 
@@ -96,7 +103,7 @@ public class RefundingServiceTest {
         UUID resultId = refundingService.createRefundRequest(request, clientId);
 
         Assert.assertEquals(resultId, expectedId);
-        verify(ticketingClient, times(1)).setRequestRefund(reservationId);
+        verify(ticketingClient, times(1)).setRequestRefund(reservationId, ROLE);
         verify(refundRequestRepository, times(1)).save(any(RefundRequest.class));
     }
 
@@ -212,10 +219,6 @@ public class RefundingServiceTest {
         refundingService.createRefundRequest(request, clientId);
     }
 
-    // =========================================================================
-    // 2. acceptRefund
-    // =========================================================================
-
     @Test
     public void testAcceptRefund_Successful() {
         UUID refundId = UUID.randomUUID();
@@ -233,11 +236,11 @@ public class RefundingServiceTest {
         when(reservation.totalPrice()).thenReturn(BigDecimal.valueOf(5000));
         when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        refundingService.acceptRefund(refundId, adminId);
+        refundingService.acceptRefund(refundId, adminId, ROLE);
 
         verify(refundRequest, times(1)).accept(adminId);
-        verify(ticketingClient, times(1)).acceptRefund(reservationId);
-        verify(paymentClient, times(1)).refundPayment(paymentId);
+        verify(ticketingClient, times(1)).acceptRefund(reservationId, ROLE);
+        verify(paymentClient, times(1)).refundPayment(paymentId, ROLE);
         verify(refundRequestRepository, times(1)).save(refundRequest);
     }
 
@@ -246,7 +249,7 @@ public class RefundingServiceTest {
         UUID refundId = UUID.randomUUID();
         when(refundRequestRepository.findById(refundId)).thenReturn(Optional.empty());
 
-        refundingService.acceptRefund(refundId, UUID.randomUUID());
+        refundingService.acceptRefund(refundId, UUID.randomUUID(), ROLE);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
@@ -260,7 +263,7 @@ public class RefundingServiceTest {
 
         when(ticketingClient.getReservationById(reservationId)).thenThrow(mock(FeignException.NotFound.class));
 
-        refundingService.acceptRefund(refundId, UUID.randomUUID());
+        refundingService.acceptRefund(refundId, UUID.randomUUID(), ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
@@ -274,7 +277,7 @@ public class RefundingServiceTest {
 
         when(ticketingClient.getReservationById(reservationId)).thenThrow(new RuntimeException("Error"));
 
-        refundingService.acceptRefund(refundId, UUID.randomUUID());
+        refundingService.acceptRefund(refundId, UUID.randomUUID(), ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
@@ -294,14 +297,10 @@ public class RefundingServiceTest {
         when(reservation.totalPrice()).thenReturn(BigDecimal.valueOf(5000));
         when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        doThrow(new RuntimeException("Payment down")).when(paymentClient).refundPayment(paymentId);
+        doThrow(new RuntimeException("Payment down")).when(paymentClient).refundPayment(paymentId, ROLE);
 
-        refundingService.acceptRefund(refundId, adminId);
+        refundingService.acceptRefund(refundId, adminId, ROLE);
     }
-
-    // =========================================================================
-    // 3. rejectRefund
-    // =========================================================================
 
     @Test
     public void testRejectRefund_Successful() {
@@ -317,10 +316,10 @@ public class RefundingServiceTest {
         when(reservation.reservationId()).thenReturn(reservationId);
         when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        refundingService.rejectRefund(refundId, adminId);
+        refundingService.rejectRefund(refundId, adminId, ROLE);
 
         verify(refundRequest, times(1)).reject(adminId);
-        verify(ticketingClient, times(1)).rejectRefund(reservationId);
+        verify(ticketingClient, times(1)).rejectRefund(reservationId, ROLE);
         verify(refundRequestRepository, times(1)).save(refundRequest);
     }
 
@@ -335,7 +334,7 @@ public class RefundingServiceTest {
 
         when(ticketingClient.getReservationById(reservationId)).thenThrow(mock(FeignException.NotFound.class));
 
-        refundingService.rejectRefund(refundId, UUID.randomUUID());
+        refundingService.rejectRefund(refundId, UUID.randomUUID(), ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
@@ -349,7 +348,7 @@ public class RefundingServiceTest {
 
         when(ticketingClient.getReservationById(reservationId)).thenThrow(new RuntimeException("Error"));
 
-        refundingService.rejectRefund(refundId, UUID.randomUUID());
+        refundingService.rejectRefund(refundId, UUID.randomUUID(), ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
@@ -366,13 +365,14 @@ public class RefundingServiceTest {
         when(reservation.reservationId()).thenReturn(reservationId);
         when(ticketingClient.getReservationById(reservationId)).thenReturn(reservation);
 
-        doThrow(new RuntimeException("Ticketing down")).when(ticketingClient).rejectRefund(reservationId);
+        doThrow(new RuntimeException("Ticketing down")).when(ticketingClient).rejectRefund(reservationId, ROLE);
 
-        refundingService.rejectRefund(refundId, adminId);
+        refundingService.rejectRefund(refundId, adminId, ROLE);
     }
 
     @Test
     public void testCancelEvent_Successful() {
+        UUID adminId = UUID.randomUUID();
         String eventId = "event-123";
 
         ReservationStateResponse reservation = mock(ReservationStateResponse.class);
@@ -382,52 +382,57 @@ public class RefundingServiceTest {
 
         when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenReturn(List.of(reservation));
 
-        refundingService.cancelEvent(eventId);
+        refundingService.cancelEvent(eventId, adminId, ROLE);
 
-        verify(catalogClient, times(1)).cancelEvent(eventId);
-        verify(paymentClient, times(1)).bulkRefund(anyList());
-        verify(ticketingClient, times(1)).bulkCancelReservations(eventId);
+        verify(catalogClient, times(1)).cancelEvent(eventId, ROLE);
+        verify(paymentClient, times(1)).bulkRefund(anyList(), ROLE);
+        verify(ticketingClient, times(1)).bulkCancelReservations(eventId, ROLE);
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
     public void testCancelEvent_EventNotFound() {
+        UUID adminId = UUID.randomUUID();
         String eventId = "event-123";
-        doThrow(mock(FeignException.NotFound.class)).when(catalogClient).cancelEvent(eventId);
+        doThrow(mock(FeignException.NotFound.class)).when(catalogClient).cancelEvent(eventId, ROLE);
 
-        refundingService.cancelEvent(eventId);
+        refundingService.cancelEvent(eventId, adminId, ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
     public void testCancelEvent_CatalogUnavailable() {
         String eventId = "event-123";
-        doThrow(new RuntimeException("Catalog down")).when(catalogClient).cancelEvent(eventId);
+        UUID adminId = UUID.randomUUID();
+        doThrow(new RuntimeException("Catalog down")).when(catalogClient).cancelEvent(eventId, ROLE);
 
-        refundingService.cancelEvent(eventId);
+        refundingService.cancelEvent(eventId, adminId, ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
     public void testCancelEvent_GetReservationsUnavailable() {
+        UUID adminId = UUID.randomUUID();
         String eventId = "event-123";
         when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenThrow(new RuntimeException("Ticketing down"));
 
-        refundingService.cancelEvent(eventId);
+        refundingService.cancelEvent(eventId, adminId, ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
     public void testCancelEvent_BulkRefundUnavailable() {
         String eventId = "event-123";
+        UUID adminId = UUID.randomUUID();
         when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenReturn(List.of());
-        doThrow(new RuntimeException("Payment down")).when(paymentClient).bulkRefund(anyList());
+        doThrow(new RuntimeException("Payment down")).when(paymentClient).bulkRefund(anyList(), ROLE);
 
-        refundingService.cancelEvent(eventId);
+        refundingService.cancelEvent(eventId, adminId, ROLE);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
     public void testCancelEvent_BulkCancelUnavailable() {
         String eventId = "event-123";
+        UUID adminId = UUID.randomUUID();
         when(ticketingClient.getReservationsByEventId(eventId, "PAID")).thenReturn(List.of());
-        doThrow(new RuntimeException("Ticketing down")).when(ticketingClient).bulkCancelReservations(eventId);
+        doThrow(new RuntimeException("Ticketing down")).when(ticketingClient).bulkCancelReservations(eventId, ROLE);
 
-        refundingService.cancelEvent(eventId);
+        refundingService.cancelEvent(eventId, adminId, ROLE);
     }
 }
