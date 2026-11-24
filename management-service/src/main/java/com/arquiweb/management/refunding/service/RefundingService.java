@@ -75,7 +75,7 @@ public class RefundingService {
     }
 
     @Transactional
-    public void acceptRefund(UUID refundRequestId, UUID adminId, String role) {
+    public void acceptRefund(UUID refundRequestId, UUID adminId, String userRole) {
         RefundRequest refundRequest = validateRefundRequest(refundRequestId);
 
         ReservationStateResponse reservation;
@@ -90,8 +90,8 @@ public class RefundingService {
         refundRequest.accept(adminId);
 
         try {
-            ticketingClient.acceptRefund(reservation.reservationId(), role);
-            paymentClient.refundPayment(reservation.paymentId(), role);
+            ticketingClient.acceptRefund(reservation.reservationId(), userRole);
+            paymentClient.refundPayment(reservation.paymentId(), userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Payment or Ticketing services.");
         }
@@ -107,7 +107,7 @@ public class RefundingService {
 
 
     @Transactional
-    public void rejectRefund(UUID refundRequestId, UUID adminId, String role) {
+    public void rejectRefund(UUID refundRequestId, UUID adminId, String userRole) {
         RefundRequest refundRequest = validateRefundRequest(refundRequestId);
 
         ReservationStateResponse reservation;
@@ -122,7 +122,7 @@ public class RefundingService {
         refundRequest.reject(adminId);
 
         try {
-            ticketingClient.rejectRefund(reservation.reservationId(), role);
+            ticketingClient.rejectRefund(reservation.reservationId(), userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing services.");
         }
@@ -137,9 +137,9 @@ public class RefundingService {
     }
 
     @Transactional
-    public void cancelEvent(String eventId, UUID adminId) {
+    public void cancelEvent(String eventId, UUID adminId, String userRole) {
         try {
-            catalogClient.cancelEvent(eventId, role);
+            catalogClient.cancelEvent(eventId, userRole);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException("Event does not exist.");
         } catch (Exception e) {
@@ -160,12 +160,10 @@ public class RefundingService {
         }
 
 
-        if (!payments.isEmpty()) {
-            try { // Should go Async
-                paymentClient.bulkRefund(payments, role);
-            } catch (Exception e) {
-                throw new ServiceUnavailableException("Something went wrong with Payment service.");
-            }
+        try {
+            paymentClient.bulkRefund(payments, userRole);
+        } catch (Exception e) {
+            throw new ServiceUnavailableException("Something went wrong with Payment service.");
         }
 
         try {
