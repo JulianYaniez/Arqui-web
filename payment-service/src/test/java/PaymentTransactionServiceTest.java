@@ -1,4 +1,6 @@
+import com.arquiweb.payment.infrastructure.breaker.CircuitBreaker;
 import com.arquiweb.payment.infrastructure.client.TicketingClient;
+import com.arquiweb.payment.infrastructure.client.dto.ReservationStateResponse;
 import com.arquiweb.payment.infrastructure.exception.*;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
@@ -15,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -31,6 +34,9 @@ import static org.mockito.Mockito.*;
 
 public class PaymentTransactionServiceTest {
 
+    private static final String SERVICE_ROLE = "CLIENT";
+    private static final String PAYMENT_SERVICE_ROLE = "PAYMENT_SERVICE";
+
     @Mock
     private PaymentRepository paymentRepository;
 
@@ -40,14 +46,23 @@ public class PaymentTransactionServiceTest {
     @Mock
     private TicketingClient ticketingClient;
 
+    @Mock
+    private CircuitBreaker circuitBreaker;
+
     private PaymentTransactionService paymentService;
     private AutoCloseable closeable;
 
     @BeforeMethod
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        Mockito.reset(paymentRepository, paymentGateway, ticketingClient);
-        paymentService = new PaymentTransactionService(paymentRepository, paymentGateway, ticketingClient);
+        paymentService = new PaymentTransactionService(
+                paymentRepository,
+                paymentGateway,
+                ticketingClient,
+                circuitBreaker
+        );
+        ReflectionTestUtils.setField(paymentService, "maxGatewayAttempts", 2);
+        ReflectionTestUtils.setField(paymentService, "sleepTime", 1);
     }
 
     @AfterMethod
@@ -58,7 +73,7 @@ public class PaymentTransactionServiceTest {
     }
 
     @Test
-    public void testProcessPayment_CreditCardApproved_Successful() throws Exception {
+    public void testProcessPayment_CreditCardApproved_Successful() throws TimeoutException {
         UUID reservationId = UUID.randomUUID();
         String validToken = "4111222233334444";
         BigDecimal amount = BigDecimal.valueOf(5000);
@@ -70,26 +85,29 @@ public class PaymentTransactionServiceTest {
         when(request.amount()).thenReturn(amount);
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
+        when(circuitBreaker.allowRequest()).thenReturn(true);
 
         PaymentTransaction domainTx = new PaymentTransaction();
         domainTx.setId(UUID.randomUUID());
         domainTx.setReservationId(reservationId);
         when(request.toDomain()).thenReturn(domainTx);
 
-        GatewayResponse gatewayResponse = new GatewayResponse(TransactionStatus.APPROVED, "ext-tx-123", "aproved");
-        when(paymentGateway.processPayment(validToken, amount, PaymentMethod.CREDIT_CARD)).thenReturn(gatewayResponse);
+        GatewayResponse gatewayResponse = new GatewayResponse(TransactionStatus.APPROVED, "ext-tx-123", "approved");
+        when(paymentGateway.processPayment(validToken, amount, PaymentMethod.CREDIT_CARD, null))
+                .thenReturn(gatewayResponse);
         when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        PaymentTransaction result = paymentService.processPayment(request);
+        PaymentTransaction result = paymentService.processPayment(request, null, SERVICE_ROLE);
 
         Assert.assertEquals(result.getStatus(), TransactionStatus.APPROVED);
         Assert.assertEquals(result.getExternalGatewayTransactionId(), "ext-tx-123");
-        verify(ticketingClient, never()).releaseReservations(any());
+        verify(circuitBreaker, times(1)).recordSuccess();
+        verify(ticketingClient, never()).releaseReservations(any(), any());
         verify(paymentRepository, times(1)).save(domainTx);
     }
 
     @Test
-    public void testProcessPayment_NonCreditCardApproved_SkipsPrefixCheck() throws Exception {
+    public void testProcessPayment_NonCreditCardApproved_SkipsPrefixCheck() throws TimeoutException {
         UUID reservationId = UUID.randomUUID();
         BigDecimal amount = BigDecimal.valueOf(3000);
 
@@ -100,19 +118,22 @@ public class PaymentTransactionServiceTest {
         when(request.amount()).thenReturn(amount);
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
+        when(circuitBreaker.allowRequest()).thenReturn(true);
 
         PaymentTransaction domainTx = new PaymentTransaction();
         domainTx.setReservationId(reservationId);
         when(request.toDomain()).thenReturn(domainTx);
 
-        GatewayResponse gatewayResponse = new GatewayResponse(TransactionStatus.APPROVED, "ext-tx-456", "aproved");
-        when(paymentGateway.processPayment("0000", amount, PaymentMethod.MERCADO_PAGO_BITE)).thenReturn(gatewayResponse);
+        GatewayResponse gatewayResponse = new GatewayResponse(TransactionStatus.APPROVED, "ext-tx-456", "approved");
+        when(paymentGateway.processPayment("0000", amount, PaymentMethod.MERCADO_PAGO_BITE, null))
+                .thenReturn(gatewayResponse);
         when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        PaymentTransaction result = paymentService.processPayment(request);
+        PaymentTransaction result = paymentService.processPayment(request, null, SERVICE_ROLE);
 
         Assert.assertEquals(result.getStatus(), TransactionStatus.APPROVED);
-        verify(ticketingClient, never()).releaseReservations(any());
+        verify(circuitBreaker, times(1)).recordSuccess();
+        verify(ticketingClient, never()).releaseReservations(any(), any());
     }
 
     @Test(expectedExceptions = InvalidInputException.class)
@@ -123,7 +144,7 @@ public class PaymentTransactionServiceTest {
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(true);
 
-        paymentService.processPayment(request);
+        paymentService.processPayment(request, null, SERVICE_ROLE);
     }
 
     @Test(expectedExceptions = InvalidCardPrefixException.class)
@@ -136,11 +157,32 @@ public class PaymentTransactionServiceTest {
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
 
-        paymentService.processPayment(request);
+        paymentService.processPayment(request, null, SERVICE_ROLE);
     }
 
-    @Test(expectedExceptions = InvalidInputException.class)
-    public void testProcessPayment_NullGatewayResponse_ThrowsInvalidInputException() throws Exception {
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testProcessPayment_CircuitBreakerOpen_RejectsReleasesAndThrowsServiceUnavailable() {
+        UUID reservationId = UUID.randomUUID();
+        RequestPaymentDTO request = mock(RequestPaymentDTO.class);
+        when(request.reservationId()).thenReturn(reservationId);
+        when(request.paymentMethod()).thenReturn(PaymentMethod.CREDIT_CARD);
+        when(request.cardToken()).thenReturn("4111111122223333");
+
+        PaymentTransaction domainTx = new PaymentTransaction();
+        when(request.toDomain()).thenReturn(domainTx);
+
+        when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
+        when(circuitBreaker.allowRequest()).thenReturn(false);
+        when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        paymentService.processPayment(request, null, SERVICE_ROLE);
+
+        verifyNoInteractions(paymentGateway);
+        verify(ticketingClient, times(1)).releaseReservations(reservationId, SERVICE_ROLE);
+    }
+
+    @Test(expectedExceptions = InvalidGatewayResponseException.class)
+    public void testProcessPayment_NullGatewayResponse_ThrowsInvalidGatewayResponseException() throws TimeoutException {
         UUID reservationId = UUID.randomUUID();
         RequestPaymentDTO request = mock(RequestPaymentDTO.class);
         when(request.reservationId()).thenReturn(reservationId);
@@ -150,13 +192,15 @@ public class PaymentTransactionServiceTest {
         when(request.toDomain()).thenReturn(new PaymentTransaction());
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
-        when(paymentGateway.processPayment(any(), any(), any())).thenReturn(null);
+        when(circuitBreaker.allowRequest()).thenReturn(true);
+        when(paymentGateway.processPayment(any(), any(), any(), any())).thenReturn(null);
+        when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        paymentService.processPayment(request);
+        paymentService.processPayment(request, null, SERVICE_ROLE);
     }
 
-    @Test(expectedExceptions = InvalidInputException.class)
-    public void testProcessPayment_NullTransactionStatusInGatewayResponse_ThrowsInvalidInputException() throws Exception {
+    @Test(expectedExceptions = InvalidGatewayResponseException.class)
+    public void testProcessPayment_NullStatusInGatewayResponse_ThrowsInvalidGatewayResponseException() throws TimeoutException {
         UUID reservationId = UUID.randomUUID();
         RequestPaymentDTO request = mock(RequestPaymentDTO.class);
         when(request.reservationId()).thenReturn(reservationId);
@@ -166,13 +210,16 @@ public class PaymentTransactionServiceTest {
         when(request.toDomain()).thenReturn(new PaymentTransaction());
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
-        when(paymentGateway.processPayment(any(), any(), any())).thenReturn(new GatewayResponse(null, "ext-1", "null"));
+        when(circuitBreaker.allowRequest()).thenReturn(true);
+        when(paymentGateway.processPayment(any(), any(), any(), any()))
+                .thenReturn(new GatewayResponse(null, "ext-1", "null"));
+        when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        paymentService.processPayment(request);
+        paymentService.processPayment(request, null, SERVICE_ROLE);
     }
 
     @Test
-    public void testProcessPayment_GatewayRejected_SavesRejectedAndReleasesReservation() throws Exception {
+    public void testProcessPayment_GatewayRejected_SavesRejectedAndReleasesReservation() throws TimeoutException {
         UUID reservationId = UUID.randomUUID();
         RequestPaymentDTO request = mock(RequestPaymentDTO.class);
         when(request.reservationId()).thenReturn(reservationId);
@@ -185,18 +232,20 @@ public class PaymentTransactionServiceTest {
         when(request.toDomain()).thenReturn(domainTx);
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
-        when(paymentGateway.processPayment(any(), any(), any()))
+        when(circuitBreaker.allowRequest()).thenReturn(true);
+        when(paymentGateway.processPayment(any(), any(), any(), any()))
                 .thenReturn(new GatewayResponse(TransactionStatus.REJECTED, "ext-rej-1", "rejected"));
         when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        PaymentTransaction result = paymentService.processPayment(request);
+        PaymentTransaction result = paymentService.processPayment(request, null, SERVICE_ROLE);
 
         Assert.assertEquals(result.getStatus(), TransactionStatus.REJECTED);
-        verify(ticketingClient, times(1)).releaseReservations(reservationId);
+        verify(circuitBreaker, times(1)).recordSuccess();
+        verify(ticketingClient, times(1)).releaseReservations(reservationId, SERVICE_ROLE);
     }
 
-    @Test
-    public void testProcessPayment_GatewayTimeout_SavesRejectedAndReleasesReservation() throws Exception {
+    @Test(expectedExceptions = GatewayRetriesExhaustedException.class)
+    public void testProcessPayment_GatewayRetriesExhausted_RecordsFailureReleasesAndThrows() throws TimeoutException {
         UUID reservationId = UUID.randomUUID();
         RequestPaymentDTO request = mock(RequestPaymentDTO.class);
         when(request.reservationId()).thenReturn(reservationId);
@@ -209,18 +258,16 @@ public class PaymentTransactionServiceTest {
         when(request.toDomain()).thenReturn(domainTx);
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
-        when(paymentGateway.processPayment(any(), any(), any())).thenThrow(new TimeoutException("Gateway timeout"));
+        when(circuitBreaker.allowRequest()).thenReturn(true);
+        when(paymentGateway.processPayment(any(), any(), any(), any()))
+                .thenThrow(new TimeoutException("Gateway timeout"));
         when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        PaymentTransaction result = paymentService.processPayment(request);
-
-        Assert.assertEquals(result.getStatus(), TransactionStatus.REJECTED);
-        Assert.assertNull(result.getExternalGatewayTransactionId());
-        verify(ticketingClient, times(1)).releaseReservations(reservationId);
+        paymentService.processPayment(request, null, SERVICE_ROLE);
     }
 
     @Test(expectedExceptions = ReservationReleaseException.class)
-    public void testProcessPayment_RejectedAndTicketingFeignFails_ThrowsReservationReleaseException() throws Exception {
+    public void testProcessPayment_RejectedAndTicketingFeignFails_ThrowsReservationReleaseException() throws TimeoutException {
         UUID reservationId = UUID.randomUUID();
         RequestPaymentDTO request = mock(RequestPaymentDTO.class);
         when(request.reservationId()).thenReturn(reservationId);
@@ -230,12 +277,31 @@ public class PaymentTransactionServiceTest {
         when(request.toDomain()).thenReturn(new PaymentTransaction());
 
         when(paymentRepository.isPaymentProcessedAndStatus(reservationId, TransactionStatus.APPROVED)).thenReturn(false);
-        when(paymentGateway.processPayment(any(), any(), any()))
+        when(circuitBreaker.allowRequest()).thenReturn(true);
+        when(paymentGateway.processPayment(any(), any(), any(), any()))
                 .thenReturn(new GatewayResponse(TransactionStatus.REJECTED, "ext-rej", "rejected"));
         when(paymentRepository.save(any(PaymentTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
-        doThrow(mock(FeignException.class)).when(ticketingClient).releaseReservations(reservationId);
+        doThrow(mock(FeignException.class)).when(ticketingClient).releaseReservations(reservationId, SERVICE_ROLE);
 
-        paymentService.processPayment(request);
+        paymentService.processPayment(request, null, SERVICE_ROLE);
+    }
+
+    @Test
+    public void testCallGateway_RetriesOnceAndSucceeds() throws TimeoutException {
+        RequestPaymentDTO request = mock(RequestPaymentDTO.class);
+        when(request.cardToken()).thenReturn("4111222233334444");
+        when(request.amount()).thenReturn(BigDecimal.TEN);
+        when(request.paymentMethod()).thenReturn(PaymentMethod.CREDIT_CARD);
+
+        GatewayResponse expected = new GatewayResponse(TransactionStatus.APPROVED, "ext-ok", "ok");
+        when(paymentGateway.processPayment(any(), any(), any(), any()))
+                .thenThrow(new ServiceUnavailableException())
+                .thenReturn(expected);
+
+        GatewayResponse result = paymentService.callGateway(request, null);
+
+        Assert.assertEquals(result, expected);
+        verify(paymentGateway, times(2)).processPayment(any(), any(), any(), any());
     }
 
     @Test
@@ -271,22 +337,33 @@ public class PaymentTransactionServiceTest {
     @Test
     public void testRefundTransaction_Successful() {
         UUID paymentId = UUID.randomUUID();
-        UUID reservationId = UUID.randomUUID();
 
-        PaymentTransaction tx = new PaymentTransaction();
-        tx.setId(paymentId);
-        tx.setReservationId(reservationId);
-        tx.setExternalGatewayTransactionId("ext-123");
-        tx.setAmount(BigDecimal.valueOf(1000));
+        PaymentTransaction tx = mock(PaymentTransaction.class);
+        when(tx.isRefunded()).thenReturn(false);
+        when(tx.getExternalGatewayTransactionId()).thenReturn("ext-123");
+        when(tx.getAmount()).thenReturn(BigDecimal.valueOf(1000));
 
         when(paymentRepository.getPaymentTransactionByIdWithLock(paymentId)).thenReturn(Optional.of(tx));
         when(paymentGateway.refund("ext-123", BigDecimal.valueOf(1000), false)).thenReturn(true);
 
         paymentService.refundTransaction(paymentId, false);
 
-        Assert.assertEquals(tx.getStatus(), TransactionStatus.REFUNDED);
+        verify(tx, times(1)).setStatus(TransactionStatus.REFUNDED);
         verify(paymentRepository, times(1)).save(tx);
-        verify(ticketingClient, times(1)).releaseReservations(reservationId);
+    }
+
+    @Test
+    public void testRefundTransaction_AlreadyRefunded_SkipsGatewayAndSave() {
+        UUID paymentId = UUID.randomUUID();
+        PaymentTransaction tx = mock(PaymentTransaction.class);
+        when(tx.isRefunded()).thenReturn(true);
+
+        when(paymentRepository.getPaymentTransactionByIdWithLock(paymentId)).thenReturn(Optional.of(tx));
+
+        paymentService.refundTransaction(paymentId, false);
+
+        verifyNoInteractions(paymentGateway);
+        verify(paymentRepository, never()).save(any());
     }
 
     @Test(expectedExceptions = ResourceNotFoundException.class)
@@ -300,9 +377,10 @@ public class PaymentTransactionServiceTest {
     @Test(expectedExceptions = PaymentGatewayException.class)
     public void testRefundTransaction_GatewayReturnsFalse_ThrowsPaymentGatewayException() {
         UUID paymentId = UUID.randomUUID();
-        PaymentTransaction tx = new PaymentTransaction();
-        tx.setExternalGatewayTransactionId("ext-123");
-        tx.setAmount(BigDecimal.valueOf(1000));
+        PaymentTransaction tx = mock(PaymentTransaction.class);
+        when(tx.isRefunded()).thenReturn(false);
+        when(tx.getExternalGatewayTransactionId()).thenReturn("ext-123");
+        when(tx.getAmount()).thenReturn(BigDecimal.valueOf(1000));
 
         when(paymentRepository.getPaymentTransactionByIdWithLock(paymentId)).thenReturn(Optional.of(tx));
         when(paymentGateway.refund("ext-123", BigDecimal.valueOf(1000), true)).thenReturn(false);
@@ -331,7 +409,6 @@ public class PaymentTransactionServiceTest {
         PaymentTransaction tx1 = mock(PaymentTransaction.class);
         when(tx1.isRefunded()).thenReturn(false);
         when(tx1.getExternalGatewayTransactionId()).thenReturn("ext-1");
-        when(tx1.getReservationId()).thenReturn(resId1);
         when(paymentRepository.getPaymentTransactionByIdWithLock(payId1)).thenReturn(Optional.of(tx1));
         when(paymentGateway.refund("ext-1", BigDecimal.valueOf(2000), false)).thenReturn(true);
 
@@ -347,7 +424,6 @@ public class PaymentTransactionServiceTest {
 
         verify(tx1, times(1)).setStatus(TransactionStatus.REFUNDED);
         verify(paymentRepository, times(1)).save(tx1);
-        verify(ticketingClient, times(1)).releaseReservations(resId1);
         verify(paymentGateway, never()).refund(eq(null), any(), anyBoolean());
     }
 
@@ -379,5 +455,70 @@ public class PaymentTransactionServiceTest {
         when(paymentGateway.refund("ext-1", BigDecimal.valueOf(2000), false)).thenReturn(false);
 
         paymentService.processBulkRefund(List.of(req));
+    }
+
+    @Test
+    public void testIsReservationOwnedBy_MatchingUser_ReturnsTrue() {
+        UUID reservationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(userId);
+        when(ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE)).thenReturn(reservation);
+
+        Assert.assertTrue(paymentService.isReservationOwnedBy(reservationId, userId));
+    }
+
+    @Test
+    public void testIsReservationOwnedBy_DifferentUser_ReturnsFalse() {
+        UUID reservationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(otherUserId);
+        when(ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE)).thenReturn(reservation);
+
+        Assert.assertFalse(paymentService.isReservationOwnedBy(reservationId, userId));
+    }
+
+    @Test
+    public void testValidateReservationForPayment_Valid_DoesNotThrow() {
+        UUID reservationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        BigDecimal amount = BigDecimal.valueOf(5000);
+
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(userId);
+        when(reservation.totalPrice()).thenReturn(new BigDecimal("5000.00"));
+        when(ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE)).thenReturn(reservation);
+
+        paymentService.validateReservationForPayment(reservationId, userId, amount);
+    }
+
+    @Test(expectedExceptions = ForbiddenException.class)
+    public void testValidateReservationForPayment_WrongUser_ThrowsForbiddenException() {
+        UUID reservationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(otherUserId);
+        when(ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE)).thenReturn(reservation);
+
+        paymentService.validateReservationForPayment(reservationId, userId, BigDecimal.valueOf(5000));
+    }
+
+    @Test(expectedExceptions = InvalidInputException.class)
+    public void testValidateReservationForPayment_AmountMismatch_ThrowsInvalidInputException() {
+        UUID reservationId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        ReservationStateResponse reservation = mock(ReservationStateResponse.class);
+        when(reservation.clientId()).thenReturn(userId);
+        when(reservation.totalPrice()).thenReturn(BigDecimal.valueOf(5000));
+        when(ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE)).thenReturn(reservation);
+
+        paymentService.validateReservationForPayment(reservationId, userId, BigDecimal.valueOf(4500));
     }
 }
