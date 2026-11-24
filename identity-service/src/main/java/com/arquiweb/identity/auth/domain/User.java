@@ -19,7 +19,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -102,6 +102,6 @@ public class User {
 
     public boolean verifyPassword(String rawPassword, PasswordEncoder encoder) {
         if (rawPassword == null || rawPassword.isBlank()) return false;
-        return encoder.matches(rawPassword, this .password);
+        return encoder.matches(rawPassword, this.password);
     }
 }

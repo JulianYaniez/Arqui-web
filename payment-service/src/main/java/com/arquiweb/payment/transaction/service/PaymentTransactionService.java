@@ -1,9 +1,13 @@
 package com.arquiweb.payment.transaction.service;
 
+import com.arquiweb.payment.infrastructure.breaker.CircuitBreaker;
+import com.arquiweb.payment.infrastructure.client.dto.ReservationStateResponse;
 import com.arquiweb.payment.infrastructure.exception.*;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
 
 import com.arquiweb.payment.transaction.domain.Exception.InvalidCardPrefixException;
+import com.arquiweb.payment.transaction.domain.enums.MockFailureSimulation;
+import com.arquiweb.payment.transaction.domain.enums.MockFailureSimulation;
 import com.arquiweb.payment.transaction.dtos.request.PaymentRefundRequest;
 import com.arquiweb.payment.transaction.dtos.request.RequestPaymentDTO;
 import com.arquiweb.payment.transaction.domain.PaymentTransaction;
@@ -12,12 +16,16 @@ import com.arquiweb.payment.infrastructure.client.TicketingClient;
 import com.arquiweb.payment.infrastructure.gateway.PaymentGateway;
 import com.arquiweb.payment.transaction.repository.interfaces.PaymentRepository;
 import feign.FeignException;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +39,16 @@ import static com.arquiweb.payment.transaction.domain.enums.PaymentMethod.CREDIT
 @Slf4j
 public class PaymentTransactionService {
 
+    private static final String PAYMENT_SERVICE_ROLE = "PAYMENT_SERVICE";
+
     private final PaymentRepository paymentRepository;
     private final PaymentGateway paymentGateway;
     private final TicketingClient ticketingClient;
+    private final CircuitBreaker circuitBreaker;
 
     private final List<String> validPrefixes = List.of("4111", "4242", "5555", "3782");
 
-    public PaymentTransaction processPayment(RequestPaymentDTO request) {
+    public PaymentTransaction processPayment(RequestPaymentDTO request, MockFailureSimulation simulateFail, String serviceRole) {
         if (paymentRepository.isPaymentProcessedAndStatus(request.reservationId(), TransactionStatus.APPROVED)){
             throw new InvalidInputException("Payment already processed",
                     Map.of("reservationId", "Reservation " +
@@ -51,34 +62,59 @@ public class PaymentTransactionService {
 
         PaymentTransaction pt = request.toDomain();
         GatewayResponse gatewayResponse;
-        try {
-            gatewayResponse = paymentGateway.processPayment(request.cardToken(), request.amount(), request.paymentMethod());
-            if (gatewayResponse == null) {
-                throw new InvalidInputException("Invalid gateway response",
-                        Map.of("gateway", "The payment gateway did not return a valid response."));
-            }
-            if (gatewayResponse.ts() == null){
-                throw new InvalidInputException("Invalid gateway response",
-                        Map.of("gateway", "The payment gateway did not return a transaction status."));
-            }
-        }catch (TimeoutException e) {
-            pt = fillAndSave(TransactionStatus.REJECTED, null,LocalDateTime.now(), pt);
-            releaseReservation(request.reservationId());
-            return pt;
-        }
-        pt = fillAndSave(gatewayResponse.ts(), gatewayResponse.externalTransactionId(),LocalDateTime.now(), pt);
-        if (gatewayResponse.ts() == TransactionStatus.REJECTED) {
-            releaseReservation(request.reservationId());
-        }
-        log.info("Payment transaction processed successfully, id={}, reservationId={}, staus={}", pt.getId(), pt.getReservationId(), pt.getStatus());
-        return pt;
 
+        if(!circuitBreaker.allowRequest()){
+            rejectAndRelease(pt, request.reservationId(), TransactionStatus.FAILED, serviceRole);
+            throw new ServiceUnavailableException();
+        }
+
+        try {
+            gatewayResponse = callGateway(request, simulateFail);
+            if (gatewayResponse == null || gatewayResponse.ts() == null) {
+                circuitBreaker.recordFailure();
+                rejectAndRelease(pt, request.reservationId(), TransactionStatus.FAILED, serviceRole);
+                throw new InvalidGatewayResponseException(
+                        "The payment gateway returned an invalid response."
+                );
+            }
+
+            circuitBreaker.recordSuccess();
+            pt = fillAndSave(gatewayResponse.ts(), gatewayResponse.externalTransactionId(),LocalDateTime.now(), pt);
+
+            if (gatewayResponse.ts() == TransactionStatus.REJECTED) {
+                releaseReservation(request.reservationId(), serviceRole);
+            }
+
+            log.info("Payment transaction processed successfully, id={}, reservationId={}, staus={}", pt.getId(), pt.getReservationId(), pt.getStatus());
+            return pt;
+        }catch (GatewayRetriesExhaustedException e) {
+            circuitBreaker.recordFailure();
+            rejectAndRelease(pt, request.reservationId(),  TransactionStatus.FAILED, serviceRole);
+            throw e;
+        }
+    }
+
+    private PaymentTransaction rejectAndRelease(
+            PaymentTransaction transaction,
+            UUID reservationId,
+            TransactionStatus transactionStatus,
+            String serviceRole
+    ) {
+        PaymentTransaction rejected = fillAndSave(
+                transactionStatus,
+                null,
+                LocalDateTime.now(),
+                transaction
+        );
+
+        releaseReservation(reservationId, serviceRole);
+        return rejected;
     }
 
 
-    private void releaseReservation(UUID reservationId) {
+    private void releaseReservation(UUID reservationId, String serviceRole) {
         try {
-            ticketingClient.releaseReservations(reservationId);
+            ticketingClient.releaseReservations(reservationId, serviceRole);
         } catch (FeignException e){
             log.error("Error communicating with the ticketing service to release the reservation id={}: {}", reservationId, e.getMessage());
             throw new ReservationReleaseException(
@@ -106,11 +142,12 @@ public class PaymentTransactionService {
 
         PaymentTransaction transaction = paymentRepository.getPaymentTransactionByIdWithLock(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + paymentId));
+        if (transaction.isRefunded()) return;
+
         boolean gatewaySuccess = paymentGateway.refund(transaction.getExternalGatewayTransactionId(), transaction.getAmount(), simulateFail);
         if (gatewaySuccess) {
             transaction.setStatus(TransactionStatus.REFUNDED);
             paymentRepository.save(transaction);
-            this.releaseReservation(transaction.getReservationId());
         }else{
             throw new PaymentGatewayException("the payment gateway refund failed");
         }}catch (PessimisticLockingFailureException e){
@@ -148,11 +185,63 @@ public class PaymentTransactionService {
             }
             transaction.setStatus(TransactionStatus.REFUNDED);
             paymentRepository.save(transaction);
-            this.releaseReservation(transaction.getReservationId());
         }
         catch(Exception e){
             throw new ConflictException("The resource is currently being modified by another request.", Map.of("paymentId", request.paymentId().toString()));
         }
 
     }}
+    @Value("${payment.gateway.max-attempts}")
+    private int maxGatewayAttempts;
+    @Value("${payment.gateway.sleep-time}")
+    private int sleepTime;
+    public GatewayResponse callGateway(RequestPaymentDTO request, MockFailureSimulation simulateFail){
+        for (int i = 0; i<maxGatewayAttempts; i++) {
+            try {
+                return paymentGateway.processPayment(request.cardToken(), request.amount(), request.paymentMethod(), simulateFail);
+            }catch (PaymentGatewayException | TimeoutException | ServiceUnavailableException e){
+                if (i == maxGatewayAttempts - 1)  throw new GatewayRetriesExhaustedException(
+                        "Payment gateway processing failed for reservation: " + request.reservationId(),
+                        e
+                );
+                sleepRetry(sleepTime);
+            }
+        }
+        throw new PaymentGatewayException("Gateway did not return a response");
+    }
+
+
+    public void sleepRetry(int milliSeconds){
+        try {
+            Thread.sleep(milliSeconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public boolean isReservationOwnedBy(UUID reservationId, UUID userId) {
+        ReservationStateResponse reservation =
+                ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE);
+
+        return userId.equals(reservation.clientId());
+    }
+
+    public void validateReservationForPayment(@NotNull UUID reservationId, UUID userId, @NotNull @Positive BigDecimal paymentAmount) {
+        ReservationStateResponse reservation =
+                ticketingClient.getReservationState(reservationId, PAYMENT_SERVICE_ROLE);
+
+        if (!userId.equals(reservation.clientId())) {
+            throw new ForbiddenException(
+                    "The reservation does not belong to the authenticated user."
+            );
+        }
+
+        if (paymentAmount.compareTo(reservation.totalPrice()) != 0) {
+            throw new InvalidInputException(
+                    "Payment amount does not match the reservation total.",
+                    Map.of("amount", "Amount must match the reservation total.")
+            );
+        }
+
+    }
 }

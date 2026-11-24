@@ -1,5 +1,7 @@
 package com.arquiweb.management.refunding.service;
 
+import com.arquiweb.management.audit.domain.enums.AuditActionType;
+import com.arquiweb.management.audit.service.AuditService;
 import com.arquiweb.management.infrastructure.client.CatalogClient;
 import com.arquiweb.management.infrastructure.client.PaymentClient;
 import com.arquiweb.management.infrastructure.client.TicketingClient;
@@ -29,10 +31,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefundingService {
 
+    private static final String SERVICE_ROLE = "ADMIN";
+
     private final RefundRequestRepository refundRequestRepository;
     private final TicketingClient ticketingClient;
     private final CatalogClient catalogClient;
     private final PaymentClient paymentClient;
+    private final AuditService auditService;
 
     @Transactional
     public UUID createRefundRequest(CreateRefundRequest request, UUID clientId) {
@@ -64,13 +69,13 @@ public class RefundingService {
 
         RefundRequest refundRequest = new RefundRequest(reservation.reservationId(), clientId, request.reason());
 
-        ticketingClient.setRequestRefund(reservation.reservationId());
+        ticketingClient.setRequestRefund(reservation.reservationId(), SERVICE_ROLE);
 
         return refundRequestRepository.save(refundRequest).getId();
     }
 
     @Transactional
-    public void acceptRefund(UUID refundRequestId, UUID adminId) {
+    public void acceptRefund(UUID refundRequestId, UUID adminId, String userRole) {
         RefundRequest refundRequest = validateRefundRequest(refundRequestId);
 
         ReservationStateResponse reservation;
@@ -84,25 +89,25 @@ public class RefundingService {
 
         refundRequest.accept(adminId);
 
-        PaymentRefundRequest paymentRefundRequest = new PaymentRefundRequest(
-                reservation.reservationId(),
-                reservation.paymentId(),
-                reservation.totalPrice()
-        );
-
         try {
-            ticketingClient.acceptRefund(reservation.reservationId());
-            paymentClient.refundPayment(reservation.paymentId());
+            ticketingClient.acceptRefund(reservation.reservationId(), userRole);
+            paymentClient.refundPayment(reservation.paymentId(), userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Payment or Ticketing services.");
         }
 
         refundRequestRepository.save(refundRequest);
+        auditService.log(
+                AuditActionType.REFUND_APPROVED,
+                refundRequest.getReservationId().toString(),
+                adminId,
+                "Reservation refund accepted."
+        );
     }
 
 
     @Transactional
-    public void rejectRefund(UUID refundRequestId, UUID adminId) {
+    public void rejectRefund(UUID refundRequestId, UUID adminId, String userRole) {
         RefundRequest refundRequest = validateRefundRequest(refundRequestId);
 
         ReservationStateResponse reservation;
@@ -117,18 +122,24 @@ public class RefundingService {
         refundRequest.reject(adminId);
 
         try {
-            ticketingClient.rejectRefund(reservation.reservationId());
+            ticketingClient.rejectRefund(reservation.reservationId(), userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing services.");
         }
 
         refundRequestRepository.save(refundRequest);
+        auditService.log(
+                AuditActionType.REFUND_REJECTED,
+                refundRequest.getReservationId().toString(),
+                adminId,
+                "Reservation refund rejected."
+        );
     }
 
     @Transactional
-    public void cancelEvent(String eventId) {
+    public void cancelEvent(String eventId, UUID adminId, String userRole) {
         try {
-            catalogClient.cancelEvent(eventId);
+            catalogClient.cancelEvent(eventId, userRole);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException("Event does not exist.");
         } catch (Exception e) {
@@ -148,17 +159,25 @@ public class RefundingService {
             payments.add(PaymentRefundRequest.fromReservation(reservation));
         }
 
-        try { // Should go Async
-            paymentClient.bulkRefund(payments);
+
+        try {
+            paymentClient.bulkRefund(payments, userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Payment service.");
         }
 
         try {
-            ticketingClient.bulkCancelReservations(eventId);
+            ticketingClient.bulkCancelReservations(eventId, userRole);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
         }
+
+        auditService.log(
+                AuditActionType.EVENT_CANCELLED,
+                eventId,
+                adminId,
+                "Event got canceled by admin."
+        );
     }
 
 

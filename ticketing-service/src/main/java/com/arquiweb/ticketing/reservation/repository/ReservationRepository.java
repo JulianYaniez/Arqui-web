@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,4 +53,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     );
 
     List<Reservation> findByEventIdAndStatus(String eventId, ReservationStatus status);
+
+    @EntityGraph(attributePaths = "tickets")
+    List<Reservation> findByClientIdAndStatusOrderByCreatedAtDesc(
+            UUID clientId,
+            ReservationStatus status
+    );
 }

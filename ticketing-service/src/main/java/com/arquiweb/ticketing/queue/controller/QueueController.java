@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/queue")
 @RequiredArgsConstructor
-@Tag(name = "Tag management", description = "Join and query queues.")
+@Tag(name = "Queue Management", description = "Join and query queues.")
 public class QueueController {
 
 

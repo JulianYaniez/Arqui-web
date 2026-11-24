@@ -40,15 +40,67 @@ function adaptEvent(event) {
   }
 }
 
-// Obtener todos los eventos
+// Obtener todos los eventos publicados para el catálogo
 export async function getEvents(params = {}) {
-  const query = new URLSearchParams(params).toString()
-  const data = await apiFetch(`${API_URL}/event${query ? `?${query}` : ''}`)
+  const pageSize = 100
+  let page = 0
+  let allEvents = []
+  let totalPages = 1
 
-  return {
-    ...data,
-    content: data.content.map(adaptEvent)
-  }
+  do {
+    const queryParams = new URLSearchParams({
+      ...params,
+      page: page.toString(),
+      size: pageSize.toString()
+    })
+
+    const data = await apiFetch(
+      `${API_URL}/event?${queryParams.toString()}`
+    )
+
+    const eventList = Array.isArray(data)
+      ? data
+      : data?.content || []
+
+    allEvents = [...allEvents, ...eventList]
+
+    totalPages = data?.page?.totalPages ?? 1
+    page++
+
+  } while (page < totalPages)
+
+  return allEvents.map(adaptEvent)
+}
+
+// Obtener todos los eventos para administración
+export async function findAllEvents() {
+  const pageSize = 100
+  let page = 0
+  let allEvents = []
+  let totalPages = 1
+
+  do {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: pageSize.toString()
+    })
+
+    const data = await apiFetch(
+      `${API_URL}/event?${params.toString()}`
+    )
+
+    const eventList = Array.isArray(data)
+      ? data
+      : data?.content || []
+
+    allEvents = [...allEvents, ...eventList]
+
+    totalPages = data?.page?.totalPages ?? 1
+    page++
+
+  } while (page < totalPages)
+
+  return allEvents.map(adaptEvent)
 }
 
 export async function getEventById(id) {
@@ -93,18 +145,15 @@ export function addEventSector(id, sector) {
 
 // actualizar el estado del evento
 export const updateEventStatus = async (id, status) => {
-  const response = await fetch(`${API_URL}/api/events/${id}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ status })
-  })
+  switch (status) {
+    case 'PUBLISHED':
+      return publishEvent(id)
 
-  if (!response.ok) {
-    throw new Error('No se pudo actualizar el estado del evento')
+    case 'CANCELLED':
+      return cancelEvent(id)
+
+    default:
+      throw new Error(`Estado no soportado: ${status}`)
   }
-
-  return response.json()
 }
 

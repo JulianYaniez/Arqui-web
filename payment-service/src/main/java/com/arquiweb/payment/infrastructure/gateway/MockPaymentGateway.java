@@ -1,6 +1,8 @@
 package com.arquiweb.payment.infrastructure.gateway;
 
+import com.arquiweb.payment.infrastructure.exception.ServiceUnavailableException;
 import com.arquiweb.payment.infrastructure.gateway.dto.response.GatewayResponse;
+import com.arquiweb.payment.transaction.domain.enums.MockFailureSimulation;
 import com.arquiweb.payment.transaction.domain.enums.PaymentMethod;
 import com.arquiweb.payment.transaction.domain.enums.TransactionStatus;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,13 @@ public class MockPaymentGateway implements PaymentGateway{
 
     private final List<String> validPrefixes = List.of("4111", "4242", "5555", "3782");
     @Override
-    public GatewayResponse processPayment(String cardToken, BigDecimal amount, PaymentMethod paymentMethod) throws TimeoutException {
+    public GatewayResponse processPayment(String cardToken, BigDecimal amount, PaymentMethod paymentMethod, MockFailureSimulation simulateFail) throws TimeoutException {
+        if(simulateFail!=null){
+            switch(simulateFail){
+                case TIMEOUT: throw new TimeoutException();
+                case SERVER_UNAVAILABLE: throw new ServiceUnavailableException();
+            }
+        }
         GatewayResponse gr;
         String RUUID = UUID.randomUUID().toString();
         if(paymentMethod == PaymentMethod.CREDIT_CARD){
@@ -27,7 +35,6 @@ public class MockPaymentGateway implements PaymentGateway{
             gr = switch (cardToken) {
                 case "APPROVED" -> createGatewayResponse(RUUID, TransactionStatus.APPROVED, "Payment Approved");
                 case "DECLINED" -> createGatewayResponse(RUUID, TransactionStatus.REJECTED, "Payment Declined");
-                case "TIMEOUT" -> throw new TimeoutException("Gateway Timeout");
                 default -> createGatewayResponse(RUUID, TransactionStatus.REJECTED, "Invalid card token.");
             };
         }

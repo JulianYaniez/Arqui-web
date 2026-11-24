@@ -5,6 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name = "catalog-client", url = "${app.feign.catalog.url}")
 public interface CatalogClient {
@@ -13,5 +14,8 @@ public interface CatalogClient {
     EventStateResponse getEventById(@PathVariable("eventId") String id);
 
     @PostMapping("/event/{eventId}/cancel")
-    void cancelEvent(@PathVariable("eventId") String eventId);
+    void cancelEvent(
+            @PathVariable("eventId") String eventId,
+            @RequestHeader("X-User-Role") String role
+    );
 }

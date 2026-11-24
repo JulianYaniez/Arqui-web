@@ -1,3 +1,5 @@
+
+
 package com.arquiweb.catalog.events.controller;
 
 import com.arquiweb.catalog.events.dto.request.CreateEventRequest;
@@ -164,7 +166,6 @@ class EventController {
         return ResponseEntity.created(uri).build();
     }
 
-
     @Operation(summary = "Publish a drafted event.")
     @ApiResponses(value = {
             @ApiResponse(
@@ -191,33 +192,40 @@ class EventController {
     @PostMapping("/{id}/publish")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> publishEvent(
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
-            @PathVariable String id
-    ) {
-        UUID organizerId = AuthGuard.requireUserId(headerUserId);
+                @Parameter(hidden = true)
+                @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+
+                @Parameter(hidden = true)
+                @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
+
+                @PathVariable String id
+        ) {
+        UUID userId = AuthGuard.requireUserId(headerUserId);
+
         AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
 
-        eventService.publishEvent(organizerId, id);
+        eventService.publishEvent(userId, id, headerUserRole);
+
         return ResponseEntity.noContent().build();
     }
 
-
     @Operation(summary = "Get all events filtered by multiple criteria.")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Fetched successfully."
-            )
-    })
     @GetMapping
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Page<EventResponse>> findAllEvents(
-            @ModelAttribute("criteria") EventCriteriaQuery criteria,
-            @PageableDefault(size = 20, sort = "dateTime", direction = Sort.Direction.ASC) Pageable pageable
+        @Parameter(hidden = true)
+        @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
+
+        @ModelAttribute("criteria") EventCriteriaQuery criteria,
+
+        @PageableDefault(
+                size = 20,
+                sort = "dateTime",
+                direction = Sort.Direction.ASC
+        ) Pageable pageable
     ) {
-        Page<EventResponse> page = eventService.getAll(criteria, pageable);
+        Page<EventResponse> page =
+                eventService.getAll(criteria, pageable, headerUserRole);
 
         return ResponseEntity.ok(page);
     }
@@ -273,16 +281,16 @@ class EventController {
     @PostMapping("/{eventId}/cancel")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> cancelEvent(
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Id", required = false ) String headerUserId,
-            @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Role", required = false ) String headerUserRole,
-            @PathVariable("eventId") String eventId
-    ) {
-        UUID organizerId = AuthGuard.requireUserId(headerUserId);
-        AuthGuard.requireRole(headerUserRole, "ORGANIZER", "ADMIN");
+                @Parameter(hidden = true)
+                @RequestHeader(value = "X-User-Role", required = false)
+                String headerUserRole,
 
-        eventService.cancelEvent(organizerId, eventId);
+                @PathVariable("eventId") String eventId
+        ) {
+        AuthGuard.requireRole(headerUserRole, "ADMIN");
+
+        eventService.cancelEvent(eventId);
+
         return ResponseEntity.noContent().build();
     }
 

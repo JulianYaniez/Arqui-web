@@ -168,6 +168,8 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
 
+        if (reservation.getStatus() == ReservationStatus.REFUNDED) return;
+
         reservation.refund();
 
         List<CapacityRefundDto> capacities = inventoryService.countCapacities(List.of(reservation.getId()));
@@ -269,6 +271,18 @@ public class ReservationService {
         int previousTickets = reservationRepository.countTicketsByClientIdAndEventId(clientId, eventId);
         if (previousTickets + amount > this.maxTickets)
             throw new InvalidInputException("Given has previously bough more tickets (" + previousTickets + "), and the max limit is " + maxTickets + ".", null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getMyTickets(UUID clientId) {
+        return reservationRepository
+                .findByClientIdAndStatusOrderByCreatedAtDesc(
+                        clientId,
+                        ReservationStatus.PAID
+                )
+                .stream()
+                .map(ReservationResponse::fromDomain)
+                .toList();
     }
 
 }

@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import '../styles/login.css'
 
 import { login } from '../services/authService'
-
 
 function Login() {
   const navigate = useNavigate()
@@ -16,7 +14,7 @@ function Login() {
 
   const [error, setError] = useState('')
 
-  // Verificar si ya existe una sesión
+  // Redirect if a session already exists
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
 
@@ -55,7 +53,8 @@ function Login() {
         role: response.role
       }
 
-      localStorage.setItem('token', response.token)
+      // Store authentication data
+      localStorage.setItem('token', response.accessToken)
       localStorage.setItem('user', JSON.stringify(user))
 
       if (user.role === 'ADMIN') {

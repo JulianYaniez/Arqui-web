@@ -100,7 +100,7 @@ public class RefundingController {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
         UUID adminId = AuthGuard.requireUserId(headerUserId);
 
-        refundingService.acceptRefund(requestId, adminId);
+        refundingService.acceptRefund(requestId, adminId, headerUserRole);
 
         return  ResponseEntity.noContent().build();
     }
@@ -132,7 +132,7 @@ public class RefundingController {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
         UUID adminId = AuthGuard.requireUserId(headerUserId);
 
-        refundingService.rejectRefund(requestId, adminId);
+        refundingService.rejectRefund(requestId, adminId, headerUserRole);
 
         return  ResponseEntity.noContent().build();
     }
@@ -144,6 +144,7 @@ public class RefundingController {
                     responseCode = "204",
                     description = "Event successfully canceled."
             ),
+            @ApiResponse(responseCode = "401", description = "Invalid identity"),
             @ApiResponse(responseCode = "403", description = "Invalid permissions."),
             @ApiResponse(
                     responseCode = "404",
@@ -159,10 +160,13 @@ public class RefundingController {
     public ResponseEntity<Void> cancelEvent(
             @RequestParam("eventId") String eventId,
             @Parameter(hidden = true)
-            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
+            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
+            @Parameter(hidden = true)
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId
     ) {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
-        refundingService.cancelEvent(eventId);
+        UUID adminId = AuthGuard.requireUserId(headerUserId);
+        refundingService.cancelEvent(eventId, adminId, headerUserRole);
 
         return ResponseEntity.noContent().build();
     }

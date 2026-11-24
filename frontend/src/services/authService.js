@@ -1,7 +1,6 @@
+import { apiFetch } from './api'
 
-import { apiFetch } from './api';
-
-const API_URL = '/api/identity/auth';
+const API_URL = '/api/identity/auth'
 
 export const login = async (credentials) => {
   return apiFetch(`${API_URL}/login`, {
@@ -10,12 +9,17 @@ export const login = async (credentials) => {
       email: credentials.email,
       password: credentials.password,
     }),
-  });
-};
+  })
+}
 
 export const register = async (userData) => {
   return apiFetch(`${API_URL}/register`, {
     method: 'POST',
     body: JSON.stringify(userData),
-  });
-};
+  })
+}
+
+// Obtener información del usuario
+export const getUserById = async (id) => {
+  return apiFetch(`/api/identity/auth/${id}`)
+}

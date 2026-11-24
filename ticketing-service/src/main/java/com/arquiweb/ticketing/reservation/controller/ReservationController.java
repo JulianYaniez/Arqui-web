@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.arquiweb.ticketing.reservation.dto.responses.ReservationResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +30,18 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    @GetMapping("/my-tickets")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<ReservationResponse>> getMyTickets(
+        @Parameter(hidden = true)
+        @RequestHeader(value = "X-User-Id", required = false) String headerUserId
+    ) {
+      UUID clientId = AuthGuard.requireUserId(headerUserId);
+
+      return ResponseEntity.ok(
+            reservationService.getMyTickets(clientId)
+      );
+    }
 
     @Operation(summary = "Reserve tickets for an unnumbered sector.")
     @ApiResponses(value = {
@@ -224,7 +237,7 @@ public class ReservationController {
             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
             @PathVariable("reservationId") UUID reservationId
     ) {
-        AuthGuard.requireRole(headerUserRole, "ADMIN");
+        AuthGuard.requireRole(headerUserRole, "CLIENT", "ORGANIZER", "ADMIN");
 
         reservationService.setPendingRefund(reservationId);
 
@@ -329,6 +342,7 @@ public class ReservationController {
             )
     })
     @PostMapping("/{reservationId}/reject-refund")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> rejectRefund(
             @Parameter(hidden = true)
             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,

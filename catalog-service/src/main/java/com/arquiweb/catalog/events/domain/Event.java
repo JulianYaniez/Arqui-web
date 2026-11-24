@@ -105,6 +105,7 @@ public class Event {
     }
 
     public void cancel() {
+        if (this.status == EventStatus.CANCELLED) return;
         if (!this.status.equals(EventStatus.PUBLISHED)) throw new IllegalEventStateException("Only PUBLISHED events can be cancelled.");
 
         this.status = EventStatus.CANCELLED;
