@@ -31,6 +31,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefundingService {
 
+    private static final String SERVICE_ROLE = "ADMIN";
+
     private final RefundRequestRepository refundRequestRepository;
     private final TicketingClient ticketingClient;
     private final CatalogClient catalogClient;
@@ -67,13 +69,13 @@ public class RefundingService {
 
         RefundRequest refundRequest = new RefundRequest(reservation.reservationId(), clientId, request.reason());
 
-        ticketingClient.setRequestRefund(reservation.reservationId());
+        ticketingClient.setRequestRefund(reservation.reservationId(), SERVICE_ROLE);
 
         return refundRequestRepository.save(refundRequest).getId();
     }
 
     @Transactional
-    public void acceptRefund(UUID refundRequestId, UUID adminId) {
+    public void acceptRefund(UUID refundRequestId, UUID adminId, String role) {
         RefundRequest refundRequest = validateRefundRequest(refundRequestId);
 
         ReservationStateResponse reservation;
@@ -88,8 +90,8 @@ public class RefundingService {
         refundRequest.accept(adminId);
 
         try {
-            ticketingClient.acceptRefund(reservation.reservationId());
-            paymentClient.refundPayment(reservation.paymentId());
+            ticketingClient.acceptRefund(reservation.reservationId(), role);
+            paymentClient.refundPayment(reservation.paymentId(), role);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Payment or Ticketing services.");
         }
@@ -105,7 +107,7 @@ public class RefundingService {
 
 
     @Transactional
-    public void rejectRefund(UUID refundRequestId, UUID adminId) {
+    public void rejectRefund(UUID refundRequestId, UUID adminId, String role) {
         RefundRequest refundRequest = validateRefundRequest(refundRequestId);
 
         ReservationStateResponse reservation;
@@ -120,7 +122,7 @@ public class RefundingService {
         refundRequest.reject(adminId);
 
         try {
-            ticketingClient.rejectRefund(reservation.reservationId());
+            ticketingClient.rejectRefund(reservation.reservationId(), role);
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing services.");
         }
@@ -135,9 +137,9 @@ public class RefundingService {
     }
 
     @Transactional
-    public void cancelEvent(String eventId, UUID adminId) {
+    public void cancelEvent(String eventId, UUID adminId, String role) {
         try {
-            catalogClient.cancelEvent(eventId);
+            catalogClient.cancelEvent(eventId, role);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException("Event does not exist.");
         } catch (Exception e) {
@@ -157,14 +159,28 @@ public class RefundingService {
             payments.add(PaymentRefundRequest.fromReservation(reservation));
         }
 
-        try { // Should go Async
-            paymentClient.bulkRefund(payments);
-        } catch (Exception e) {
-            throw new ServiceUnavailableException("Something went wrong with Payment service.");
+
+        if (!payments.isEmpty()) {
+            try { // Should go Async
+                paymentClient.bulkRefund(payments, role);
+            } catch (Exception e) {
+                throw new ServiceUnavailableException("Something went wrong with Payment service.");
+            }
         }
 
         try {
-            ticketingClient.bulkCancelReservations(eventId);
+            ticketingClient.cancelEvent(eventId);
+        } catch (FeignException.NotFound e) {
+            if (!reservations.isEmpty()) {
+                try {
+                    List<UUID> reservationIds = reservations.stream()
+                            .map(ReservationStateResponse::reservationId)
+                            .toList();
+                    ticketingClient.bulkCancelReservations(role, reservationIds);
+                } catch (Exception cancellationException) {
+                    throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
+                }
+            }
         } catch (Exception e) {
             throw new ServiceUnavailableException("Something went wrong with Ticketing service.");
         }

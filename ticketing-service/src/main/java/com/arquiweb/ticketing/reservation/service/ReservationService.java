@@ -168,6 +168,8 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("No reservation found with given ID."));
 
+        if (reservation.getStatus() == ReservationStatus.REFUNDED) return;
+
         reservation.refund();
 
         List<CapacityRefundDto> capacities = inventoryService.countCapacities(List.of(reservation.getId()));

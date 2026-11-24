@@ -237,7 +237,7 @@ public class ReservationController {
             @RequestHeader(value = "X-User-Role", required = false) String headerUserRole,
             @PathVariable("reservationId") UUID reservationId
     ) {
-        AuthGuard.requireRole(headerUserRole, "ADMIN");
+        AuthGuard.requireRole(headerUserRole, "CLIENT", "ORGANIZER", "ADMIN");
 
         reservationService.setPendingRefund(reservationId);
 

@@ -100,7 +100,7 @@ public class RefundingController {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
         UUID adminId = AuthGuard.requireUserId(headerUserId);
 
-        refundingService.acceptRefund(requestId, adminId);
+        refundingService.acceptRefund(requestId, adminId, headerUserRole);
 
         return  ResponseEntity.noContent().build();
     }
@@ -132,7 +132,7 @@ public class RefundingController {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
         UUID adminId = AuthGuard.requireUserId(headerUserId);
 
-        refundingService.rejectRefund(requestId, adminId);
+        refundingService.rejectRefund(requestId, adminId, headerUserRole);
 
         return  ResponseEntity.noContent().build();
     }
@@ -166,7 +166,7 @@ public class RefundingController {
     ) {
         AuthGuard.requireRole(headerUserRole, "ADMIN");
         UUID adminId = AuthGuard.requireUserId(headerUserId);
-        refundingService.cancelEvent(eventId, adminId);
+        refundingService.cancelEvent(eventId, adminId, headerUserRole );
 
         return ResponseEntity.noContent().build();
     }

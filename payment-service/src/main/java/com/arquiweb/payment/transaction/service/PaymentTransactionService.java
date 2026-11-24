@@ -46,7 +46,7 @@ public class PaymentTransactionService {
 
     private final List<String> validPrefixes = List.of("4111", "4242", "5555", "3782");
 
-    public PaymentTransaction processPayment(RequestPaymentDTO request, String simulateFail) {
+    public PaymentTransaction processPayment(RequestPaymentDTO request, String simulateFail, String serviceRole) {
         if (paymentRepository.isPaymentProcessedAndStatus(request.reservationId(), TransactionStatus.APPROVED)){
             throw new InvalidInputException("Payment already processed",
                     Map.of("reservationId", "Reservation " +
@@ -62,7 +62,7 @@ public class PaymentTransactionService {
         GatewayResponse gatewayResponse;
 
         if(!circuitBreaker.allowRequest()){
-            rejectAndRelease(pt, request.reservationId(), TransactionStatus.FAILED);
+            rejectAndRelease(pt, request.reservationId(), TransactionStatus.FAILED, serviceRole);
             throw new ServiceUnavailableException();
         }
 
@@ -70,7 +70,7 @@ public class PaymentTransactionService {
             gatewayResponse = callGateway(request, simulateFail);
             if (gatewayResponse == null || gatewayResponse.ts() == null) {
                 circuitBreaker.recordFailure();
-                rejectAndRelease(pt, request.reservationId(), TransactionStatus.FAILED);
+                rejectAndRelease(pt, request.reservationId(), TransactionStatus.FAILED, serviceRole);
                 throw new InvalidGatewayResponseException(
                         "The payment gateway returned an invalid response."
                 );
@@ -80,14 +80,14 @@ public class PaymentTransactionService {
             pt = fillAndSave(gatewayResponse.ts(), gatewayResponse.externalTransactionId(),LocalDateTime.now(), pt);
 
             if (gatewayResponse.ts() == TransactionStatus.REJECTED) {
-                releaseReservation(request.reservationId());
+                releaseReservation(request.reservationId(), serviceRole);
             }
 
             log.info("Payment transaction processed successfully, id={}, reservationId={}, staus={}", pt.getId(), pt.getReservationId(), pt.getStatus());
             return pt;
         }catch (GatewayRetriesExhaustedException e) {
             circuitBreaker.recordFailure();
-            rejectAndRelease(pt, request.reservationId(),  TransactionStatus.FAILED);
+            rejectAndRelease(pt, request.reservationId(),  TransactionStatus.FAILED, serviceRole);
             throw e;
         }
     }
@@ -95,7 +95,8 @@ public class PaymentTransactionService {
     private PaymentTransaction rejectAndRelease(
             PaymentTransaction transaction,
             UUID reservationId,
-            TransactionStatus transactionStatus
+            TransactionStatus transactionStatus,
+            String serviceRole
     ) {
         PaymentTransaction rejected = fillAndSave(
                 transactionStatus,
@@ -104,14 +105,14 @@ public class PaymentTransactionService {
                 transaction
         );
 
-        releaseReservation(reservationId);
+        releaseReservation(reservationId, serviceRole);
         return rejected;
     }
 
 
-    private void releaseReservation(UUID reservationId) {
+    private void releaseReservation(UUID reservationId, String serviceRole) {
         try {
-            ticketingClient.releaseReservations(reservationId, PAYMENT_SERVICE_ROLE);
+            ticketingClient.releaseReservations(reservationId, serviceRole);
         } catch (FeignException e){
             log.error("Error communicating with the ticketing service to release the reservation id={}: {}", reservationId, e.getMessage());
             throw new ReservationReleaseException(
@@ -139,6 +140,8 @@ public class PaymentTransactionService {
 
         PaymentTransaction transaction = paymentRepository.getPaymentTransactionByIdWithLock(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + paymentId));
+        if (transaction.isRefunded()) return;
+
         boolean gatewaySuccess = paymentGateway.refund(transaction.getExternalGatewayTransactionId(), transaction.getAmount(), simulateFail);
         if (gatewaySuccess) {
             transaction.setStatus(TransactionStatus.REFUNDED);

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,7 +75,7 @@ public class PaymentTransactionController {
                 clientId,
                 request.amount()
         );
-        PaymentTransaction transaction = pts.processPayment(request, simulateFail);
+        PaymentTransaction transaction = pts.processPayment(request, simulateFail, headerUserRole);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(transaction.getId())
@@ -190,7 +191,7 @@ public class PaymentTransactionController {
     )
     @PostMapping("/bulk-refund")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> bulkRefund(@Valid @RequestBody List<PaymentRefundRequest> refundRequests,
+    public ResponseEntity<Void> bulkRefund(@Valid @RequestBody @NotEmpty List<PaymentRefundRequest> refundRequests,
                                            @Parameter(hidden = true)
                                            @RequestHeader(value = "X-User-Role", required = false) String headerUserRole
     ) {
