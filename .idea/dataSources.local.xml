@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal" created-in="IU-263.7307.200">
+    <data-source name="tpe_group_7@localhost" uuid="88d7e612-8238-4e90-a204-42c8ab094db5">
+      <database-info product="PostgreSQL" version="15.19" jdbc-version="4.2" driver-name="PostgreSQL JDBC Driver" driver-version="42.7.3" dbms="POSTGRES" exact-version="15.19" exact-driver-version="42.7">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="lower" quoted-identifiers="exact" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>group_7</user-name>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="database" qname="tpe_group_7">
+            <node kind="schema">
+              <name qname="@" />
+              <name qname="public" />
+            </node>
+          </node>
+        </introspection-scope>
+      </schema-mapping>
+    </data-source>
+  </component>
+</project>

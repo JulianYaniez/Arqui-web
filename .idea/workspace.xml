@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cd3ae202-26ec-4d78-a968-5cee22c75f66" name="Changes" comment="" />
+    <list default="true" id="cd3ae202-26ec-4d78-a968-5cee22c75f66" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,6 +32,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JulianYaniez&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JulianYaniez/Arqui-web.git&quot;,
+    &quot;accountId&quot;: &quot;83ac58bd-daa5-4181-948b-4347cf1ea41d&quot;
+  }
+}</component>
   <component name="JsbtTreeLayoutManager">
     <layout place="tools.popupGrunt">
       <scroll-view-position x="0" y="0" />
@@ -39,61 +55,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0105722118388258" />
-      <entry key="MS500" value="2.5871728418364093" />
-      <entry key="S2" value="5.819567292730559" />
-      <entry key="S5" value="8.247010793041007" />
-      <entry key="S10" value="11.630434392256491" />
-      <entry key="S30" value="18.21728827828853" />
-      <entry key="S60" value="22.21898060951837" />
-      <entry key="M2" value="26.12854901400092" />
-      <entry key="M5" value="37.07968929165733" />
-      <entry key="M10" value="67.10835694745246" />
-      <entry key="M15" value="103.21467858750789" />
-      <entry key="M30" value="212.3119057613481" />
-      <entry key="H1" value="402.2772141617707" />
-      <entry key="H2" value="717.8834397310616" />
-      <entry key="H4" value="1216.9543326751402" />
-      <entry key="D1" value="2566.9044039825535" />
-      <entry key="W1" value="3039.1492288341715" />
+      <entry key="MS100" value="1.0002247748610842" />
+      <entry key="MS500" value="1.2665974325561962" />
+      <entry key="S2" value="5.262954672681795" />
+      <entry key="S5" value="15.428530259205573" />
+      <entry key="S10" value="27.184672523989303" />
+      <entry key="S30" value="44.95039650608798" />
+      <entry key="S60" value="57.48345952847176" />
+      <entry key="M2" value="74.26338606277851" />
+      <entry key="M5" value="98.88566880951981" />
+      <entry key="M10" value="126.30213379889844" />
+      <entry key="M15" value="156.02923983893746" />
+      <entry key="M30" value="255.35373937825187" />
+      <entry key="H1" value="445.44420621554957" />
+      <entry key="H2" value="769.3081303522315" />
+      <entry key="H4" value="1281.4781924509168" />
+      <entry key="D1" value="2683.219814409746" />
+      <entry key="W1" value="3179.2838160362344" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="5.430104586319181E-42" />
-      <entry key="MS500" value="5.584257165048801E-9" />
-      <entry key="S2" value="0.009211405686487057" />
-      <entry key="S5" value="0.22103900753904795" />
-      <entry key="S10" value="0.764215459574271" />
-      <entry key="S30" value="2.1202028146578495" />
-      <entry key="S60" value="3.1472520828507013" />
-      <entry key="M2" value="4.441475029677961" />
-      <entry key="M5" value="10.305076593129584" />
-      <entry key="M10" value="24.307605168899652" />
-      <entry key="M15" value="38.28707614992718" />
-      <entry key="M30" value="75.9078789189987" />
-      <entry key="H1" value="140.1260536230763" />
-      <entry key="H2" value="253.1196737953156" />
-      <entry key="H4" value="438.80566023200777" />
-      <entry key="D1" value="932.9248987686362" />
-      <entry key="W1" value="1101.7283348914568" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="2.3184635000373815E-95" />
+      <entry key="S2" value="2.194320526982361E-24" />
+      <entry key="S5" value="3.439695722382891E-10" />
+      <entry key="S10" value="1.8546416695369685E-5" />
+      <entry key="S30" value="0.026469963212028692" />
+      <entry key="S60" value="0.16269628307349568" />
+      <entry key="M2" value="0.40485908129396647" />
+      <entry key="M5" value="1.1170192741695593" />
+      <entry key="M10" value="5.750300828850421" />
+      <entry key="M15" value="14.078254401759407" />
+      <entry key="M30" value="45.498739455475" />
+      <entry key="H1" value="108.32851695622816" />
+      <entry key="H2" value="222.54139519404438" />
+      <entry key="H4" value="411.52863879906704" />
+      <entry key="D1" value="923.6265746865735" />
+      <entry key="W1" value="1100.9827072725377" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.0509869453685861" />
-      <entry key="MS500" value="2.084742230980578" />
-      <entry key="S2" value="5.655548369016952" />
-      <entry key="S5" value="8.35386696904558" />
-      <entry key="S10" value="12.272556138583033" />
-      <entry key="S30" value="20.227281111691525" />
-      <entry key="S60" value="25.274117816442047" />
-      <entry key="M2" value="30.495636722695515" />
-      <entry key="M5" value="47.31303112930185" />
-      <entry key="M10" value="91.32696529047298" />
-      <entry key="M15" value="141.4036632588084" />
-      <entry key="M30" value="288.1126138523515" />
-      <entry key="H1" value="542.2975817538771" />
-      <entry key="H2" value="970.9068138158319" />
-      <entry key="H4" value="1655.6778285282162" />
-      <entry key="D1" value="3499.801001107088" />
-      <entry key="W1" value="4140.8728183998865" />
+      <entry key="MS100" value="0.03662114595309392" />
+      <entry key="MS500" value="0.7815585089745757" />
+      <entry key="S2" value="5.105502289867289" />
+      <entry key="S5" value="15.343508562030673" />
+      <entry key="S10" value="27.12093680288528" />
+      <entry key="S30" value="44.94053665243194" />
+      <entry key="S60" value="57.6180293583348" />
+      <entry key="M2" value="74.64667003083149" />
+      <entry key="M5" value="99.98752460974386" />
+      <entry key="M10" value="132.02735976255428" />
+      <entry key="M15" value="170.06869943226744" />
+      <entry key="M30" value="300.7869020267566" />
+      <entry key="H1" value="553.6903665783101" />
+      <entry key="H2" value="991.7645278296086" />
+      <entry key="H4" value="1692.9296033845828" />
+      <entry key="D1" value="3606.8183398313267" />
+      <entry key="W1" value="4280.261776916761" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -122,9 +138,10 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;Spring Boot.Tpe3Application.executor&quot;: &quot;Run&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;tpe__final&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/testing&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/kessy/Me/Coding/ArquiWeb/Arqui-web/src/main/java/org/arquiweb/services&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/julia/OneDrive/Documentos/TUDAI/segundo año/Segundo cuatrimestre/Arqui/tpe/tpe_final2&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -151,16 +168,7 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Tpe3Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <configuration name="Tpe3Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="Arquitecturas_Web_G7" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="org.arqui.tpe_3.Tpe3Application" />
@@ -172,8 +180,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+        <option value="bundled-jdk-30f59d01ecdd-ac68fc9d2b05-intellij.indexing.shared.core-IU-263.7307.200" />
+        <option value="bundled-js-predefined-d6986cc7102b-56aff7b04f6f-JavaScript-IU-263.7307.200" />
       </set>
     </attachedChunks>
   </component>

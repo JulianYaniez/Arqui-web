@@ -1,0 +1,158 @@
+import com.arquiweb.ticketing.event.domain.TicketingEvent;
+import com.arquiweb.ticketing.event.service.EventService;
+import com.arquiweb.ticketing.event.service.EventValidator;
+import com.arquiweb.ticketing.infrastructure.messaging.NotificationEventProducer;
+import com.arquiweb.ticketing.infrastructure.messaging.ReservationEventListener;
+import com.arquiweb.ticketing.inventory.domain.SectorCapacity;
+import com.arquiweb.ticketing.inventory.service.InventoryService;
+import com.arquiweb.ticketing.queue.service.VirtualQueueService;
+import com.arquiweb.ticketing.reservation.domain.Reservation;
+import com.arquiweb.ticketing.reservation.domain.exceptions.OccupiedSpotException;
+import com.arquiweb.ticketing.reservation.dto.requests.ReserveUnnumberedRequest;
+import com.arquiweb.ticketing.reservation.repository.ReservationRepository;
+import com.arquiweb.ticketing.reservation.service.ReservationService;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.mockito.Mockito.*;
+
+public class ReservationConcurrencyTest {
+
+    private static final String EVENT_ID = UUID.randomUUID().toString();
+    private static final String SECTOR_ID = UUID.randomUUID().toString();
+
+    @Mock
+    private ReservationRepository reservationRepository;
+
+    @Mock
+    private InventoryService inventoryService;
+
+    @Mock
+    private EventValidator eventValidator;
+
+    @Mock
+    private ReservationEventListener reservationEventListener;
+
+    @Mock
+    private VirtualQueueService virtualQueueService;
+
+    @Mock
+    private NotificationEventProducer notificationEventProducer;
+
+    private ReservationService reservationService;
+    private AutoCloseable closeable;
+
+    @BeforeMethod
+    void setUp() {
+        closeable = MockitoAnnotations.openMocks(this);
+        this.reservationService = new ReservationService(
+                15,
+                4,
+                "http://localhost:8080",
+                reservationRepository,
+                inventoryService,
+                eventValidator,
+                reservationEventListener,
+                virtualQueueService,
+                notificationEventProducer
+        );
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        if (closeable != null) {
+            closeable.close();
+        }
+    }
+
+    private TicketingEvent mockEvent(boolean highDemand) {
+        TicketingEvent event = mock(TicketingEvent.class);
+        when(event.isHighDemand()).thenReturn(highDemand);
+        when(eventValidator.validateEvent(EVENT_ID)).thenReturn(event);
+        return event;
+    }
+
+    @Test
+    public void testConcurrentReservation_OnlyOneSucceeds() throws InterruptedException {
+
+        // Arrange
+        int threadsCount = 5;
+        mockEvent(false);
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch finishLatch = new CountDownLatch(threadsCount);
+
+        AtomicInteger availableCapacity = new AtomicInteger(1);
+
+        SectorCapacity sector = mock(SectorCapacity.class);
+        when(sector.getEventId()).thenReturn(EVENT_ID);
+        when(sector.getSectorId()).thenReturn(SECTOR_ID);
+        when(sector.getPrice()).thenReturn(BigDecimal.valueOf(5000));
+
+        //doAnswer(invocation -> null).when(sector).reduceCapacity(anyInt());
+
+        doAnswer(invocation -> {
+            int qty = invocation.getArgument(0);
+            while (true) {
+                int current = availableCapacity.get();
+                if (current < qty) {
+                    throw new OccupiedSpotException("No capacity available");
+                }
+                if (availableCapacity.compareAndSet(current, current - qty)) {
+                    return null;
+                }
+            }
+        }).when(sector).reduceCapacity(anyInt());
+
+        when(inventoryService.getSectorCapacity(anyString(), anyString())).thenReturn(sector);
+        when(reservationRepository.countTicketsByClientIdAndEventId(any(), any())).thenReturn(0);
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AtomicInteger successCounter = new AtomicInteger(0);
+        AtomicInteger failureCounter = new AtomicInteger(0);
+
+        // Act
+        for (int i = 0; i < threadsCount; i++) {
+            final String clientId = UUID.randomUUID().toString();
+            executor.submit(() -> {
+                try {
+                    startLatch.await();
+                    ReserveUnnumberedRequest request = new ReserveUnnumberedRequest(EVENT_ID, SECTOR_ID, 1);
+                    reservationService.reserveUnnumbered(request, UUID.fromString(clientId));
+                    successCounter.incrementAndGet();
+                } catch (Exception e) {
+                    failureCounter.incrementAndGet();
+                } finally {
+                    finishLatch.countDown();
+                }
+            });
+        }
+
+
+        startLatch.countDown();
+
+        boolean finishedInTime = finishLatch.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        // Assert
+        Assert.assertTrue(finishedInTime, "The concurrency test took too long");
+        Assert.assertEquals(successCounter.get(), 1, "Exactly one reservation must have been successful.");
+        Assert.assertEquals(failureCounter.get(), threadsCount - 1, "The other threads must have been rejected.");
+
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        verify(sector, times(threadsCount)).reduceCapacity(1);
+    }
+}
