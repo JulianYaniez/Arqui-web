@@ -104,7 +104,7 @@ public class NotificationServiceTest {
         List<UUID> userIds = List.of(u1, u2);
 
         EventChangedNotification event = mock(EventChangedNotification.class);
-        when(event.usersId()).thenReturn(userIds);
+        when(event.userIds()).thenReturn(userIds);
         when(event.eventId()).thenReturn("evt-999");
         when(event.changeType()).thenReturn("CANCELLED");
 
@@ -132,7 +132,7 @@ public class NotificationServiceTest {
         List<UUID> userIds = List.of(u1);
 
         EventChangedNotification event = mock(EventChangedNotification.class);
-        when(event.usersId()).thenReturn(userIds);
+        when(event.userIds()).thenReturn(userIds);
         when(event.eventId()).thenReturn("evt-555");
         when(event.changeType()).thenReturn("UPDATED"); // Distinto de CANCELLED
 
